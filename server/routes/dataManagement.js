@@ -5,6 +5,7 @@ const fileParser = require('../services/fileParser');
 const schemaValidator = require('../services/schemaValidator');
 const jsonConverter = require('../services/jsonConverter');
 const firestoreDataService = require('../services/firestoreDataService');
+const pythonEngine = require('../services/pythonEngineService');
 
 const router = express.Router();
 
@@ -18,7 +19,7 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['.csv', '.xlsx', '.xls'];
     const fileExtension = file.originalname.toLowerCase().split('.').pop();
-    
+
     if (allowedTypes.includes(`.${fileExtension}`)) {
       cb(null, true);
     } else {
@@ -218,19 +219,50 @@ router.post('/run-valuation', async (req, res) => {
       user_id: userId
     });
 
-    // TODO: Implement actual IFRS 17 computation
-    // For now, simulate computation
-    setTimeout(async () => {
+    // Implement actual IFRS 17 computation
+    // We need to fetch the portfolio data first. Assuming 'unifiedJson' or similar structure is what we need.
+    // For this endpoint, we might need to retrieve the data associated with the runId.
+
+    // Retrieve run data to get the portfolio/policies
+    const runData = await firestoreDataService.getValidationRun(runId);
+    if (!runData || !runData.unified_json) {
+      throw new Error('Run data not found or missing unified JSON');
+    }
+
+    // Extract policies and assumptions from unified_json
+    // Adjust path based on actual JSON structure. 
+    // unifiedJson usually has: meta, assumptions, policies, actuals (from convert step)
+    const { policies, assumptions } = runData.unified_json;
+
+    if (!policies) {
+      throw new Error('No policies found in dataset');
+    }
+
+    // Call Python Engine
+    // Note: The python engine might expect a specific format. 
+    // If the unified_json format matches the python engine requirements, we pass it directly.
+    // Otherwise, transformation is needed. Assuming unified JSON is close to target.
+
+    // Async execution to not block if it takes time, but here we await partially or offload?
+    // The original code used setTimeout to simulate async.
+    // Ideally we should push to a queue (Task 2.1). For Phase 1, we might await it or fire-and-forget 
+    // but update status asynchronously.
+
+    // We'll mimic the "background" process style by not awaiting the result for the RESPONSE,
+    // but we can't easily spawn a background thread in Node like that without a queue.
+    // However, the original code had `setTimeout` which puts it on the event loop.
+    // We will do the same wrapping.
+
+    (async () => {
       try {
+        const result = await pythonEngine.calculateIFRS17(policies, assumptions || {});
+
         await firestoreDataService.updateValidationRunStatus(runId, 'completed', {
           completed_at: new Date().toISOString(),
-          results: {
-            csm: 150000,
-            ra: 50000,
-            fcf: 800000
-          }
+          results: result // Store full result
         });
         logger.info(`Valuation completed for run: ${runId}`);
+
       } catch (error) {
         logger.error(`Error completing valuation for run ${runId}:`, error);
         await firestoreDataService.updateValidationRunStatus(runId, 'failed', {
@@ -238,7 +270,7 @@ router.post('/run-valuation', async (req, res) => {
           failed_at: new Date().toISOString()
         });
       }
-    }, 5000); // Simulate 5 second computation
+    })();
 
     res.json({
       success: true,

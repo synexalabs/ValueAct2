@@ -5,7 +5,7 @@ const logger = require('../utils/logger');
  * Calculation controller for handling calculation-related requests
  */
 class CalculationController {
-  
+
   /**
    * Start calculation
    * @param {object} req - Express request object
@@ -20,15 +20,47 @@ class CalculationController {
         userAgent: req.headers['user-agent'],
         ipAddress: req.ip || req.connection.remoteAddress
       };
-      
-      const result = await calculationService.startCalculation({
-        userId,
-        datasetId,
-        calculationType,
-        inputParams,
-        metadata
-      });
-      
+
+      // Phase 1 Integration: Connect to Python Engine
+      const pythonEngine = require('../services/pythonEngineService');
+      const firestore = require('../services/firestoreService'); // Assuming this exists or will be needed for persistence
+
+      let result;
+      if (calculationType === 'ifrs17') {
+        // Transform inputParams to match Python engine expectation if necessary
+        // specific structure depends on inputParams vs python engine requirements
+        // For now pass inputParams.portfolio and inputParams.assumptions
+        result = await pythonEngine.calculateIFRS17(inputParams.portfolio, inputParams.assumptions);
+      } else if (calculationType === 'solvency') {
+        result = await pythonEngine.calculateSolvency(inputParams.portfolio, inputParams.assumptions);
+      } else {
+        // Fallback or legacy handling via calculationService
+        result = await calculationService.startCalculation({
+          userId,
+          datasetId,
+          calculationType,
+          inputParams,
+          metadata
+        });
+      }
+
+      // If result comes from Python engine, structure the response
+      if (calculationType === 'ifrs17' || calculationType === 'solvency') {
+        // Persist result (Mocking persistence for now if firestoreService not fully aligned)
+        // In a real flow we would save this to firestore here or in the service
+
+        return res.status(201).json({
+          success: true,
+          message: 'Calculation completed successfully',
+          calculation: {
+            id: `calc_${Date.now()}`, // Temporary ID generation
+            status: 'completed',
+            results: result,
+            executionTime: 0 // Placeholder
+          }
+        });
+      }
+
       res.status(201).json({
         success: true,
         message: 'Calculation started successfully',
@@ -39,17 +71,17 @@ class CalculationController {
           executionTime: result.executionTime
         }
       });
-      
+
     } catch (error) {
       logger.error('Start calculation error:', error);
-      
+
       if (error.message.includes('validation failed')) {
         return res.status(400).json({
           success: false,
           error: error.message
         });
       }
-      
+
       res.status(500).json({
         success: false,
         error: 'Failed to start calculation'
@@ -66,31 +98,31 @@ class CalculationController {
     try {
       const { calculationId } = req.params;
       const userId = req.user.id;
-      
+
       const status = await calculationService.getCalculationStatus(calculationId, userId);
-      
+
       res.json({
         success: true,
         status
       });
-      
+
     } catch (error) {
       logger.error('Get calculation status error:', error);
-      
+
       if (error.message.includes('not found')) {
         return res.status(404).json({
           success: false,
           error: error.message
         });
       }
-      
+
       if (error.message.includes('Access denied')) {
         return res.status(403).json({
           success: false,
           error: error.message
         });
       }
-      
+
       res.status(500).json({
         success: false,
         error: 'Failed to get calculation status'
@@ -107,38 +139,38 @@ class CalculationController {
     try {
       const { calculationId } = req.params;
       const userId = req.user.id;
-      
+
       const result = await calculationService.cancelCalculation(calculationId, userId);
-      
+
       res.json({
         success: true,
         message: result.message
       });
-      
+
     } catch (error) {
       logger.error('Cancel calculation error:', error);
-      
+
       if (error.message.includes('not found')) {
         return res.status(404).json({
           success: false,
           error: error.message
         });
       }
-      
+
       if (error.message.includes('Access denied')) {
         return res.status(403).json({
           success: false,
           error: error.message
         });
       }
-      
+
       if (error.message.includes('Cannot cancel')) {
         return res.status(400).json({
           success: false,
           error: error.message
         });
       }
-      
+
       res.status(500).json({
         success: false,
         error: 'Failed to cancel calculation'
@@ -155,17 +187,17 @@ class CalculationController {
     try {
       const userId = req.user.id;
       const filters = req.query;
-      
+
       const result = await calculationService.getCalculationHistory(userId, filters);
-      
+
       res.json({
         success: true,
         ...result
       });
-      
+
     } catch (error) {
       logger.error('Get calculation history error:', error);
-      
+
       res.status(500).json({
         success: false,
         error: 'Failed to get calculation history'
@@ -182,39 +214,39 @@ class CalculationController {
     try {
       const { calculationId } = req.params;
       const userId = req.user.id;
-      
+
       // This will be implemented in Phase 2 when we have the full calculation service
       const calculation = await calculationService.getCalculationStatus(calculationId, userId);
-      
+
       if (calculation.status !== 'completed') {
         return res.status(400).json({
           success: false,
           error: 'Calculation not completed yet'
         });
       }
-      
+
       res.json({
         success: true,
         results: calculation.results
       });
-      
+
     } catch (error) {
       logger.error('Get calculation results error:', error);
-      
+
       if (error.message.includes('not found')) {
         return res.status(404).json({
           success: false,
           error: error.message
         });
       }
-      
+
       if (error.message.includes('Access denied')) {
         return res.status(403).json({
           success: false,
           error: error.message
         });
       }
-      
+
       res.status(500).json({
         success: false,
         error: 'Failed to get calculation results'

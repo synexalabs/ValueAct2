@@ -35,7 +35,7 @@ if (!admin.apps.length) {
       }),
       projectId: process.env.FIREBASE_PROJECT_ID
     };
-    
+
     admin.initializeApp(firebaseConfig);
     logger.info('Firebase Admin initialized successfully');
     logger.info(`Connected to Firebase project: ${process.env.FIREBASE_PROJECT_ID}`);
@@ -96,21 +96,21 @@ app.use('/api/data-management', dataManagementRoutes);
 app.post('/api/chat', async (req, res) => {
   try {
     const { message } = req.body;
-    
+
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
     // Require valid API key
     if (!process.env.GOOGLE_API_KEY) {
-      return res.status(500).json({ 
-        error: 'AI service not configured. Please set GOOGLE_API_KEY environment variable.' 
+      return res.status(500).json({
+        error: 'AI service not configured. Please set GOOGLE_API_KEY environment variable.'
       });
     }
 
     // Use Gemini AI
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    
+
     const prompt = `You are AxiomAI, an expert actuarial co-pilot specializing in life insurance actuarial practice. 
     You have deep knowledge across all areas of life insurance actuarial work including:
     
@@ -140,7 +140,7 @@ app.post('/api/chat', async (req, res) => {
     res.json({ response: text });
   } catch (error) {
     console.error('Chat error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to process chat request',
       response: "I'm experiencing technical difficulties. Please try again in a moment."
     });
@@ -160,10 +160,10 @@ app.post('/api/solutions', async (req, res) => {
     // Store in Firestore
     await db.collection('solutions').add(solutionData);
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       solutionId: solutionData.id,
-      message: 'Solution submitted successfully' 
+      message: 'Solution submitted successfully'
     });
   } catch (error) {
     console.error('Solution submission error:', error);
@@ -175,18 +175,18 @@ app.post('/api/solutions', async (req, res) => {
 app.get('/api/solutions/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    
+
     // Get solutions from Firestore
     const solutionsSnapshot = await db.collection('solutions')
       .where('userId', '==', userId)
       .orderBy('submittedAt', 'desc')
       .get();
-    
+
     const userSolutions = solutionsSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
-    
+
     res.json({ solutions: userSolutions });
   } catch (error) {
     console.error('Get solutions error:', error);
@@ -198,21 +198,21 @@ app.get('/api/solutions/:userId', async (req, res) => {
 app.post('/api/analyze-solution', async (req, res) => {
   try {
     const { solutionData } = req.body;
-    
+
     if (!solutionData) {
       return res.status(400).json({ error: 'Solution data is required' });
     }
 
     // Require valid API key
     if (!process.env.GOOGLE_API_KEY) {
-      return res.status(500).json({ 
-        error: 'AI service not configured. Please set GOOGLE_API_KEY environment variable.' 
+      return res.status(500).json({
+        error: 'AI service not configured. Please set GOOGLE_API_KEY environment variable.'
       });
     }
 
     // Use Gemini AI for analysis
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    
+
     const prompt = `As an expert actuarial mentor, analyze this student solution:
 
     Module: ${solutionData.moduleName}
@@ -240,7 +240,7 @@ app.post('/api/analyze-solution', async (req, res) => {
       res.json({ analysis });
     } catch (parseError) {
       console.error('Failed to parse AI response:', parseError);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to parse AI analysis response',
         analysis: {
           technicalScore: 0,
@@ -253,7 +253,7 @@ app.post('/api/analyze-solution', async (req, res) => {
     }
   } catch (error) {
     console.error('Analysis error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to analyze solution'
     });
   }
@@ -270,12 +270,21 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
+// Create HTTP server
+const http = require('http');
+const server = http.createServer(app);
+
+// Initialize WebSocket
+const { initializeWebSocket } = require('./websocket');
+const io = initializeWebSocket(server);
+
 // Start server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 Valuact server running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
   console.log(`🤖 AI Chat: http://localhost:${PORT}/api/chat`);
   console.log(`💾 Solutions: http://localhost:${PORT}/api/solutions`);
+  console.log(`🔌 WebSocket: ws://localhost:${PORT}`);
 });
 
 module.exports = app;

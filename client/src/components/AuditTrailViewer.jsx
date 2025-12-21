@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { FileText, Clock, User, CheckCircle, AlertTriangle, Info, Download, Eye, EyeOff } from 'lucide-react';
 import { InlineMath, BlockMath } from 'react-katex';
 import CalculationStepViewer from './CalculationStepViewer';
+import { jsPDF } from 'jspdf';
 import 'katex/dist/katex.min.css';
 
 const AuditTrailViewer = ({
@@ -29,22 +30,61 @@ const AuditTrailViewer = ({
     setExpandedSections(newExpanded);
   };
 
+
+
   const handleExport = () => {
-    const exportData = {
-      auditTrail,
-      resultValidation,
-      exportedAt: new Date().toISOString()
+    const doc = new jsPDF();
+
+    // Add Title
+    doc.setFontSize(20);
+    doc.text(title, 20, 20);
+    doc.setFontSize(10);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 30);
+
+    let yPos = 40;
+
+    // Helper function to add text and manage page breaks
+    const addText = (text, x, y, options = {}) => {
+      if (y > 280) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(text, x, y, options);
+      return y + (options.lineHeight || 10);
     };
-    
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `audit_trail_${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+
+    // Calculation Steps
+    if (auditTrail.calculationSteps) {
+      doc.setFontSize(16);
+      yPos = addText('Calculation Steps', 20, yPos);
+      doc.setFontSize(10);
+
+      auditTrail.calculationSteps.forEach((step, idx) => {
+        yPos = addText(`${idx + 1}. ${step.name}`, 20, yPos);
+        // Add more details if needed
+        if (step.description) {
+          yPos = addText(`   ${step.description}`, 20, yPos);
+        }
+        if (step.result) {
+          yPos = addText(`   Result: ${step.result}`, 20, yPos);
+        }
+      });
+      yPos += 10;
+    }
+
+    // Inputs
+    if (auditTrail.calculationInputs) {
+      doc.setFontSize(16);
+      yPos = addText('Inputs', 20, yPos);
+      doc.setFontSize(10);
+      Object.entries(auditTrail.calculationInputs).forEach(([key, value]) => {
+        yPos = addText(`${key}: ${value}`, 20, yPos);
+      });
+      yPos += 10;
+    }
+
+    // Save the PDF
+    doc.save(`audit_trail_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const tabs = [
@@ -81,7 +121,7 @@ const AuditTrailViewer = ({
             </div>
             <div className="text-2xl font-bold text-blue-600 mt-1">{summary.totalSteps}</div>
           </div>
-          
+
           <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
             <div className="flex items-center space-x-2">
               <FileText className="h-5 w-5 text-green-600" />
@@ -89,7 +129,7 @@ const AuditTrailViewer = ({
             </div>
             <div className="text-2xl font-bold text-green-600 mt-1">{summary.totalFormulasUsed}</div>
           </div>
-          
+
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div className="flex items-center space-x-2">
               <AlertTriangle className="h-5 w-5 text-yellow-600" />
@@ -97,7 +137,7 @@ const AuditTrailViewer = ({
             </div>
             <div className="text-2xl font-bold text-yellow-600 mt-1">{summary.totalWarnings}</div>
           </div>
-          
+
           <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
             <div className="flex items-center space-x-2">
               <Info className="h-5 w-5 text-purple-600" />
@@ -117,9 +157,8 @@ const AuditTrailViewer = ({
             </div>
             <div>
               <span className="font-medium text-gray-700">Validation Status:</span>
-              <span className={`ml-2 px-2 py-1 rounded text-xs ${
-                summary.hasValidationIssues ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-              }`}>
+              <span className={`ml-2 px-2 py-1 rounded text-xs ${summary.hasValidationIssues ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                }`}>
                 {summary.hasValidationIssues ? 'Issues Found' : 'All Passed'}
               </span>
             </div>
@@ -220,13 +259,13 @@ const AuditTrailViewer = ({
                 </span>
               </div>
             </div>
-            
+
             {formula.latex && (
               <div className="mb-3">
                 <BlockMath math={formula.latex} />
               </div>
             )}
-            
+
             <div className="text-sm text-gray-600">
               <div><strong>Formula ID:</strong> {formula.formulaId}</div>
               <div><strong>Used At:</strong> {new Date(formula.usedAt).toLocaleString()}</div>
@@ -257,7 +296,7 @@ const AuditTrailViewer = ({
                 {assumption.source}
               </span>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="font-medium text-gray-700">Value:</span>
@@ -272,7 +311,7 @@ const AuditTrailViewer = ({
                 <span className="ml-2 text-gray-600">{assumption.justification}</span>
               </div>
             </div>
-            
+
             <div className="mt-2 text-xs text-gray-500">
               Used: {new Date(assumption.usedAt).toLocaleString()}
             </div>
@@ -295,18 +334,16 @@ const AuditTrailViewer = ({
     return (
       <div className="space-y-6">
         {/* Overall Status */}
-        <div className={`p-4 rounded-lg border ${
-          resultValidation.passedAll ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-        }`}>
+        <div className={`p-4 rounded-lg border ${resultValidation.passedAll ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+          }`}>
           <div className="flex items-center space-x-2">
             {resultValidation.passedAll ? (
               <CheckCircle className="h-5 w-5 text-green-600" />
             ) : (
               <AlertTriangle className="h-5 w-5 text-red-600" />
             )}
-            <span className={`font-semibold ${
-              resultValidation.passedAll ? 'text-green-800' : 'text-red-800'
-            }`}>
+            <span className={`font-semibold ${resultValidation.passedAll ? 'text-green-800' : 'text-red-800'
+              }`}>
               {resultValidation.passedAll ? 'All Validations Passed' : 'Validation Issues Found'}
             </span>
           </div>
@@ -318,14 +355,12 @@ const AuditTrailViewer = ({
             <h4 className="font-semibold text-gray-800 mb-3">Range Checks</h4>
             <div className="space-y-2">
               {resultValidation.rangeChecks.map((check, index) => (
-                <div key={index} className={`p-3 rounded-lg border ${
-                  check.passed ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-                }`}>
+                <div key={index} className={`p-3 rounded-lg border ${check.passed ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                  }`}>
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-gray-800">{check.variable}</span>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      check.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`px-2 py-1 rounded text-xs ${check.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
                       {check.passed ? 'Passed' : 'Failed'}
                     </span>
                   </div>
@@ -347,14 +382,12 @@ const AuditTrailViewer = ({
             <h4 className="font-semibold text-gray-800 mb-3">Consistency Checks</h4>
             <div className="space-y-2">
               {resultValidation.consistencyChecks.map((check, index) => (
-                <div key={index} className={`p-3 rounded-lg border ${
-                  check.passed ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-                }`}>
+                <div key={index} className={`p-3 rounded-lg border ${check.passed ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                  }`}>
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-gray-800">{check.checkName}</span>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      check.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`px-2 py-1 rounded text-xs ${check.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
                       {check.passed ? 'Passed' : 'Failed'}
                     </span>
                   </div>
@@ -374,14 +407,12 @@ const AuditTrailViewer = ({
             <h4 className="font-semibold text-gray-800 mb-3">Reasonableness Tests</h4>
             <div className="space-y-2">
               {resultValidation.reasonablenessTests.map((test, index) => (
-                <div key={index} className={`p-3 rounded-lg border ${
-                  test.passed ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-                }`}>
+                <div key={index} className={`p-3 rounded-lg border ${test.passed ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                  }`}>
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-gray-800">{test.testName}</span>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      test.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`px-2 py-1 rounded text-xs ${test.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
                       {test.passed ? 'Passed' : 'Failed'}
                     </span>
                   </div>
@@ -446,34 +477,31 @@ const AuditTrailViewer = ({
     return (
       <div className="space-y-2">
         {auditTrail.executionLog.map((log, index) => (
-          <div key={index} className={`p-3 rounded-lg border ${
-            log.level === 'error' ? 'bg-red-50 border-red-200' :
+          <div key={index} className={`p-3 rounded-lg border ${log.level === 'error' ? 'bg-red-50 border-red-200' :
             log.level === 'warning' ? 'bg-yellow-50 border-yellow-200' :
-            log.level === 'info' ? 'bg-blue-50 border-blue-200' :
-            'bg-gray-50 border-gray-200'
-          }`}>
+              log.level === 'info' ? 'bg-blue-50 border-blue-200' :
+                'bg-gray-50 border-gray-200'
+            }`}>
             <div className="flex items-start space-x-2">
               <Clock className="h-4 w-4 text-gray-600 mt-0.5" />
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <span className={`font-medium ${
-                    log.level === 'error' ? 'text-red-800' :
+                  <span className={`font-medium ${log.level === 'error' ? 'text-red-800' :
                     log.level === 'warning' ? 'text-yellow-800' :
-                    log.level === 'info' ? 'text-blue-800' :
-                    'text-gray-800'
-                  }`}>
+                      log.level === 'info' ? 'text-blue-800' :
+                        'text-gray-800'
+                    }`}>
                     {log.level.toUpperCase()}
                   </span>
                   <span className="text-xs text-gray-600">
                     {new Date(log.timestamp).toLocaleString()}
                   </span>
                 </div>
-                <p className={`mt-1 ${
-                  log.level === 'error' ? 'text-red-700' :
+                <p className={`mt-1 ${log.level === 'error' ? 'text-red-700' :
                   log.level === 'warning' ? 'text-yellow-700' :
-                  log.level === 'info' ? 'text-blue-700' :
-                  'text-gray-700'
-                }`}>
+                    log.level === 'info' ? 'text-blue-700' :
+                      'text-gray-700'
+                  }`}>
                   {log.message}
                 </p>
                 {log.data && (
@@ -531,11 +559,10 @@ const AuditTrailViewer = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              className={`flex items-center space-x-2 py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === tab.id
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
             >
               <tab.icon className="h-4 w-4" />
               <span>{tab.label}</span>

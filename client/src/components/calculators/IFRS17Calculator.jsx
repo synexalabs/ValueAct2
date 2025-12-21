@@ -26,10 +26,13 @@ import {
 import { formatCurrency, formatPercentage, formatNumber } from '../../utils/formatters';
 import { validateFields, actuarialValidationRules } from '../../utils/validation';
 import ValidatedInput from '../ValidatedInput';
+import { calculations } from '../../utils/api';
 import { getCalculatorColors, getStatusColors } from '../../utils/designSystem';
 
-const IFRS17Calculator = () => {
+const IFRS17Calculator = ({ portfolio }) => {
   const [activeTab, setActiveTab] = useState('csm');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const { history, saveCalculation } = useCalculationHistory('ifrs17');
   const colors = getCalculatorColors('ifrs17');
 
@@ -61,100 +64,140 @@ const IFRS17Calculator = () => {
   // Results state
   const [results, setResults] = useState({});
 
-  const calculateCSMResults = () => {
+  const calculateCSMResults = async () => {
+    setLoading(true);
+    setError(null);
     const { premium, fcf, ra } = csmInputs;
-    const csm = calculateCSM(premium, fcf, ra);
-    const lossComponent = calculateLossComponent(fcf, ra, premium);
 
-    // Create calculation steps for transparency
-    const calculationSteps = [
-      {
-        name: 'Input Validation',
-        description: 'Validate input parameters',
-        status: 'completed',
-        inputs: { premium, fcf, ra },
-        output: 'Validated',
-        explanation: 'All inputs validated successfully'
-      },
-      {
-        name: 'CSM Calculation',
-        description: 'Calculate Contractual Service Margin',
-        status: 'completed',
-        formula: 'CSM = \\max(0, P - FCF - RA)',
-        inputs: { P: premium, FCF: fcf, RA: ra },
-        calculation: [
-          'Step 1: Calculate total obligations',
-          `Total Obligations = FCF + RA = ${fcf.toLocaleString()} + ${ra.toLocaleString()} = ${(fcf + ra).toLocaleString()}`,
-          'Step 2: Calculate CSM',
-          `CSM = \max(0, P - Total Obligations)`,
-          `CSM = \max(0, ${premium.toLocaleString()} - ${(fcf + ra).toLocaleString()}) = ${csm.toLocaleString()}`
-        ],
-        output: csm,
-        unit: 'USD',
-        explanation: 'CSM represents unearned profit to be recognized over coverage period'
-      },
-      {
-        name: 'Loss Component Calculation',
-        description: 'Calculate loss component for onerous contracts',
-        status: 'completed',
-        formula: 'LC = \\max(0, FCF + RA - P)',
-        inputs: { P: premium, FCF: fcf, RA: ra },
-        calculation: [
-          'Step 1: Calculate total obligations',
-          `Total Obligations = FCF + RA = ${fcf.toLocaleString()} + ${ra.toLocaleString()} = ${(fcf + ra).toLocaleString()}`,
-          'Step 2: Calculate loss component',
-          `LC = \max(0, Total Obligations - P)`,
-          `LC = \max(0, ${(fcf + ra).toLocaleString()} - ${premium.toLocaleString()}) = ${lossComponent.toLocaleString()}`
-        ],
-        output: lossComponent,
-        unit: 'USD',
-        explanation: 'Loss component represents immediate loss recognition for onerous contracts'
+    try {
+      // For portfolio calculations, use backend
+      if (portfolio && portfolio.length > 0) {
+        const response = await calculations.runIFRS17(portfolio, {
+          // Pass current inputs as assumptions or overrides if needed
+          // For now, assuming portfolio contains policy data and these inputs might acts as global assumptions
+          discount_rate: 0.035, // Example default
+          ...csmInputs
+        });
+
+        // Ensure result format matches what we expect or transform it
+        const backendResult = response.data.results || response.data;
+
+        // This assumes backend returns a compatible structure or we need to map it
+        // For Phase 1, we might just store it.
+        // If backendResult has 'csm', 'lossComponent' etc.
+
+        const newResults = {
+          ...backendResult,
+          timestamp: new Date().toISOString()
+        };
+
+        setResults(prev => ({ ...prev, csm: newResults }));
+        // Setup audit trail from backend response if available
+        if (backendResult.audit_trail) {
+          setAuditTrail(backendResult.audit_trail);
+        }
+
+      } else {
+        // Local calculation for single policy demo
+        const csm = calculateCSM(premium, fcf, ra);
+        const lossComponent = calculateLossComponent(fcf, ra, premium);
+
+        // Create calculation steps for transparency
+        const calculationSteps = [
+          {
+            name: 'Input Validation',
+            description: 'Validate input parameters',
+            status: 'completed',
+            inputs: { premium, fcf, ra },
+            output: 'Validated',
+            explanation: 'All inputs validated successfully'
+          },
+          {
+            name: 'CSM Calculation',
+            description: 'Calculate Contractual Service Margin',
+            status: 'completed',
+            formula: 'CSM = \\max(0, P - FCF - RA)',
+            inputs: { P: premium, FCF: fcf, RA: ra },
+            calculation: [
+              'Step 1: Calculate total obligations',
+              `Total Obligations = FCF + RA = ${fcf.toLocaleString()} + ${ra.toLocaleString()} = ${(fcf + ra).toLocaleString()}`,
+              'Step 2: Calculate CSM',
+              `CSM = \max(0, P - Total Obligations)`,
+              `CSM = \max(0, ${premium.toLocaleString()} - ${(fcf + ra).toLocaleString()}) = ${csm.toLocaleString()}`
+            ],
+            output: csm,
+            unit: 'USD',
+            explanation: 'CSM represents unearned profit to be recognized over coverage period'
+          },
+          {
+            name: 'Loss Component Calculation',
+            description: 'Calculate loss component for onerous contracts',
+            status: 'completed',
+            formula: 'LC = \\max(0, FCF + RA - P)',
+            inputs: { P: premium, FCF: fcf, RA: ra },
+            calculation: [
+              'Step 1: Calculate total obligations',
+              `Total Obligations = FCF + RA = ${fcf.toLocaleString()} + ${ra.toLocaleString()} = ${(fcf + ra).toLocaleString()}`,
+              'Step 2: Calculate loss component',
+              `LC = \max(0, Total Obligations - P)`,
+              `LC = \max(0, ${(fcf + ra).toLocaleString()} - ${premium.toLocaleString()}) = ${lossComponent.toLocaleString()}`
+            ],
+            output: lossComponent,
+            unit: 'USD',
+            explanation: 'Loss component represents immediate loss recognition for onerous contracts'
+          }
+        ];
+
+        // Create audit trail
+        const auditTrailData = {
+          calculationInputs: { premium, fcf, ra },
+          calculationSteps: calculationSteps,
+          intermediateResults: [
+            { name: 'Total Obligations', value: fcf + ra, unit: 'USD', description: 'Sum of FCF and Risk Adjustment' },
+            { name: 'CSM', value: csm, unit: 'USD', description: 'Contractual Service Margin' },
+            { name: 'Loss Component', value: lossComponent, unit: 'USD', description: 'Loss component for onerous contracts' }
+          ],
+          methodologyVersion: 'IFRS17_CSM_v1.0.0',
+          formulasUsed: [
+            { formulaId: 'CSM_Initial', version: '1.0.0', name: 'Initial CSM Recognition', latex: 'CSM = \\max(0, P - FCF - RA)', usedAt: new Date() },
+            { formulaId: 'Loss_Component', version: '1.0.0', name: 'Loss Component', latex: 'LC = \\max(0, FCF + RA - P)', usedAt: new Date() }
+          ],
+          assumptionsUsed: [
+            { name: 'Discount Rate', value: '3.5%', source: 'regulatory', justification: 'IFRS 17 requirement', usedAt: new Date() },
+            { name: 'Risk Adjustment', value: ra, source: 'company', justification: 'Company-specific risk adjustment', usedAt: new Date() }
+          ],
+          validationResults: [
+            { checkName: 'CSM Non-Negative', type: 'range', passed: csm >= 0, message: `CSM: ${csm.toLocaleString()}`, severity: 'info', timestamp: new Date() },
+            { checkName: 'Loss Component Non-Negative', type: 'range', passed: lossComponent >= 0, message: `Loss Component: ${lossComponent.toLocaleString()}`, severity: 'info', timestamp: new Date() }
+          ],
+          warnings: [],
+          executionLog: [
+            { level: 'info', message: 'CSM calculation started', timestamp: new Date() },
+            { level: 'info', message: 'CSM calculation completed successfully', timestamp: new Date() }
+          ]
+        };
+
+        const newResults = {
+          csm,
+          lossComponent,
+          premium,
+          fcf,
+          ra,
+          timestamp: new Date().toISOString(),
+          calculationSteps,
+          auditTrail: auditTrailData
+        };
+
+        setResults(prev => ({ ...prev, csm: newResults }));
+        setAuditTrail(auditTrailData);
+        saveCalculation({ type: 'csm', ...newResults });
       }
-    ];
-
-    // Create audit trail
-    const auditTrailData = {
-      calculationInputs: { premium, fcf, ra },
-      calculationSteps: calculationSteps,
-      intermediateResults: [
-        { name: 'Total Obligations', value: fcf + ra, unit: 'USD', description: 'Sum of FCF and Risk Adjustment' },
-        { name: 'CSM', value: csm, unit: 'USD', description: 'Contractual Service Margin' },
-        { name: 'Loss Component', value: lossComponent, unit: 'USD', description: 'Loss component for onerous contracts' }
-      ],
-      methodologyVersion: 'IFRS17_CSM_v1.0.0',
-      formulasUsed: [
-        { formulaId: 'CSM_Initial', version: '1.0.0', name: 'Initial CSM Recognition', latex: 'CSM = \\max(0, P - FCF - RA)', usedAt: new Date() },
-        { formulaId: 'Loss_Component', version: '1.0.0', name: 'Loss Component', latex: 'LC = \\max(0, FCF + RA - P)', usedAt: new Date() }
-      ],
-      assumptionsUsed: [
-        { name: 'Discount Rate', value: '3.5%', source: 'regulatory', justification: 'IFRS 17 requirement', usedAt: new Date() },
-        { name: 'Risk Adjustment', value: ra, source: 'company', justification: 'Company-specific risk adjustment', usedAt: new Date() }
-      ],
-      validationResults: [
-        { checkName: 'CSM Non-Negative', type: 'range', passed: csm >= 0, message: `CSM: ${csm.toLocaleString()}`, severity: 'info', timestamp: new Date() },
-        { checkName: 'Loss Component Non-Negative', type: 'range', passed: lossComponent >= 0, message: `Loss Component: ${lossComponent.toLocaleString()}`, severity: 'info', timestamp: new Date() }
-      ],
-      warnings: [],
-      executionLog: [
-        { level: 'info', message: 'CSM calculation started', timestamp: new Date() },
-        { level: 'info', message: 'CSM calculation completed successfully', timestamp: new Date() }
-      ]
-    };
-
-    const newResults = {
-      csm,
-      lossComponent,
-      premium,
-      fcf,
-      ra,
-      timestamp: new Date().toISOString(),
-      calculationSteps,
-      auditTrail: auditTrailData
-    };
-
-    setResults(prev => ({ ...prev, csm: newResults }));
-    setAuditTrail(auditTrailData);
-    saveCalculation({ type: 'csm', ...newResults });
+    } catch (err) {
+      console.error('Calculation failed:', err);
+      setError(err.message || 'Calculation failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const calculateRiskAdjustmentResults = () => {
@@ -229,8 +272,8 @@ const IFRS17Calculator = () => {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${activeTab === tab.id
-                ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg`
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg`
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
           >
             <tab.icon className="h-4 w-4" />
