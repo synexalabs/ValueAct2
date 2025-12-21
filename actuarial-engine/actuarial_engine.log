@@ -1,0 +1,88 @@
+2025-10-25 23:10:01 - main - INFO - Starting IFRS 17 calculation for 1 policies
+2025-10-25 23:10:01 - main - INFO - Starting IFRS 17 calculation for 1 policies
+2025-10-25 23:10:01 - main - ERROR - Unhandled exception: 'dict' object is not callable
+2025-10-25 23:10:01 - main - ERROR - Unhandled exception: 'dict' object is not callable
+2025-10-25 23:10:04 - main - INFO - Starting IFRS 17 calculation for 1 policies
+2025-10-25 23:10:04 - main - INFO - Starting IFRS 17 calculation for 1 policies
+2025-10-25 23:10:04 - main - ERROR - Unhandled exception: 'dict' object is not callable
+2025-10-25 23:10:04 - main - ERROR - Unhandled exception: 'dict' object is not callable
+2025-10-25 23:15:10 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/main.py')}
+2025-10-25 23:15:11 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/actuarial_engine.log')}
+2025-10-25 23:15:14 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/main.py')}
+2025-10-25 23:15:18 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/main.py')}
+2025-10-25 23:15:36 - main - INFO - Starting IFRS 17 calculation for 1 policies
+2025-10-25 23:15:36 - main - INFO - Starting IFRS 17 calculation for 1 policies
+2025-10-25 23:15:55 - main - INFO - Starting IFRS 17 calculation for 1 policies
+2025-10-25 23:15:55 - main - INFO - Starting IFRS 17 calculation for 1 policies
+2025-10-25 23:20:14 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/main.py')}
+2025-10-25 23:20:15 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/actuarial_engine.log')}
+2025-10-25 23:20:25 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/main.py')}
+2025-10-25 23:20:29 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/main.py')}
+2025-10-25 23:20:38 - main - INFO - Starting IFRS 17 calculation for 1 policies
+2025-10-25 23:20:38 - main - INFO - Starting IFRS 17 calculation for 1 policies
+2025-10-25 23:20:38 - main - ERROR - IFRS 17 calculation failed: name 'AuditContext' is not defined
+2025-10-25 23:20:38 - main - ERROR - IFRS 17 calculation failed: name 'AuditContext' is not defined
+2025-10-25 23:20:53 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-25 23:20:54 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/actuarial_engine.log')}
+2025-10-25 23:21:05 - main - INFO - Starting IFRS 17 calculation for 1 policies
+2025-10-25 23:21:05 - main - INFO - Starting IFRS 17 calculation for 1 policies
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Calculation started: IFRS17_CSM_20251025_232105
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Calculation started: IFRS17_CSM_20251025_232105
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Calculation inputs captured
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Calculation inputs captured
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Assumption used: Discount Rate = 0.03 (source: regulatory)
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Assumption used: Discount Rate = 0.03 (source: regulatory)
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Assumption used: Mortality Table = CSO_2017 (source: regulatory)
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Assumption used: Mortality Table = CSO_2017 (source: regulatory)
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Assumption used: Risk Adjustment = 0.02 (source: company)
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Assumption used: Risk Adjustment = 0.02 (source: company)
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Step 1: Data Preparation
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Step 1: Data Preparation
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Step 2: Assumption Validation
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Step 2: Assumption Validation
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Validation Assumption Validation: PASSED
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Validation Assumption Validation: PASSED
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Step 3: Mortality Table Selection
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Step 3: Mortality Table Selection
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - ERROR - Exception in calculation: name 'get_mortality_table' is not defined
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - ERROR - Exception in calculation: name 'get_mortality_table' is not defined
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Calculation completed in 0.01 seconds
+2025-10-25 23:21:05 - audit_IFRS17_CSM_20251025_232105 - INFO - Calculation completed in 0.01 seconds
+2025-10-25 23:21:05 - main - ERROR - IFRS 17 calculation failed: name 'get_mortality_table' is not defined
+2025-10-25 23:21:05 - main - ERROR - IFRS 17 calculation failed: name 'get_mortality_table' is not defined
+2025-10-25 23:21:09 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-25 23:21:10 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/actuarial_engine.log')}
+2025-10-25 23:22:18 - watchfiles.main - DEBUG - 1 change detected: {(<Change.added: 1>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/Dockerfile')}
+2025-10-25 23:22:21 - watchfiles.main - DEBUG - 1 change detected: {(<Change.added: 1>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/cloud-run.yaml')}
+2025-10-25 23:22:21 - watchfiles.main - DEBUG - 1 change detected: {(<Change.added: 1>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/cloud-run.yaml')}
+2025-10-25 23:22:46 - watchfiles.main - DEBUG - 1 change detected: {(<Change.added: 1>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/deploy.sh')}
+2025-10-25 23:22:48 - watchfiles.main - DEBUG - 1 change detected: {(<Change.added: 1>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/deploy.sh')}
+2025-10-25 23:22:55 - watchfiles.main - DEBUG - 1 change detected: {(<Change.added: 1>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/.dockerignore')}
+2025-10-25 23:22:55 - watchfiles.main - DEBUG - 1 change detected: {(<Change.added: 1>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/.dockerignore')}
+2025-10-25 23:23:23 - watchfiles.main - DEBUG - 1 change detected: {(<Change.added: 1>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/DEPLOYMENT_GUIDE.md')}
+2025-10-25 23:23:23 - watchfiles.main - DEBUG - 1 change detected: {(<Change.added: 1>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/DEPLOYMENT_GUIDE.md')}
+2025-10-25 23:23:41 - watchfiles.main - DEBUG - 7 changes detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py'), (<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/DEPLOYMENT_GUIDE.md'), (<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/main.py'), (<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/deploy.sh'), (<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/Dockerfile'), (<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/.dockerignore'), (<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/cloud-run.yaml')}
+2025-10-25 23:23:45 - watchfiles.main - DEBUG - 7 changes detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py'), (<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/DEPLOYMENT_GUIDE.md'), (<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/main.py'), (<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/deploy.sh'), (<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/Dockerfile'), (<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/.dockerignore'), (<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/cloud-run.yaml')}
+2025-10-25 23:41:32 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/main.py')}
+2025-10-25 23:42:15 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-25 23:48:15 - watchfiles.main - DEBUG - 2 changes detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/main.py'), (<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-25 23:54:09 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-25 23:55:56 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-25 23:58:58 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-25 23:59:11 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-25 23:59:19 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-25 23:59:25 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-25 23:59:28 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-26 00:00:53 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-26 00:01:59 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-26 00:02:48 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-26 00:02:51 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-26 00:02:53 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-26 00:05:47 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-26 00:12:41 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-26 00:12:52 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-26 00:13:44 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-26 00:13:46 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-26 00:13:58 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-26 00:17:01 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/calculations/ifrs17.py')}
+2025-10-26 00:21:04 - watchfiles.main - DEBUG - 1 change detected: {(<Change.modified: 2>, '/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/.DS_Store')}
