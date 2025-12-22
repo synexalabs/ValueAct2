@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: valuact
+  labels:
+    app.kubernetes.io/name: valuact
+    app.kubernetes.io/component: platform
+---
+# ConfigMap for shared configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: valuact-config
+  namespace: valuact
+data:
+  LOG_LEVEL: "info"
+  NODE_ENV: "production"
+  CALCULATION_TIMEOUT: "300000"
+---
+# Secret for sensitive data (base64 encoded - replace in production)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: valuact-secrets
+  namespace: valuact
+type: Opaque
+data:
+  # echo -n 'your-jwt-secret' | base64
+  JWT_SECRET: Y2hhbmdlLW1lLWluLXByb2R1Y3Rpb24=
+  # echo -n 'your-session-secret' | base64
+  SESSION_SECRET: Y2hhbmdlLW1lLWluLXByb2R1Y3Rpb24=

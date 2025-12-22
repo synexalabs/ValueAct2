@@ -1,41 +1,155 @@
 version: "3.8"
 
+# Valuact Production Docker Compose
+# Includes Redis for caching/sessions, health checks, and volumes
+
+x-common-env: &common-env
+  TZ: UTC
+  LOG_LEVEL: info
+
 services:
+  # Redis for caching, sessions, and job queues
+  redis:
+    image: redis:7-alpine
+    container_name: valuact-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - valuact-network
+
+  # Python Actuarial Engine (FastAPI)
   actuarial-engine:
     build:
       context: ./actuarial-engine
       dockerfile: Dockerfile
+    container_name: valuact-actuarial-engine
     ports:
       - "8000:8000"
     environment:
-      - LOG_LEVEL=info
+      <<: *common-env
+      REDIS_URL: redis://redis:6379/0
+      WORKERS: 4
+      MAX_REQUESTS: 1000
+      MAX_REQUESTS_JITTER: 50
+    volumes:
+      - ./actuarial-engine/data:/app/data:ro
+      - calculation_cache:/app/cache
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 20s
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - valuact-network
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
 
+  # Node.js Backend (Express)
   server:
     build:
       context: ./server
       dockerfile: Dockerfile
+    container_name: valuact-server
     ports:
       - "3001:3001"
     environment:
-      - NODE_ENV=development
-      - PYTHON_ENGINE_URL=http://actuarial-engine:8000
+      <<: *common-env
+      NODE_ENV: production
+      PYTHON_ENGINE_URL: http://actuarial-engine:8000
+      REDIS_URL: redis://redis:6379/1
+      CALCULATION_TIMEOUT: 300000
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-in-production}
     env_file:
       - ./server/.env
+    volumes:
+      - server_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
     depends_on:
-      - actuarial-engine
+      actuarial-engine:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - valuact-network
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
 
+  # Next.js Frontend
   client:
     build:
       context: ./client
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3001
+    container_name: valuact-client
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      <<: *common-env
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_WS_URL: ws://localhost:3001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
     depends_on:
-      - server
+      server:
+        condition: service_healthy
+    networks:
+      - valuact-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+
+networks:
+  valuact-network:
+    driver: bridge
+    name: valuact-network
+
+volumes:
+  redis_data:
+    name: valuact-redis-data
+  calculation_cache:
+    name: valuact-calculation-cache
+  server_logs:
+    name: valuact-server-logs

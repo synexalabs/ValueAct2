@@ -32,11 +32,29 @@ export const calculations = {
             inputParams: { portfolio, assumptions }
         }),
 
+    runSensitivity: (calculationType, portfolio, baseAssumptions, scenarios) =>
+        api.post('/api/calculations/sensitivity', {
+            calculationType,
+            portfolio,
+            baseAssumptions,
+            scenarios
+        }),
+
     getHistory: (params) => api.get('/api/calculations/history', { params }),
 
     getResult: (calculationId) =>
         api.get(`/api/calculations/${calculationId}/results`),
+
+    getStatus: (calculationId) =>
+        api.get(`/api/calculations/${calculationId}/status`),
 };
+
+export const health = {
+    check: () => api.get('/api/health'),
+    engine: () => api.get('/api/health/engine'),
+    detailed: () => api.get('/api/health/detailed'),
+};
+
 
 export const data = {
     uploadPortfolio: (files) => {

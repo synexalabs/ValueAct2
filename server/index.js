@@ -14,6 +14,8 @@ const dataRoutes = require('./routes/data');
 const calculationRoutes = require('./routes/calculations');
 const methodologyRoutes = require('./routes/methodology');
 const dataManagementRoutes = require('./routes/dataManagement');
+const healthRoutes = require('./routes/healthRoutes');
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -72,10 +74,8 @@ app.use('/api/', limiter);
 
 // Routes
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
-});
+// Health check routes (detailed endpoints)
+app.use('/api/health', healthRoutes);
 
 // Authentication routes
 app.use('/api/auth', authRoutes);

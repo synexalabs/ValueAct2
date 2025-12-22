@@ -253,6 +253,70 @@ class CalculationController {
       });
     }
   }
+
+  /**
+   * Run sensitivity analysis
+   * @param {object} req - Express request object
+   * @param {object} res - Express response object
+   */
+  async runSensitivityAnalysis(req, res) {
+    try {
+      const { calculationType, portfolio, baseAssumptions, scenarios } = req.body;
+
+      // Validate inputs
+      if (!calculationType || !['ifrs17', 'solvency'].includes(calculationType)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid calculation type. Must be "ifrs17" or "solvency"'
+        });
+      }
+
+      if (!portfolio || !Array.isArray(portfolio) || portfolio.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Portfolio is required and must be a non-empty array'
+        });
+      }
+
+      if (!baseAssumptions) {
+        return res.status(400).json({
+          success: false,
+          error: 'Base assumptions are required'
+        });
+      }
+
+      // Default scenarios if not provided
+      const defaultScenarios = scenarios || [
+        { name: 'Base', shocks: {} },
+        { name: 'Discount +100bps', shocks: { discountRate: (baseAssumptions.discountRate || 0.035) + 0.01 } },
+        { name: 'Discount -100bps', shocks: { discountRate: (baseAssumptions.discountRate || 0.035) - 0.01 } },
+        { name: 'Lapse +50%', shocks: { lapseRate: (baseAssumptions.lapseRate || 0.05) * 1.5 } },
+        { name: 'Mortality +15%', shocks: { mortalityShock: 1.15 } },
+      ];
+
+      const pythonEngine = require('../services/pythonEngineService');
+      const result = await pythonEngine.runSensitivityAnalysis(
+        calculationType,
+        portfolio,
+        baseAssumptions,
+        defaultScenarios
+      );
+
+      res.json({
+        success: true,
+        message: 'Sensitivity analysis completed',
+        ...result
+      });
+
+    } catch (error) {
+      logger.error('Sensitivity analysis error:', error);
+
+      res.status(500).json({
+        success: false,
+        error: 'Failed to run sensitivity analysis'
+      });
+    }
+  }
 }
 
 module.exports = new CalculationController();

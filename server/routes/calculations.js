@@ -30,4 +30,10 @@ router.get('/history',
   calculationController.getCalculationHistory
 );
 
+// Sensitivity analysis route
+router.post('/sensitivity',
+  calculationController.runSensitivityAnalysis
+);
+
 module.exports = router;
+

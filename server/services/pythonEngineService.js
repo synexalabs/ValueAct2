@@ -155,6 +155,90 @@ class PythonEngineService {
     }
 
     /**
+     * Run sensitivity analysis across multiple scenarios
+     * @param {string} calculationType - 'ifrs17' or 'solvency'
+     * @param {Array} portfolio - List of policies
+     * @param {Object} baseAssumptions - Base actuarial assumptions
+     * @param {Array} scenarios - Array of scenario objects with name and shocks
+     * @returns {Promise<Object>} Sensitivity analysis results
+     */
+    async runSensitivityAnalysis(calculationType, portfolio, baseAssumptions, scenarios) {
+        const startTime = Date.now();
+        logger.info(`Starting sensitivity analysis with ${scenarios.length} scenarios`);
+
+        try {
+            const results = await Promise.all(
+                scenarios.map(async (scenario) => {
+                    const shockedAssumptions = { ...baseAssumptions };
+
+                    // Apply shocks
+                    Object.entries(scenario.shocks || {}).forEach(([key, value]) => {
+                        if (typeof value === 'number') {
+                            // Check if it's a multiplier (for lapse, mortality)
+                            if (key.includes('Multiplier') || key.includes('multiplier')) {
+                                const baseKey = key.replace('Multiplier', '').replace('multiplier', '');
+                                shockedAssumptions[baseKey] = (shockedAssumptions[baseKey] || 0) * value;
+                            } else {
+                                shockedAssumptions[key] = value;
+                            }
+                        }
+                    });
+
+                    const result = calculationType === 'ifrs17'
+                        ? await this.calculateIFRS17(portfolio, shockedAssumptions)
+                        : await this.calculateSolvency(portfolio, shockedAssumptions);
+
+                    return {
+                        scenario: scenario.name,
+                        shocks: scenario.shocks,
+                        results: result.aggregate_results || result,
+                    };
+                })
+            );
+
+            const duration = Date.now() - startTime;
+            logger.info(`Sensitivity analysis completed in ${duration}ms`);
+
+            return {
+                base_scenario: 'Base',
+                scenarios: results,
+                generated_at: new Date().toISOString(),
+                duration_ms: duration,
+            };
+        } catch (error) {
+            logger.error('Sensitivity analysis error:', error.message);
+            throw new Error(`Sensitivity analysis failed: ${error.message}`);
+        }
+    }
+
+    /**
+     * Get available mortality tables from Python engine
+     * @returns {Promise<Array>} List of available mortality tables
+     */
+    async getMortalityTables() {
+        if (!this.canMakeRequest()) {
+            throw new Error('Python engine circuit breaker is OPEN - service temporarily unavailable');
+        }
+
+        try {
+            const response = await axios.get(
+                `${PYTHON_ENGINE_URL}/api/v1/mortality-tables`,
+                { timeout: 10000 }
+            );
+            this.recordSuccess();
+            return response.data;
+        } catch (error) {
+            this.recordFailure();
+            logger.error('Get mortality tables error:', error.message);
+            // Return default tables if endpoint not available
+            return {
+                tables: ['CSO_2017', 'CSO_2001', 'GAM_1994'],
+                error: 'Could not fetch from engine, returning defaults',
+            };
+        }
+    }
+
+    /**
      * Check health of Python engine
      * @returns {Promise<Object>} Health status
      */

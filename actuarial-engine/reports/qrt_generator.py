@@ -61,36 +61,82 @@ class QRTGenerator:
             'Date': [self.reporting_date.strftime('%Y-%m-%d')] * 7
         })
 
+    def generate_s12_01(self) -> pd.DataFrame:
+        """
+        S.12.01 - Life and Health SLT Technical Provisions.
+        Detailed breakdown of technical provisions components.
+        """
+        # Extract values with defaults
+        best_estimate = self.results.get('best_estimate', 0)
+        risk_margin = self.results.get('risk_margin', 0)
+        gross_tp = self.results.get('technical_provisions', best_estimate + risk_margin)
+        reins_recoverable = self.results.get('reinsurance_recoverables', 0)
+        net_tp = gross_tp - reins_recoverable
+        
+        # IFRS 17 specific fields if available
+        csm = self.results.get('total_csm', 0)
+        loss_component = self.results.get('loss_component', 0)
+        
+        items = [
+            ('R0010', 'Technical provisions calculated as a whole', 0),
+            ('R0020', 'Best Estimate', best_estimate),
+            ('R0030', 'Risk margin', risk_margin),
+            ('R0040', 'Technical provisions - total (gross)', gross_tp),
+            ('R0050', 'Reinsurance recoverables', reins_recoverable),
+            ('R0060', 'Technical provisions minus recoverables (net)', net_tp),
+            ('R0070', 'CSM (IFRS 17)', csm),
+            ('R0080', 'Loss component (IFRS 17)', loss_component),
+        ]
+        
+        return pd.DataFrame({
+            'Row ID': [i[0] for i in items],
+            'Item': [i[1] for i in items],
+            'Value': [i[2] for i in items],
+            'Currency': ['EUR'] * len(items),
+            'Date': [self.reporting_date.strftime('%Y-%m-%d')] * len(items)
+        })
+
     def generate_s25_01(self) -> pd.DataFrame:
         """
         S.25.01 - Solvency Capital Requirement - for undertakings on Standard Formula.
         Detailed breakdown of SCR components (Market, Life, Health, etc.).
         """
         scr_components = self.results.get('scr_components', {})
+        aggregate = self.results.get('aggregate_results', self.results)
         
-        # Standard formula risk modules
-        # If components provided, map them. Otherwise return empty structure.
-        risk_modules = [
-            'Market risk',
-            'Counterparty default risk',
-            'Life underwriting risk',
-            'Health underwriting risk',
-            'Non-life underwriting risk',
-            'Diversification',
-            'Intangible asset risk',
-            'Basic Solvency Capital Requirement'
+        # Standard formula risk modules with sub-risks
+        risk_items = [
+            # Market risk module
+            ('R0010', 'Interest rate risk', scr_components.get('interest_rate_risk', aggregate.get('interest_rate_risk', 0))),
+            ('R0020', 'Equity risk', scr_components.get('equity_risk', aggregate.get('equity_risk', 0))),
+            ('R0030', 'Property risk', scr_components.get('property_risk', aggregate.get('property_risk', 0))),
+            ('R0040', 'Spread risk', scr_components.get('spread_risk', aggregate.get('spread_risk', 0))),
+            ('R0050', 'Currency risk', scr_components.get('currency_risk', aggregate.get('currency_risk', 0))),
+            ('R0060', 'Concentration risk', scr_components.get('concentration_risk', 0)),
+            ('R0100', 'Total Market risk', scr_components.get('market_risk', aggregate.get('market_risk', 0))),
+            # Life underwriting risk module
+            ('R0110', 'Mortality risk', scr_components.get('mortality_risk', aggregate.get('mortality_risk', 0))),
+            ('R0120', 'Longevity risk', scr_components.get('longevity_risk', aggregate.get('longevity_risk', 0))),
+            ('R0130', 'Disability-morbidity risk', scr_components.get('disability_risk', 0)),
+            ('R0140', 'Lapse risk', scr_components.get('lapse_risk', aggregate.get('lapse_risk', 0))),
+            ('R0150', 'Expense risk', scr_components.get('expense_risk', aggregate.get('expense_risk', 0))),
+            ('R0160', 'Life catastrophe risk', scr_components.get('life_cat_risk', aggregate.get('life_cat_risk', 0))),
+            ('R0200', 'Total Life underwriting risk', scr_components.get('life_underwriting_risk', aggregate.get('life_underwriting_risk', 0))),
+            # Other modules
+            ('R0210', 'Counterparty default risk', scr_components.get('counterparty_default_risk', aggregate.get('counterparty_default_risk', 0))),
+            ('R0220', 'Health underwriting risk', scr_components.get('health_underwriting_risk', aggregate.get('health_underwriting_risk', 0))),
+            # Aggregation
+            ('R0300', 'Basic Solvency Capital Requirement', scr_components.get('bscr', aggregate.get('bscr', 0))),
+            ('R0310', 'Operational risk', scr_components.get('operational_risk', aggregate.get('operational_risk_charge', 0))),
+            ('R0400', 'Solvency Capital Requirement (SCR)', self.results.get('total_scr', aggregate.get('total_scr', 0))),
         ]
-        
-        values = []
-        for module in risk_modules:
-            # Try to match key from results (assuming keys like 'market_risk', 'life_risk')
-            key = module.lower().replace(' ', '_')
-            values.append(scr_components.get(key, 0))
 
         return pd.DataFrame({
-            'Risk Module': risk_modules,
-            'SCR Value': values
+            'Row ID': [i[0] for i in risk_items],
+            'Risk Module': [i[1] for i in risk_items],
+            'SCR Value': [i[2] for i in risk_items],
         })
+
 
     def generate_summary_report(self) -> str:
         """Generates a text summary of the solvency position."""

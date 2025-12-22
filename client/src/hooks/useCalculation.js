@@ -82,6 +82,33 @@ export function useCalculation() {
         }
     }, []);
 
+    /**
+     * Run sensitivity analysis
+     */
+    const runSensitivity = useCallback(async (calculationType, portfolio, baseAssumptions, scenarios) => {
+        setLoading(true);
+        setError(null);
+        setProgress(0);
+
+        try {
+            const response = await calculations.runSensitivity(
+                calculationType,
+                portfolio,
+                baseAssumptions,
+                scenarios
+            );
+            setResults(response.data);
+            setProgress(100);
+            return response.data;
+        } catch (err) {
+            const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message;
+            setError(errorMessage);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
 
     /**
      * Reset state
@@ -100,6 +127,7 @@ export function useCalculation() {
         progress,
         runIFRS17,
         runSolvency,
+        runSensitivity,
         getHistory,
         getResult,
         reset,
@@ -107,3 +135,4 @@ export function useCalculation() {
 }
 
 export default useCalculation;
+

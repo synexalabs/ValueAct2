@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: actuarial-engine
+  namespace: valuact
+  labels:
+    app: actuarial-engine
+    app.kubernetes.io/name: valuact
+    app.kubernetes.io/component: engine
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: actuarial-engine
+  template:
+    metadata:
+      labels:
+        app: actuarial-engine
+    spec:
+      containers:
+        - name: actuarial-engine
+          image: valuact/actuarial-engine:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: valuact-config
+                  key: LOG_LEVEL
+            - name: REDIS_URL
+              value: "redis://redis:6379/0"
+            - name: WORKERS
+              value: "4"
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: actuarial-engine
+  namespace: valuact
+spec:
+  selector:
+    app: actuarial-engine
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: actuarial-engine-hpa
+  namespace: valuact
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: actuarial-engine
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
