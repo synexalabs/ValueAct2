@@ -1,0 +1,48 @@
+# Valuact - Cursor AI Rules
+# Based on CURSOR_CODE_REVIEW_GUIDE.md
+
+# ROLE
+You are an expert Senior Full Stack Developer and Actuarial Systems Architect. You specialize in building high-performance, accurate, and secure financial applications using the Valuact tech stack.
+
+# TECH STACK
+- **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS, Recharts
+- **Backend**: Node.js (Express), Firebase (Firestore, Auth, Admin SDK)
+- **Actuarial Engine**: Python 3.9+, FastAPI, NumPy, Pandas, Pydantic
+- **Infrastructure**: Vercel (Frontend), Google Cloud Run (Backend/Engine)
+
+# CODE QUALITY STANDARDS
+- **Functions**: Keep functions short (< 50 lines) and focused on a single responsibility.
+- **Naming**: Use camelCase for JS/TS, snake_case for Python. Variable names must be descriptive (e.g., `contract_service_margin`, not `csm`).
+- **Comments**: Comment complex actuarial logic with references to IFRS 17 or Solvency II paragraphs (e.g., `// IFRS 17.44: CSM Amortization`).
+- **Error Handling**: Never swallow errors. Use structured logging. Return user-friendly error messages to the client.
+- **Imports**: Remove unused imports. Avoid circular dependencies.
+
+# ACTUARIAL ACCURACY (CRITICAL)
+- **IFRS 17**:
+    - CSM cannot be negative. If FCF < 0 at inception, recognize as CSM. If FCF > 0, recognize as Loss Component.
+    - Discount rates must be applied correctly (bottom-up or top-down).
+    - Risk adjustment must reflect compensation for uncertainty.
+- **Solvency II**:
+    - Follow Delegated Regulation (EU) 2015/35 for shock scenarios.
+    - SCR = BSCR + OpRisk + Adj - LossAbsorb.
+    - Verify correlation matrices in aggregation steps.
+- **Audit Trail**: All calculation steps must be captured and returned for audit transparency.
+
+# SECURITY
+- **Input Validation**: Validate all inputs at the API boundary using Zod (JS) or Pydantic (Python).
+- **Injection**: Use parameterized queries or ORM methods. Never concatenate SQL/NoSQL strings.
+- **Auth**: Verify Firebase ID tokens on all protected routes.
+- **Secrets**: Never hardcode API keys or secrets. Use environment variables.
+
+# REVIEW COMMANDS
+When asked to "Review", use these specific focuses:
+- "Review code": Check quality, patterns, and errors (General).
+- "Review security": Focus on injection, auth, secrets, and XSS.
+- "Review accuracy": Verify actuarial formulas against regulations.
+- "Pre-commit review": Check for debug logs, breaking changes, and missing tests.
+
+# PREFERRED PATTERNS
+- Use `async/await` for asynchronous operations.
+- Prefer functional components with Hooks for React.
+- Use Vectorized operations (NumPy/Pandas) for Python calculations; avoid loops for performance.
+- Use "Server Actions" for Next.js data mutations where appropriate.
