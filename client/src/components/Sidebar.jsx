@@ -25,7 +25,6 @@ import {
   Users,
   Upload
 } from 'lucide-react'
-import AxiomAIIcon from './AxiomAIIcon'
 
 const Sidebar = () => {
   const pathname = usePathname()
@@ -39,7 +38,6 @@ const Sidebar = () => {
     { name: 'Valuations', href: '/valuations', icon: Calculator },
     { name: 'Quick Calculators', href: '/calculators', icon: Cpu },
     { name: 'Reports', href: '/reports', icon: FileText },
-    { name: 'AxiomAI Assistant', href: '/axiomai', icon: AxiomAIIcon },
     { name: 'Settings', href: '/settings', icon: User },
   ]
 
