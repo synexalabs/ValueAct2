@@ -37,7 +37,6 @@ const Sidebar = () => {
     { name: 'Data Management', href: '/data', icon: Database },
     { name: 'Valuations', href: '/valuations', icon: Calculator },
     { name: 'Quick Calculators', href: '/calculators', icon: Cpu },
-    { name: 'Reports', href: '/reports', icon: FileText },
     { name: 'Settings', href: '/settings', icon: User },
   ]
 
