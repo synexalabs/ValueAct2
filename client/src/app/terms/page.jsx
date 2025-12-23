@@ -23,8 +23,8 @@ export default function TermsPage() {
                             <button
                                 onClick={() => setLanguage('de')}
                                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${language === 'de'
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                             >
                                 DE
@@ -32,8 +32,8 @@ export default function TermsPage() {
                             <button
                                 onClick={() => setLanguage('en')}
                                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${language === 'en'
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                     }`}
                             >
                                 EN
@@ -72,7 +72,6 @@ export default function TermsPage() {
                                         <li>Solvency II Berechnungen (SCR, MCR, Solvency Ratio)</li>
                                         <li>Pricing und Produktentwicklung</li>
                                         <li>Sterbetafeln und Mortalitätsberechnungen</li>
-                                        <li>KI-gestützte Beratung (AxiomAI)</li>
                                     </ul>
                                 </div>
 
@@ -160,7 +159,6 @@ export default function TermsPage() {
                                         <li>Solvency II calculations (SCR, MCR, Solvency Ratio)</li>
                                         <li>Pricing and product development</li>
                                         <li>Mortality tables and mortality calculations</li>
-                                        <li>AI-powered assistance (AxiomAI)</li>
                                     </ul>
                                 </div>
 
