@@ -23,7 +23,8 @@ import {
   Search,
   CheckCircle,
   Users,
-  Upload
+  Upload,
+  HelpCircle
 } from 'lucide-react'
 
 const Sidebar = () => {
@@ -42,6 +43,7 @@ const Sidebar = () => {
 
   const referenceNavigation = [
     { name: 'Methodology', href: '/methodology', icon: BookOpen },
+    { name: 'User Guide', href: '/user-guide', icon: HelpCircle },
   ]
 
   // const handleLogout = () => {
