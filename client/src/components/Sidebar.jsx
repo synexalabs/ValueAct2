@@ -97,11 +97,7 @@ const Sidebar = () => {
 
           {/* Reference Section */}
           <div className="pt-6 mt-6 border-t border-gray-200">
-            <div className="flex items-center space-x-3 px-4 py-3 text-xs font-bold text-gray-600 uppercase tracking-wider bg-gray-50 rounded-lg">
-              <FileText className="h-4 w-4" />
-              <span>Reference</span>
-            </div>
-            <div className="mt-3 space-y-2">
+            <div className="space-y-2">
               {referenceNavigation.map((item) => {
                 const isActive = pathname.startsWith(item.href);
                 return (
@@ -184,11 +180,7 @@ const Sidebar = () => {
 
               {/* Mobile Reference Section */}
               <div className="pt-6 mt-6 border-t border-gray-200">
-                <div className="flex items-center space-x-3 px-4 py-3 text-xs font-bold text-gray-600 uppercase tracking-wider bg-gray-50 rounded-lg">
-                  <FileText className="h-4 w-4" />
-                  <span>Reference</span>
-                </div>
-                <div className="mt-3 space-y-2">
+                <div className="space-y-2">
                   {referenceNavigation.map((item) => {
                     const isActive = pathname.startsWith(item.href);
                     return (
