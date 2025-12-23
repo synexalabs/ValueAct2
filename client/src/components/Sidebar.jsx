@@ -43,7 +43,6 @@ const Sidebar = () => {
 
   const referenceNavigation = [
     { name: 'Methodology', href: '/methodology', icon: BookOpen },
-    { name: 'API Documentation', href: '/api-docs', icon: Search },
   ]
 
   // const handleLogout = () => {
