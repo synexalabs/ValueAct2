@@ -111,14 +111,14 @@ const COMBINED_SCENARIOS = [
 ];
 
 const SeverityBadge = ({ severity }) => {
-    const colors = {
-        high: 'bg-red-100 text-red-800 border-red-200',
-        medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-        low: 'bg-green-100 text-green-800 border-green-200',
+    const styles = {
+        high: 'bg-accent-50 text-accent-700 border-accent-100',
+        medium: 'bg-trust-50 text-trust-700 border-trust-100',
+        low: 'bg-growth-50 text-growth-700 border-growth-100',
     };
 
     return (
-        <span className={`text-xs px-2 py-0.5 rounded-full border ${colors[severity] || colors.medium}`}>
+        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${styles[severity] || styles.medium}`}>
             {severity}
         </span>
     );
@@ -178,31 +178,33 @@ export default function StressTestPanel({
 
     if (!portfolio) {
         return (
-            <div className="bg-white rounded-lg shadow-lg p-6 text-center text-gray-500">
-                Select a portfolio to enable stress testing.
+            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-16 border border-trust-50 shadow-glass text-center">
+                <div className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Simulation Engine Idle</div>
+                <p className="text-xs text-gray-400 font-medium">Select a portfolio to enable regulatory stress testing.</p>
             </div>
         );
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Stress Testing</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                    Regulatory and scenario-based stress tests for {calculationType.toUpperCase()}
+        <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
+            <div className="mb-10">
+                <h2 className="text-3xl font-heading font-black text-trust-950 uppercase tracking-tight mb-2">Regulatory Stress Testing</h2>
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                    Systemic Risk Modeling ({calculationType.toUpperCase()})
                 </p>
             </div>
 
             {error && (
-                <div className="bg-red-50 text-red-700 p-3 rounded-lg mb-4 text-sm border border-red-200">
+                <div className="mb-6 p-6 bg-accent-50/50 border border-accent-100 rounded-2xl text-accent-700 text-[11px] font-bold uppercase tracking-widest flex items-center gap-2">
+                    <span className="w-1 h-1 bg-accent-500 rounded-full animate-pulse" />
                     {error}
                 </div>
             )}
 
             {/* Regulatory Scenarios */}
-            <div className="mb-8">
-                <h3 className="text-lg font-semibold mb-4">Regulatory Scenarios</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="mb-12">
+                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6 px-1">Pillar 1 Regulatory Scenarios</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {scenarios.map(scenario => {
                         const metricKey = calculationType === 'solvency' ? 'total_scr' : 'total_csm';
                         const impact = calculateImpact(scenario.id, metricKey);
@@ -211,32 +213,31 @@ export default function StressTestPanel({
                         return (
                             <div
                                 key={scenario.id}
-                                className="border rounded-lg p-4 hover:border-blue-500 transition-colors hover:shadow-sm"
+                                className="group bg-gray-50/50 border border-gray-100 rounded-2xl p-6 hover:border-trust-200 transition-all duration-300 hover:shadow-md"
                             >
-                                <div className="flex items-start gap-3 mb-3">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <h4 className="font-medium text-gray-900">{scenario.name}</h4>
-                                            <SeverityBadge severity={scenario.severity} />
-                                        </div>
-                                        <p className="text-xs text-gray-500 mb-1">{scenario.description}</p>
-                                        <p className="text-xs text-blue-600">{scenario.regulation}</p>
+                                <div className="flex flex-col mb-4">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h4 className="text-[11px] font-black text-trust-950 uppercase tracking-widest">{scenario.name}</h4>
+                                        <SeverityBadge severity={scenario.severity} />
                                     </div>
+                                    <p className="text-[10px] font-bold text-gray-400 leading-relaxed mb-3">{scenario.description}</p>
+                                    <p className="text-[9px] font-black text-trust-500 uppercase tracking-[0.2em]">{scenario.regulation}</p>
                                 </div>
 
                                 {stressResults[scenario.id] && impact && (
-                                    <div className="mb-3 p-3 bg-gray-50 rounded-lg">
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-500">
-                                                {calculationType === 'solvency' ? 'SCR Impact:' : 'CSM Impact:'}
+                                    <div className="mb-4 p-4 bg-white/50 rounded-xl border border-white/80 shadow-sm">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                                                {calculationType === 'solvency' ? 'SCR Impact' : 'CSM Impact'}
                                             </span>
-                                            <span className={`font-mono font-medium ${impact.relative > 0 ? 'text-red-600' : 'text-green-600'
-                                                }`}>
-                                                {formatCurrency(impact.absolute)}
-                                                <span className="text-xs ml-1">
-                                                    ({formatPercentage(impact.relative)})
+                                            <div className="text-right">
+                                                <span className={`text-[11px] font-black tracking-tighter block ${impact.relative > 0 ? 'text-accent-600' : 'text-growth-600'}`}>
+                                                    {formatCurrency(impact.absolute)}
                                                 </span>
-                                            </span>
+                                                <span className={`text-[9px] font-bold ${impact.relative > 0 ? 'text-accent-500' : 'text-growth-500'}`}>
+                                                    {formatPercentage(impact.relative)}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -244,12 +245,12 @@ export default function StressTestPanel({
                                 <button
                                     onClick={() => runStressTest(scenario)}
                                     disabled={isRunning}
-                                    className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors ${isRunning
+                                    className={`w-full py-3 px-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${isRunning
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                                        : 'bg-trust-950 text-white hover:bg-trust-900 shadow-sm hover:shadow-md'
                                         }`}
                                 >
-                                    {isRunning ? 'Running...' : stressResults[scenario.id] ? 'Re-run' : 'Run Test'}
+                                    {isRunning ? 'Processing...' : stressResults[scenario.id] ? 'Re-run Analysis' : 'Execute Test'}
                                 </button>
                             </div>
                         );
@@ -258,9 +259,9 @@ export default function StressTestPanel({
             </div>
 
             {/* Combined Scenarios */}
-            <div className="mb-8">
-                <h3 className="text-lg font-semibold mb-4">Combined Scenarios</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mb-12">
+                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6 px-1">Internal Risk Aggregation</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {COMBINED_SCENARIOS.map(scenario => {
                         const metricKey = calculationType === 'solvency' ? 'total_scr' : 'total_csm';
                         const impact = calculateImpact(scenario.id, metricKey);
@@ -269,34 +270,40 @@ export default function StressTestPanel({
                         return (
                             <div
                                 key={scenario.id}
-                                className={`border-2 rounded-lg p-4 ${scenario.severity === 'high'
-                                    ? 'border-red-200 bg-red-50'
-                                    : 'border-yellow-200 bg-yellow-50'
+                                className={`rounded-[2rem] p-8 border-2 transition-all duration-300 ${scenario.severity === 'high'
+                                    ? 'border-accent-100 bg-accent-50/30'
+                                    : 'border-trust-100 bg-trust-50/30'
                                     }`}
                             >
-                                <div className="flex items-center gap-2 mb-2">
-                                    <h4 className="font-semibold text-gray-900">{scenario.name}</h4>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h4 className="text-[13px] font-heading font-black text-trust-950 uppercase tracking-tight">{scenario.name}</h4>
                                     <SeverityBadge severity={scenario.severity} />
                                 </div>
-                                <p className="text-sm text-gray-600 mb-3">{scenario.description}</p>
+                                <p className="text-[11px] font-bold text-gray-500 mb-6 leading-relaxed italic">{scenario.description}</p>
 
-                                <div className="text-xs text-gray-500 mb-3">
-                                    <strong>Shocks:</strong>{' '}
+                                <div className="grid grid-cols-2 gap-2 mb-6">
                                     {Object.entries(scenario.shocks).map(([k, v]) => (
-                                        <span key={k} className="mr-2">
-                                            {k}: {typeof v === 'number' ? formatPercentage(v) : String(v)}
-                                        </span>
+                                        <div key={k} className="bg-white/50 px-3 py-2 rounded-xl border border-white/80">
+                                            <div className="text-[8px] font-black text-gray-400 uppercase tracking-widest truncate">{k.replace('_', ' ')}</div>
+                                            <div className="text-[10px] font-black text-trust-950">
+                                                {typeof v === 'number' ? formatPercentage(v) : String(v)}
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
 
                                 {stressResults[scenario.id] && impact && (
-                                    <div className="p-3 bg-white rounded-lg mb-3">
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-500">Impact:</span>
-                                            <span className={`font-mono font-medium ${impact.relative > 0 ? 'text-red-600' : 'text-green-600'
-                                                }`}>
-                                                {formatCurrency(impact.absolute)} ({formatPercentage(impact.relative)})
-                                            </span>
+                                    <div className="mb-6 p-5 bg-white rounded-2xl border border-white shadow-sm">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Aggregate Impact</span>
+                                            <div className="text-right">
+                                                <span className={`text-sm font-black tracking-tighter block ${impact.relative > 0 ? 'text-accent-600' : 'text-growth-600'}`}>
+                                                    {formatCurrency(impact.absolute)}
+                                                </span>
+                                                <span className={`text-[10px] font-bold ${impact.relative > 0 ? 'text-accent-500' : 'text-growth-500'}`}>
+                                                    {formatPercentage(impact.relative)}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -304,14 +311,14 @@ export default function StressTestPanel({
                                 <button
                                     onClick={() => runStressTest(scenario)}
                                     disabled={isRunning}
-                                    className={`w-full py-2 px-4 rounded-lg text-sm font-medium ${isRunning
+                                    className={`w-full py-4 px-6 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${isRunning
                                         ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                         : scenario.severity === 'high'
-                                            ? 'bg-red-600 text-white hover:bg-red-700'
-                                            : 'bg-yellow-600 text-white hover:bg-yellow-700'
+                                            ? 'bg-accent-600 text-white hover:bg-accent-700 shadow-lg shadow-accent-200'
+                                            : 'bg-trust-950 text-white hover:bg-trust-900 shadow-lg shadow-trust-200'
                                         }`}
                                 >
-                                    {isRunning ? 'Running...' : 'Run Combined Test'}
+                                    {isRunning ? 'Running Analysis...' : 'Execute Aggregation'}
                                 </button>
                             </div>
                         );
@@ -320,12 +327,12 @@ export default function StressTestPanel({
             </div>
 
             {/* Methodology */}
-            <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Stress Test Methodology</h4>
-                <p className="text-sm text-gray-600">
-                    Stress tests are applied instantaneously to the current portfolio. Results show the
-                    impact on key metrics compared to the base scenario. Regulatory scenarios follow
-                    {calculationType === 'solvency' ? ' Solvency II Standard Formula' : ' IFRS 17'} specifications.
+            {/* Methodology */}
+            <div className="bg-trust-950 p-8 rounded-3xl border border-trust-900 shadow-xl overflow-hidden relative mt-12">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-accent-400/10 blur-[100px] rounded-full -mr-32 -mt-32" />
+                <h4 className="text-[10px] font-black text-accent-400 uppercase tracking-[0.2em] mb-3 relative z-10">Stress Test Methodology</h4>
+                <p className="text-sm text-gray-400 leading-relaxed font-medium relative z-10">
+                    Stress modeling is executed as instantaneous shocks to the current recognition period. Results indicate the immediate delta in solvency and profitability metrics compared to the baseline audited scenario. Regulatory scenarios are modeled in compliance with {calculationType === 'solvency' ? 'Solvency II Standard Formula' : 'IFRS 17 Transition'} standards.
                 </p>
             </div>
         </div>

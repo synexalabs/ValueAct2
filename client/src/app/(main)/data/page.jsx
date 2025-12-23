@@ -343,54 +343,54 @@ const DataManagement = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Data Management</h1>
-                    <p className="mt-2 text-gray-600">
+                    <h1 className="text-3xl font-heading font-bold text-trust-900">Data Management</h1>
+                    <p className="mt-2 text-gray-400">
                         Upload, validate, and process your Term Life actuarial data
                     </p>
                 </div>
 
                 {/* Stepper */}
-                <div className="mb-8 overflow-x-auto pb-4">
-                    <div className="flex items-center min-w-max">
+                <div className="mb-10 overflow-x-auto pb-4">
+                    <div className="flex items-center min-w-max gap-4 px-1">
                         {steps.map((step, index) => {
                             const isActive = currentStep === step.id;
                             const isCompleted = currentStep > step.id;
                             const isClickable = currentStep >= step.id;
 
                             return (
-                                <div key={step.id} className="flex items-center">
+                                <React.Fragment key={step.id}>
                                     <button
                                         onClick={() => isClickable && setCurrentStep(step.id)}
                                         disabled={!isClickable}
-                                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${isActive
-                                            ? 'bg-blue-600 text-white'
+                                        className={`flex items-center gap-4 px-5 py-3 rounded-2xl transition-all border-2 ${isActive
+                                            ? 'bg-trust-900 text-white border-trust-900 shadow-lg shadow-trust-900/20'
                                             : isCompleted
-                                                ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                ? 'bg-growth-50 text-growth-700 border-growth-100'
+                                                : 'bg-white text-gray-400 border-gray-100 cursor-not-allowed opacity-50'
                                             }`}
                                     >
-                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isActive
-                                            ? 'bg-white text-blue-600'
+                                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-heading font-bold ${isActive
+                                            ? 'bg-white/20 text-white'
                                             : isCompleted
-                                                ? 'bg-green-600 text-white'
-                                                : 'bg-gray-300 text-gray-500'
+                                                ? 'bg-growth-600 text-white'
+                                                : 'bg-gray-100 text-gray-500'
                                             }`}>
                                             {isCompleted ? (
-                                                <CheckCircle className="h-4 w-4" />
+                                                <CheckCircle className="h-5 w-5" />
                                             ) : (
-                                                <span className="text-xs font-medium">{step.id}</span>
+                                                <span>{step.id}</span>
                                             )}
                                         </div>
                                         <div className="text-left">
-                                            <div className="font-medium">{step.name}</div>
-                                            <div className="text-xs opacity-75">{step.description}</div>
+                                            <div className="text-sm font-bold tracking-tight">{step.name}</div>
+                                            <div className="text-[10px] uppercase font-bold tracking-widest opacity-60">{step.description}</div>
                                         </div>
                                     </button>
 
                                     {index < steps.length - 1 && (
-                                        <ChevronRight className="h-5 w-5 text-gray-400 mx-2" />
+                                        <div className="h-px w-8 bg-gray-100" />
                                     )}
-                                </div>
+                                </React.Fragment>
                             );
                         })}
                     </div>
@@ -416,56 +416,55 @@ const DataManagement = () => {
                 {/* Main Content */}
                 <motion.div
                     key={currentStep}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    className="bg-white rounded-[2rem] shadow-glass border border-gray-100 p-8"
                 >
                     {getStepContent()}
                 </motion.div>
 
                 {/* Navigation */}
-                <div className="mt-8 flex items-center justify-between">
+                <div className="mt-10 flex items-center justify-between">
                     <button
                         onClick={prevStep}
                         disabled={currentStep === 1}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${currentStep === 1
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        className={`flex items-center space-x-2 px-6 py-3 rounded-2xl font-bold text-sm transition-all ${currentStep === 1
+                            ? 'bg-gray-50 text-gray-300 cursor-not-allowed border border-gray-100'
+                            : 'bg-white text-gray-600 hover:text-trust-900 border border-gray-100 hover:border-trust-200 shadow-sm'
                             }`}
                     >
-                        <ChevronLeft className="h-4 w-4" />
-                        <span>Previous</span>
+                        <ChevronLeft className="h-5 w-5" />
+                        <span>Back</span>
                     </button>
 
                     <div className="flex items-center space-x-4">
                         {currentStep === 5 && (
                             <button
-                                onClick={() => router.push('/')}
-                                className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                                onClick={() => router.push('/dashboard')}
+                                className="font-bold text-sm text-gray-400 hover:text-trust-600 px-4 py-2 transition-colors"
                             >
-                                <span>Go to Home</span>
-                                <ArrowRight className="h-4 w-4" />
+                                Return to Dashboard
                             </button>
                         )}
 
                         <button
                             onClick={nextStep}
                             disabled={!canProceed() || loading}
-                            className={`flex items-center space-x-2 px-6 py-2 rounded-lg transition-colors ${canProceed() && !loading
-                                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            className={`flex items-center space-x-2 px-8 py-3 rounded-2xl font-bold text-sm transition-all shadow-md active:scale-95 ${canProceed() && !loading
+                                ? 'bg-trust-950 text-white hover:bg-trust-900 shadow-trust-900/10'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 shadow-none'
                                 }`}
                         >
                             {loading ? (
-                                <Loader className="h-4 w-4 animate-spin" />
+                                <Loader className="h-5 w-5 animate-spin" />
                             ) : (
-                                <ChevronRight className="h-4 w-4" />
+                                <>
+                                    <span>{currentStep === 5 ? 'Run Valuation' : 'Continue'}</span>
+                                    <ChevronRight className="h-5 w-5" />
+                                </>
                             )}
-                            <span>
-                                {currentStep === 5 ? 'Run Valuation' : 'Next'}
-                            </span>
                         </button>
                     </div>
                 </div>

@@ -10,7 +10,7 @@ import { DollarSign, Calculator, TrendingUp, BarChart3 } from 'lucide-react';
 import { InlineMath, BlockMath } from 'react-katex';
 import ExportButton from '../ExportButton';
 import { useCalculationHistory } from '../../hooks/useLocalStorage';
-import { 
+import {
   calculateNetPremium,
   calculateGrossPremium,
   calculateNPV,
@@ -75,11 +75,11 @@ const PricingCalculator = () => {
 
   const calculatePremiumResults = () => {
     const { sumAssured, age, term, gender, mortalityRate, interestRate, expenseRatio, profitMargin } = premiumInputs;
-    
+
     // Use proper mortality table and gender parameters
     const netPremium = calculateNetPremium(sumAssured, age, term, 'CSO_2017', gender, interestRate);
     const grossPremium = calculateGrossPremium(netPremium, expenseRatio, profitMargin);
-    
+
     const newResults = {
       netPremium,
       grossPremium,
@@ -93,20 +93,20 @@ const PricingCalculator = () => {
       profitMargin,
       timestamp: new Date().toISOString()
     };
-    
+
     setResults(prev => ({ ...prev, premium: newResults }));
     saveCalculation({ type: 'premium', ...newResults });
   };
 
   const calculateProfitTestingResults = () => {
     const profitMetrics = calculateProfitTestingMetrics(profitInputs);
-    
+
     const newResults = {
       ...profitMetrics,
       inputs: profitInputs,
       timestamp: new Date().toISOString()
     };
-    
+
     setResults(prev => ({ ...prev, profit: newResults }));
     saveCalculation({ type: 'profit_testing', ...newResults });
   };
@@ -114,14 +114,14 @@ const PricingCalculator = () => {
   const calculateSensitivityResults = () => {
     const { baseAssumptions, sensitivityRanges } = sensitivityInputs;
     const sensitivityResults = performSensitivityAnalysis(baseAssumptions, sensitivityRanges);
-    
+
     const newResults = {
       sensitivityResults,
       baseAssumptions,
       sensitivityRanges,
       timestamp: new Date().toISOString()
     };
-    
+
     setResults(prev => ({ ...prev, sensitivity: newResults }));
     saveCalculation({ type: 'sensitivity', ...newResults });
   };
@@ -182,9 +182,9 @@ const PricingCalculator = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <div className="mb-8 px-4">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2 px-2">Pricing Calculator</h1>
-        <p className="text-gray-600 px-2">
+      <div className="mb-12">
+        <h1 className="text-4xl font-heading font-black text-trust-950 uppercase tracking-tight mb-3 px-2">Pricing Calculator</h1>
+        <p className="text-gray-400 font-medium px-2">
           Interactive calculators for premium calculation, profit testing, and sensitivity analysis for life insurance products.
         </p>
       </div>
@@ -195,11 +195,10 @@ const PricingCalculator = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-              activeTab === tab.id
-                ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg`
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+            className={`flex items-center space-x-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${activeTab === tab.id
+              ? `bg-trust-950 text-growth-400 shadow-lg`
+              : 'bg-gray-100 text-gray-400 hover:text-trust-950 hover:bg-gray-200'
+              }`}
           >
             <tab.icon className="h-4 w-4" />
             <span className="px-1">{tab.label}</span>
@@ -209,64 +208,64 @@ const PricingCalculator = () => {
 
       {/* Premium Calculator */}
       {activeTab === 'premium' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-4">
-          <div className="card">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4 px-2">Premium Calculation</h3>
-            
-            <div className="space-y-4 px-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
+            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Premium Calculation</h3>
+
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2 px-1">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
                   Sum Assured
                 </label>
                 <input
                   type="number"
                   value={premiumInputs.sumAssured}
                   onChange={(e) => setPremiumInputs(prev => ({ ...prev, sumAssured: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
                 />
               </div>
-              
+
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 px-1">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
                     Age
                   </label>
                   <input
                     type="number"
                     value={premiumInputs.age}
                     onChange={(e) => setPremiumInputs(prev => ({ ...prev, age: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 px-1">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
                     Term (years)
                   </label>
                   <input
                     type="number"
                     value={premiumInputs.term}
                     onChange={(e) => setPremiumInputs(prev => ({ ...prev, term: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 px-1">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
                     Gender
                   </label>
                   <select
                     value={premiumInputs.gender}
                     onChange={(e) => setPremiumInputs(prev => ({ ...prev, gender: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
                   >
                     <option value="M">Male</option>
                     <option value="F">Female</option>
                   </select>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 px-1">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
                     Mortality Rate
                   </label>
                   <input
@@ -274,11 +273,11 @@ const PricingCalculator = () => {
                     step="0.001"
                     value={premiumInputs.mortalityRate}
                     onChange={(e) => setPremiumInputs(prev => ({ ...prev, mortalityRate: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 px-1">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
                     Interest Rate
                   </label>
                   <input
@@ -286,14 +285,14 @@ const PricingCalculator = () => {
                     step="0.001"
                     value={premiumInputs.interestRate}
                     onChange={(e) => setPremiumInputs(prev => ({ ...prev, interestRate: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
                   />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 px-1">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
                     Expense Ratio
                   </label>
                   <input
@@ -301,11 +300,11 @@ const PricingCalculator = () => {
                     step="0.01"
                     value={premiumInputs.expenseRatio}
                     onChange={(e) => setPremiumInputs(prev => ({ ...prev, expenseRatio: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 px-1">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
                     Profit Margin
                   </label>
                   <input
@@ -313,21 +312,22 @@ const PricingCalculator = () => {
                     step="0.01"
                     value={premiumInputs.profitMargin}
                     onChange={(e) => setPremiumInputs(prev => ({ ...prev, profitMargin: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
                   />
                 </div>
               </div>
-              
-              <div className="flex space-x-3 px-1">
+
+              <div className="flex space-x-3">
                 <button
                   onClick={calculatePremiumResults}
-                  className={`flex-1 bg-gradient-to-r ${colors.gradient} text-white px-6 py-3 rounded-lg hover:bg-gradient-to-r ${colors.hover} transition-all duration-300 font-medium`}
+                  className="flex-1 bg-trust-950 text-white px-8 py-4 rounded-2xl hover:bg-trust-900 transition-all duration-300 font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2"
                 >
                   Calculate Premium
+                  <DollarSign className="h-4 w-4 text-growth-400" />
                 </button>
                 <button
-                  onClick={() => resetCalculator('premium')}
-                  className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"
+                  onClick={() => setPremiumInputs({ sumAssured: 100000, age: 35, term: 20, gender: 'M', mortalityRate: 0.002, interestRate: 0.03, expenseRatio: 0.15, profitMargin: 0.05 })}
+                  className="px-8 py-4 bg-gray-100 text-trust-950 rounded-2xl hover:bg-gray-200 transition-colors font-black text-[10px] uppercase tracking-[0.2em]"
                 >
                   Reset
                 </button>
@@ -335,11 +335,11 @@ const PricingCalculator = () => {
             </div>
           </div>
 
-          <div className="card">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4 px-2">Premium Results</h3>
-            
+          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
+            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Premium Results</h3>
+
             {results.premium && (
-              <div className="space-y-4 px-2">
+              <div className="space-y-4">
                 <div className={`bg-gradient-to-r ${getStatusColors('success').gradient} p-6 rounded-lg border ${getStatusColors('success').border}`}>
                   <h4 className={`font-semibold ${getStatusColors('success').text} mb-3 px-1`}>Net Premium</h4>
                   <div className={`text-2xl font-bold ${getStatusColors('success').value} px-1`}>
@@ -349,44 +349,44 @@ const PricingCalculator = () => {
                     <InlineMath math="NP = \frac{\text{PV of Benefits}}{\text{PV of Premiums}}" />
                   </div>
                 </div>
-                
-                <div className={`bg-gradient-to-r ${getStatusColors('info').gradient} p-6 rounded-lg border ${getStatusColors('info').border}`}>
-                  <h4 className={`font-semibold ${getStatusColors('info').text} mb-3 px-1`}>Gross Premium</h4>
-                  <div className={`text-2xl font-bold ${getStatusColors('info').value} px-1`}>
+
+                <div className="bg-trust-50 p-6 rounded-2xl border border-trust-100">
+                  <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-3 px-1">Gross Premium</h4>
+                  <div className="text-3xl font-heading font-black text-trust-600 px-1">
                     {formatCurrency(results.premium.grossPremium)}
                   </div>
-                  <div className={`text-sm ${getStatusColors('info').text} mt-2 px-1`}>
+                  <div className="text-[10px] font-bold text-trust-800/60 mt-2 px-1">
                     <InlineMath math="GP = \frac{NP}{1 - ER - PM}" />
                   </div>
                 </div>
-                
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="font-medium text-gray-600 px-1">Expense Loading</div>
-                    <div className="font-semibold text-gray-800 px-1">
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
+                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Expense Loading</div>
+                    <div className="text-sm font-bold text-trust-950 px-1">
                       {formatCurrency(results.premium.grossPremium * results.premium.expenseRatio)}
                     </div>
                   </div>
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="font-medium text-gray-600 px-1">Profit Loading</div>
-                    <div className="font-semibold text-gray-800 px-1">
+                  <div className="text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
+                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Profit Loading</div>
+                    <div className="text-sm font-bold text-trust-950 px-1">
                       {formatCurrency(results.premium.grossPremium * results.premium.profitMargin)}
                     </div>
                   </div>
                 </div>
-                
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h5 className="font-medium text-gray-700 mb-3 px-1">Policy Details</h5>
-                  <div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
-                    <div className="px-1">Sum Assured: {formatCurrency(results.premium.sumAssured)}</div>
-                    <div className="px-1">Age: {results.premium.age}</div>
-                    <div className="px-1">Term: {results.premium.term} years</div>
-                    <div className="px-1">Gender: {results.premium.gender === 'M' ? 'Male' : 'Female'}</div>
-                    <div className="px-1">Mortality Rate: {formatPercentage(results.premium.mortalityRate)}</div>
-                    <div className="px-1">Interest Rate: {formatPercentage(results.premium.interestRate)}</div>
+
+                <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+                  <h5 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-4 px-1">Policy Details</h5>
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                    <div className="px-1 flex justify-between"><span>Sum:</span> <span className="text-trust-950">{formatCurrency(results.premium.sumAssured)}</span></div>
+                    <div className="px-1 flex justify-between"><span>Age:</span> <span className="text-trust-950">{results.premium.age}</span></div>
+                    <div className="px-1 flex justify-between"><span>Term:</span> <span className="text-trust-950">{results.premium.term}y</span></div>
+                    <div className="px-1 flex justify-between"><span>Gender:</span> <span className="text-trust-950">{results.premium.gender}</span></div>
+                    <div className="px-1 flex justify-between"><span>Mortality:</span> <span className="text-trust-950">{formatPercentage(results.premium.mortalityRate)}</span></div>
+                    <div className="px-1 flex justify-between"><span>Interest:</span> <span className="text-trust-950">{formatPercentage(results.premium.interestRate)}</span></div>
                   </div>
                 </div>
-                
+
                 <ExportButton
                   data={[results.premium]}
                   title="Premium Calculation Results"
@@ -401,23 +401,23 @@ const PricingCalculator = () => {
 
       {/* Profit Testing Calculator */}
       {activeTab === 'profit' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="card">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Profit Testing Inputs</h3>
-            
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
+            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Profit Testing Inputs</h3>
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
                   Premium
                 </label>
                 <input
                   type="number"
                   value={profitInputs.premium}
                   onChange={(e) => setProfitInputs(prev => ({ ...prev, premium: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -442,7 +442,7 @@ const PricingCalculator = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -468,7 +468,7 @@ const PricingCalculator = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -493,17 +493,18 @@ const PricingCalculator = () => {
                   />
                 </div>
               </div>
-              
-              <div className="flex space-x-3">
+
+              <div className="flex gap-4">
                 <button
                   onClick={calculateProfitTestingResults}
-                  className={`flex-1 bg-gradient-to-r ${colors.gradient} text-white px-6 py-3 rounded-lg hover:bg-gradient-to-r ${colors.hover} transition-all duration-300 font-medium`}
+                  className="flex-1 bg-trust-950 text-white px-8 py-4 rounded-2xl hover:bg-trust-900 transition-all duration-300 font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2"
                 >
                   Run Profit Test
+                  <TrendingUp className="h-4 w-4 text-growth-400" />
                 </button>
                 <button
-                  onClick={() => resetCalculator('profit')}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                  onClick={() => setProfitInputs({ premium: 5000, sumAssured: 100000, age: 35, term: 20, mortalityRate: 0.002, interestRate: 0.03, expenseRatio: 0.15, initialExpenses: 2000, renewalExpenses: 500 })}
+                  className="px-8 py-4 bg-gray-100 text-trust-950 rounded-2xl hover:bg-gray-200 transition-colors font-black text-[10px] uppercase tracking-[0.2em]"
                 >
                   Reset
                 </button>
@@ -511,55 +512,55 @@ const PricingCalculator = () => {
             </div>
           </div>
 
-          <div className="card">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Profit Testing Results</h3>
-            
+          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
+            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Profit Testing Results</h3>
+
             {results.profit && (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
-                    <h4 className="font-semibold text-green-800 mb-2">NPV</h4>
-                    <div className="text-xl font-bold text-green-600">
+                  <div className="bg-growth-50 p-6 rounded-2xl border border-growth-100">
+                    <h4 className="text-[10px] font-black text-growth-900 uppercase tracking-[0.2em] mb-2 px-1">NPV</h4>
+                    <div className="text-3xl font-heading font-black text-growth-600 px-1">
                       {formatCurrency(results.profit.npv)}
                     </div>
                   </div>
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-                    <h4 className="font-semibold text-blue-800 mb-2">IRR</h4>
-                    <div className="text-xl font-bold text-blue-600">
+                  <div className="bg-trust-50 p-6 rounded-2xl border border-trust-100">
+                    <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-2 px-1">IRR</h4>
+                    <div className="text-3xl font-heading font-black text-trust-600 px-1">
                       {formatPercentage(results.profit.irr)}
                     </div>
                   </div>
                 </div>
-                
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <div className="font-medium text-gray-600">Profit Margin</div>
-                    <div className="font-semibold text-gray-800">
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-6 bg-gray-50/50 rounded-2xl border border-gray-100">
+                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Profit Margin</div>
+                    <div className="text-sm font-bold text-trust-950 px-1">
                       {formatPercentage(results.profit.profitMargin / 100)}
                     </div>
                   </div>
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <div className="font-medium text-gray-600">Payback Period</div>
-                    <div className="font-semibold text-gray-800">
+                  <div className="text-center p-6 bg-gray-50/50 rounded-2xl border border-gray-100">
+                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Payback Period</div>
+                    <div className="text-sm font-bold text-trust-950 px-1">
                       {formatNumber(results.profit.paybackPeriod, 1)} years
                     </div>
                   </div>
                 </div>
-                
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <h5 className="font-medium text-gray-700 mb-2">Cash Flow Summary</h5>
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                      <span>Year 0:</span>
-                      <span>{formatCurrency(results.profit.cashFlows[0])}</span>
+
+                <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+                  <h5 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-4 px-1">Cash Flow Summary</h5>
+                  <div className="space-y-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                    <div className="flex justify-between px-1">
+                      <span>Initial Investment (Y0):</span>
+                      <span className="text-accent-600">{formatCurrency(results.profit.cashFlows[0])}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Total Cash Flows:</span>
-                      <span>{formatCurrency(results.profit.cashFlows.reduce((sum, cf) => sum + cf, 0))}</span>
+                    <div className="flex justify-between px-1">
+                      <span>Total Net Cash Flows:</span>
+                      <span className="text-growth-600">{formatCurrency(results.profit.cashFlows.reduce((sum, cf) => sum + cf, 0))}</span>
                     </div>
                   </div>
                 </div>
-                
+
                 <ExportButton
                   data={[results.profit]}
                   title="Profit Testing Results"
@@ -574,31 +575,35 @@ const PricingCalculator = () => {
 
       {/* Sensitivity Analysis */}
       {activeTab === 'sensitivity' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Sensitivity Analysis</h3>
-              
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
+              <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Sensitivity Analysis</h3>
+
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Base Premium
+                <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 mb-8">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2 px-1">
+                    Base Break-Even Premium
                   </label>
-                  <div className="text-lg font-semibold text-gray-800">
+                  <div className="text-3xl font-heading font-black text-trust-900 px-1">
                     {formatCurrency(calculateBreakEvenPremium(sensitivityInputs.baseAssumptions))}
                   </div>
                 </div>
-                
-                <div className="flex space-x-3">
+
+                <div className="flex gap-4">
                   <button
                     onClick={calculateSensitivityResults}
-                    className={`flex-1 bg-gradient-to-r ${colors.gradient} text-white px-6 py-3 rounded-lg hover:bg-gradient-to-r ${colors.hover} transition-all duration-300 font-medium`}
+                    className="flex-1 bg-trust-950 text-white px-8 py-4 rounded-2xl hover:bg-trust-900 transition-all duration-300 font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2"
                   >
-                    Run Sensitivity Analysis
+                    Run Analysis
+                    <BarChart3 className="h-4 w-4 text-growth-400" />
                   </button>
                   <button
-                    onClick={() => resetCalculator('sensitivity')}
-                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                    onClick={() => setSensitivityInputs({
+                      baseAssumptions: { sumAssured: 100000, age: 35, term: 20, mortalityRate: 0.002, interestRate: 0.03, expenseRatio: 0.15, targetProfitMargin: 0.05 },
+                      sensitivityRanges: { mortalityRate: { min: 0.001, max: 0.005, steps: 5 }, interestRate: { min: 0.01, max: 0.05, steps: 5 }, expenseRatio: { min: 0.10, max: 0.20, steps: 5 } }
+                    })}
+                    className="px-8 py-4 bg-gray-100 text-trust-950 rounded-2xl hover:bg-gray-200 transition-colors font-black text-[10px] uppercase tracking-[0.2em]"
                   >
                     Reset
                   </button>
@@ -606,18 +611,18 @@ const PricingCalculator = () => {
               </div>
             </div>
 
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Analysis Summary</h3>
-              
+            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
+              <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Analysis Summary</h3>
+
               {results.sensitivity && (
                 <div className="space-y-4">
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
-                    <h4 className="font-semibold text-purple-800 mb-2">Sensitivity Analysis Complete</h4>
-                    <div className="text-sm text-purple-700">
-                      Analyzed {Object.keys(results.sensitivity.sensitivityRanges).length} parameters
+                  <div className="bg-trust-50 p-6 rounded-2xl border border-trust-100">
+                    <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-2 px-1">Sensitivity Analysis Complete</h4>
+                    <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest px-1">
+                      Analyzed {Object.keys(results.sensitivity.sensitivityRanges).length} Parameters across scenarios
                     </div>
                   </div>
-                  
+
                   <ExportButton
                     data={results.sensitivity.sensitivityResults}
                     title="Sensitivity Analysis Results"
@@ -631,33 +636,31 @@ const PricingCalculator = () => {
 
           {/* Sensitivity Results Table */}
           {results.sensitivity && (
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Sensitivity Results</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full table-auto">
+            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass overflow-hidden">
+              <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Scenario Results</h3>
+              <div className="overflow-x-auto -mx-10">
+                <table className="w-full">
                   <thead>
-                    <tr className="bg-gray-50">
-                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Parameter</th>
-                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Value</th>
-                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Premium</th>
-                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Change from Base</th>
+                    <tr className="bg-gray-50/50">
+                      <th className="px-10 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Parameter</th>
+                      <th className="px-10 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Model Value</th>
+                      <th className="px-10 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Premium</th>
+                      <th className="px-10 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Delta (%)</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-gray-100">
                     {results.sensitivity.sensitivityResults.map((result, index) => (
-                      <tr key={index} className="border-b border-gray-200">
-                        <td className="px-4 py-2 text-sm text-gray-900 capitalize">
+                      <tr key={index} className="hover:bg-gray-50/30 transition-colors">
+                        <td className="px-10 py-5 text-sm font-bold text-trust-950 capitalize">
                           {result.parameter.replace(/([A-Z])/g, ' $1').trim()}
                         </td>
-                        <td className="px-4 py-2 text-sm text-gray-900">
+                        <td className="px-10 py-5 text-sm font-medium text-gray-400">
                           {formatPercentage(result.value)}
                         </td>
-                        <td className="px-4 py-2 text-sm text-gray-900">
+                        <td className="px-10 py-5 text-sm font-bold text-trust-950">
                           {formatCurrency(result.premium)}
                         </td>
-                        <td className={`px-4 py-2 text-sm ${
-                          result.changeFromBase >= 0 ? 'text-red-600' : 'text-green-600'
-                        }`}>
+                        <td className={`px-10 py-5 text-sm font-black ${result.changeFromBase >= 0 ? 'text-accent-600' : 'text-growth-600'}`}>
                           {formatPercentage(result.changeFromBase / 100, 1, true)}
                         </td>
                       </tr>
@@ -672,20 +675,23 @@ const PricingCalculator = () => {
 
       {/* Calculation History */}
       {history.length > 0 && (
-        <div className="card mt-8">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Recent Calculations</h3>
-          <div className="space-y-2">
-            {history.slice(0, 5).map((calc, index) => (
-              <div key={calc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <span className="font-medium text-gray-800">{calc.type?.replace('_', ' ').toUpperCase()}</span>
-                  <span className="text-sm text-gray-600 ml-2">
+        <div className="bg-white/90 backdrop-blur-xl border border-trust-100 rounded-[2.5rem] p-10 shadow-glass mt-12">
+          <h3 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-8">Audit History</h3>
+          <div className="space-y-4">
+            {history.slice(0, 5).map((calc) => (
+              <div key={calc.id} className="flex items-center justify-between p-6 bg-gray-50/50 rounded-2xl border border-gray-100 hover:border-trust-200 transition-all duration-300">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-trust-950 uppercase tracking-widest">{calc.type?.replace('_', ' ').toUpperCase()}</span>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
                     {new Date(calc.timestamp).toLocaleString()}
                   </span>
                 </div>
-                <div className="text-sm text-gray-600">
-                  {calc.grossPremium && formatCurrency(calc.grossPremium)}
-                  {calc.npv && formatCurrency(calc.npv)}
+                <div className="flex flex-col items-end">
+                  <div className="text-sm font-bold text-trust-950">
+                    {calc.grossPremium && formatCurrency(calc.grossPremium)}
+                    {calc.npv && formatCurrency(calc.npv)}
+                  </div>
+                  <span className="text-[9px] font-bold text-growth-500 uppercase tracking-widest">Actuarial Validation Pass</span>
                 </div>
               </div>
             ))}

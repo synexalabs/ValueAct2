@@ -4,12 +4,12 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  CheckCircle, 
-  AlertCircle, 
-  XCircle, 
-  ChevronDown, 
-  ChevronUp, 
+import {
+  CheckCircle,
+  AlertCircle,
+  XCircle,
+  ChevronDown,
+  ChevronUp,
   Download,
   Filter,
   Search
@@ -19,11 +19,11 @@ import {
  * ValidationStatus Component
  * Displays validation results with expandable error details
  */
-const ValidationStatus = ({ 
-  validationResults, 
-  completeValidation, 
+const ValidationStatus = ({
+  validationResults,
+  completeValidation,
   onDownloadReport,
-  className = '' 
+  className = ''
 }) => {
   const [expandedSections, setExpandedSections] = useState({});
   const [filterSeverity, setFilterSeverity] = useState('all');
@@ -31,7 +31,7 @@ const ValidationStatus = ({
 
   const getOverallStatus = () => {
     if (!completeValidation) return { status: 'unknown', color: 'gray', icon: AlertCircle };
-    
+
     if (completeValidation.isValid) {
       return { status: 'valid', color: 'green', icon: CheckCircle };
     } else if (completeValidation.errors.some(e => e.severity === 'error')) {
@@ -76,26 +76,26 @@ const ValidationStatus = ({
 
   const filterIssues = (issues) => {
     let filtered = issues;
-    
+
     // Filter by severity
     if (filterSeverity !== 'all') {
       filtered = filtered.filter(issue => issue.severity === filterSeverity);
     }
-    
+
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(issue => 
+      filtered = filtered.filter(issue =>
         issue.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
         issue.field.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     return filtered;
   };
 
   const generateReport = () => {
     if (!completeValidation) return null;
-    
+
     const report = {
       timestamp: new Date().toISOString(),
       overallStatus: getOverallStatus().status,
@@ -113,14 +113,14 @@ const ValidationStatus = ({
         severity: error.severity
       }))
     };
-    
+
     return report;
   };
 
   const downloadReport = () => {
     const report = generateReport();
     if (!report) return;
-    
+
     const csvContent = [
       ['File', 'Row', 'Field', 'Message', 'Severity'],
       ...report.details.map(detail => [
@@ -131,7 +131,7 @@ const ValidationStatus = ({
         detail.severity
       ])
     ].map(row => row.join(',')).join('\n');
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -141,7 +141,7 @@ const ValidationStatus = ({
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
-    
+
     if (onDownloadReport) {
       onDownloadReport(report);
     }
@@ -167,44 +167,44 @@ const ValidationStatus = ({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`p-6 rounded-lg border-2 ${
-          overallStatus.color === 'green' ? 'border-green-200 bg-green-50' :
-          overallStatus.color === 'red' ? 'border-red-200 bg-red-50' :
-          overallStatus.color === 'yellow' ? 'border-yellow-200 bg-yellow-50' :
-          'border-gray-200 bg-gray-50'
-        }`}
+        className={`p-8 rounded-[2rem] border-2 shadow-lg transition-all ${overallStatus.color === 'green' ? 'border-growth-200 bg-growth-50/30' :
+            overallStatus.color === 'red' ? 'border-accent-200 bg-accent-50/30' :
+              overallStatus.color === 'yellow' ? 'border-amber-200 bg-amber-50/30' :
+                'border-gray-100 bg-white'
+          }`}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <StatusIcon className={`h-8 w-8 ${
-              overallStatus.color === 'green' ? 'text-green-600' :
-              overallStatus.color === 'red' ? 'text-red-600' :
-              overallStatus.color === 'yellow' ? 'text-yellow-600' :
-              'text-gray-600'
-            }`} />
+          <div className="flex items-center space-x-5">
+            <div className={`p-4 rounded-2xl shadow-sm ${overallStatus.color === 'green' ? 'bg-growth-600 text-white' :
+                overallStatus.color === 'red' ? 'bg-accent-600 text-white' :
+                  overallStatus.color === 'yellow' ? 'bg-amber-500 text-white' :
+                    'bg-gray-100 text-gray-400'
+              }`}>
+              <StatusIcon className="h-8 w-8" />
+            </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {overallStatus.status === 'valid' ? 'Validation Successful' :
-                 overallStatus.status === 'error' ? 'Validation Failed' :
-                 overallStatus.status === 'warning' ? 'Validation Warnings' :
-                 'Validation Status'}
+              <h3 className="text-2xl font-heading font-bold text-trust-900 leading-tight">
+                {overallStatus.status === 'valid' ? 'Security Cleared' :
+                  overallStatus.status === 'error' ? 'Compliance Failure' :
+                    overallStatus.status === 'warning' ? 'Quality Warnings' :
+                      'Valuation Audit'}
               </h3>
-              <p className="text-sm text-gray-600">
-                {completeValidation ? 
-                  `${completeValidation.errors.length} issues found` :
-                  'Validation in progress...'
+              <p className="text-sm text-gray-400 font-medium mt-1">
+                {completeValidation ?
+                  `${completeValidation.errors.length} audit finding${completeValidation.errors.length !== 1 ? 's' : ''} detected` :
+                  'Initializing actuarial audit sequence...'
                 }
               </p>
             </div>
           </div>
-          
+
           {completeValidation && (
             <button
               onClick={downloadReport}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="group flex items-center space-x-2 px-6 py-3 bg-white text-trust-900 border border-gray-100 rounded-2xl font-bold text-sm shadow-sm hover:shadow-md transition-all active:scale-95"
             >
-              <Download className="h-4 w-4" />
-              <span>Download Report</span>
+              <Download className="h-4 w-4 text-gray-400 group-hover:text-trust-600 transition-colors" />
+              <span>Full Audit Report</span>
             </button>
           )}
         </div>
@@ -216,7 +216,7 @@ const ValidationStatus = ({
           {Object.entries(validationResults).map(([fileType, result]) => {
             const isExpanded = expandedSections[fileType];
             const hasIssues = result.errors.length > 0 || result.warnings.length > 0;
-            
+
             return (
               <motion.div
                 key={fileType}
@@ -226,40 +226,42 @@ const ValidationStatus = ({
               >
                 <button
                   onClick={() => toggleSection(fileType)}
-                  className="w-full p-4 text-left hover:bg-gray-50 transition-colors"
+                  className="w-full p-6 text-left hover:bg-trust-50/50 transition-all flex items-center justify-between group"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-4">
+                    <div className={`p-2.5 rounded-xl border ${result.isValid ? 'bg-growth-50 border-growth-100 text-growth-600' : 'bg-accent-50 border-accent-100 text-accent-600'}`}>
                       {result.isValid ? (
-                        <CheckCircle className="h-5 w-5 text-green-500" />
+                        <CheckCircle className="h-5 w-5" />
                       ) : (
-                        <XCircle className="h-5 w-5 text-red-500" />
+                        <XCircle className="h-5 w-5" />
                       )}
-                      <div>
-                        <h4 className="font-medium text-gray-900 capitalize">
-                          {fileType} Data
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          {result.stats.validRows}/{result.stats.totalRows} rows valid
-                        </p>
-                      </div>
                     </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      {hasIssues && (
-                        <span className="text-sm text-gray-500">
-                          {result.errors.length} issue{result.errors.length !== 1 ? 's' : ''}
-                        </span>
-                      )}
+                    <div>
+                      <h4 className="font-heading font-bold text-trust-900 capitalize">
+                        {fileType} Ledger
+                      </h4>
+                      <p className="text-xs font-bold text-gray-400">
+                        {result.stats.validRows}/{result.stats.totalRows} ENTITIES VERIFIED
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-4">
+                    {hasIssues && (
+                      <span className="px-2.5 py-1 bg-accent-50 text-accent-700 text-[10px] font-bold rounded-lg border border-accent-100">
+                        {result.errors.length} FINDINGS
+                      </span>
+                    )}
+                    <div className={`p-1.5 rounded-lg bg-gray-50 group-hover:bg-trust-100 transition-colors`}>
                       {isExpanded ? (
-                        <ChevronUp className="h-4 w-4 text-gray-400" />
+                        <ChevronUp className="h-4 w-4 text-trust-400" />
                       ) : (
-                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                        <ChevronDown className="h-4 w-4 text-trust-400" />
                       )}
                     </div>
                   </div>
                 </button>
-                
+
                 <AnimatePresence>
                   {isExpanded && (
                     <motion.div
@@ -285,7 +287,7 @@ const ValidationStatus = ({
                             <div className="text-gray-600">Errors</div>
                           </div>
                         </div>
-                        
+
                         {/* Issues */}
                         {hasIssues && (
                           <div className="space-y-2">
@@ -345,7 +347,7 @@ const ValidationStatus = ({
                 <option value="info">Info Only</option>
               </select>
             </div>
-            
+
             <div className="flex items-center space-x-2 flex-1">
               <Search className="h-4 w-4 text-gray-400" />
               <input

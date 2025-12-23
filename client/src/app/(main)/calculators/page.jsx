@@ -19,172 +19,170 @@ const CalculatorHub = () => {
     const calculators = [
         {
             id: 'ifrs17',
-            title: 'IFRS 17 Calculator',
-            description: 'Calculate CSM, Risk Adjustment, and BEL for individual contracts',
+            title: 'IFRS 17 Engine',
+            description: 'Determine CSM, Risk Adjustment, and BEL for individual contracts using our core cloud logic.',
             icon: Calculator,
-            color: 'from-blue-600 to-indigo-600',
-            features: ['CSM Calculation', 'Risk Adjustment', 'BEL Analysis', 'Loss Component'],
+            color: 'trust',
+            features: ['CSM Determination', 'Risk Adjustment Analysis', 'BEL Projections', 'Loss Component Tracking'],
             route: '/calculators/ifrs17'
         },
         {
             id: 'solvency',
-            title: 'Solvency II Calculator',
-            description: 'Calculate SCR, MCR, and capital ratios for individual scenarios',
+            title: 'Solvency II Audit',
+            description: 'Validate SCR, MCR, and capital ratios against regulatory benchmarks in real-time.',
             icon: Shield,
-            color: 'from-green-600 to-emerald-600',
-            features: ['SCR Calculation', 'MCR Calculation', 'Solvency Ratio', 'Risk Contributions'],
+            color: 'growth',
+            features: ['SCR Stress Testing', 'MCR Calibration', 'Solvency Ratio Audit', 'Pillar 1 Capital Check'],
             route: '/calculators/solvency'
         },
         {
             id: 'pricing',
-            title: 'Pricing Calculator',
-            description: 'Calculate premiums, profit margins, and product metrics',
+            title: 'Premium Modeler',
+            description: 'Calibrate premiums and profit margins with advanced sensitivity analysis for any product.',
             icon: DollarSign,
-            color: 'from-purple-600 to-indigo-600',
-            features: ['Premium Calculation', 'Profit Testing', 'Sensitivity Analysis', 'Break-even Analysis'],
+            color: 'accent',
+            features: ['Premium Calibration', 'Profit Sensitivity', 'Expense Loading', 'Break-even Forecast'],
             route: '/calculators/pricing'
         },
         {
             id: 'mortality',
-            title: 'Mortality Calculator',
-            description: 'Calculate mortality rates, life expectancies, and annuities',
+            title: 'Actuarial Tables',
+            description: 'Access and compute with the latest German mortality tables and life expectancy curves.',
             icon: Heart,
-            color: 'from-red-600 to-pink-600',
-            features: ['Mortality Rates', 'Life Expectancy', 'Present Value', 'Annuity Calculations'],
+            color: 'trust',
+            features: ['DAV 2008 T/R Tables', 'Projected Life Expectancy', 'Annuity Present Value', 'Risk Assessment'],
             route: '/calculators/mortality'
         }
     ];
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-12">
             {/* Header */}
-            <div className="text-center">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">Quick Actuarial Calculators</h1>
-                <p className="text-xl text-gray-600 mb-2">Ad-hoc calculations for single policies or quick analysis</p>
-                <p className="text-sm text-gray-500">
-                    For batch processing of multiple policies, use{' '}
-                    <Link href="/data" className="text-blue-600 hover:text-blue-800 font-medium">
-                        Data Management
-                    </Link>
+            <div className="flex flex-col items-center text-center">
+                <div className="px-4 py-1.5 bg-trust-50 text-trust-600 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-4 border border-trust-100">
+                    Precision Tools
+                </div>
+                <h1 className="text-4xl md:text-5xl font-heading font-bold text-trust-900 mb-4">Actuarial Sandbox</h1>
+                <p className="max-w-2xl text-lg text-gray-400">
+                    High-precision ad-hoc calculators for single-policy validation, scenario testing, and quick architectural review.
                 </p>
             </div>
 
             {/* Batch Processing Notice */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <div className="flex items-center space-x-3">
-                    <Database className="h-6 w-6 text-blue-600" />
-                    <div>
-                        <h3 className="text-lg font-semibold text-blue-800">Need Batch Processing?</h3>
-                        <p className="text-blue-700">
-                            For processing multiple policies, uploading datasets, and running valuations,
-                            use our Data Management system for comprehensive batch operations.
+            <div className="relative group overflow-hidden bg-gradient-to-br from-trust-900 to-trust-950 rounded-[2.5rem] p-10 text-white shadow-2xl">
+                <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                    <Database className="h-40 w-40" />
+                </div>
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div className="space-y-4 max-w-xl text-center md:text-left">
+                        <h3 className="text-2xl font-heading font-bold">Scaling to Production?</h3>
+                        <p className="text-white/70 leading-relaxed text-lg">
+                            For bulk data processing, automated cloud valuations, and IFRS 17 batch runs,
+                            leverage our unified Data Management infrastructure.
                         </p>
-                        <Link
-                            href="/data"
-                            className="inline-flex items-center mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                            <Database className="h-4 w-4 mr-2" />
-                            Go to Data Management
-                        </Link>
                     </div>
+                    <Link
+                        href="/data"
+                        className="px-8 py-4 bg-growth-600 text-white rounded-2xl font-bold hover:bg-growth-500 transition-all shadow-lg shadow-growth-900/40 active:scale-95 flex items-center gap-2"
+                    >
+                        <Database className="h-5 w-5" />
+                        Enter Data Hub
+                    </Link>
                 </div>
             </div>
 
             {/* Calculators Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {calculators.map((calculator) => {
-                    const IconComponent = calculator.icon;
+                {calculators.map((calc, idx) => {
+                    const colors = {
+                        trust: 'bg-trust-50 text-trust-600 border-trust-100',
+                        growth: 'bg-growth-50 text-growth-600 border-growth-100',
+                        accent: 'bg-accent-50 text-accent-700 border-accent-100'
+                    };
+                    const hoverColors = {
+                        trust: 'hover:border-trust-300',
+                        growth: 'hover:border-growth-300',
+                        accent: 'hover:border-accent-300'
+                    };
+
                     return (
                         <div
-                            key={calculator.id}
-                            className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                            key={calc.id}
+                            className={`group bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm hover:shadow-xl transition-all duration-500 ${hoverColors[calc.color]}`}
                         >
-                            {/* Header */}
-                            <div className={`bg-gradient-to-r ${calculator.color} p-6 text-white min-h-[120px] flex items-center`}>
-                                <div className="flex items-center space-x-4 w-full">
-                                    <div className="p-3 bg-white bg-opacity-20 rounded-lg flex-shrink-0">
-                                        <IconComponent className="h-8 w-8" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h2 className="text-2xl font-bold leading-tight">{calculator.title}</h2>
-                                        <p className="text-white text-opacity-90 mt-1 leading-relaxed">{calculator.description}</p>
-                                    </div>
+                            <div className="flex items-start justify-between mb-8">
+                                <div className={`p-4 rounded-2xl ${colors[calc.color]} shadow-inner`}>
+                                    <calc.icon className="h-8 w-8" />
+                                </div>
+                                <div className="text-[10px] font-bold text-gray-300 uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-lg">
+                                    V1.2 Tool
                                 </div>
                             </div>
 
-                            {/* Features */}
-                            <div className="p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Features</h3>
-                                <ul className="space-y-2">
-                                    {calculator.features.map((feature, index) => {
-                                        const colors = getCalculatorColors(calculator.id);
-                                        return (
-                                            <li key={index} className="flex items-center text-gray-700">
-                                                <div className={`w-2 h-2 ${colors.value.replace('text-', 'bg-')} rounded-full mr-3`}></div>
-                                                {feature}
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
+                            <h2 className="text-2xl font-heading font-bold text-trust-900 mb-3">{calc.title}</h2>
+                            <p className="text-gray-400 text-sm leading-relaxed mb-8">
+                                {calc.description}
+                            </p>
 
-                                {/* Actions */}
-                                <div className="mt-6 flex space-x-3">
-                                    <Link
-                                        href={calculator.route}
-                                        className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors text-center font-medium"
-                                    >
-                                        Open Calculator
-                                    </Link>
-                                    <button className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                                        <Download className="h-4 w-4" />
-                                    </button>
-                                </div>
+                            <div className="space-y-3 mb-8">
+                                {calc.features.map((feature, i) => (
+                                    <div key={i} className="flex items-center gap-3">
+                                        <div className={`h-1.5 w-1.5 rounded-full ${calc.color === 'trust' ? 'bg-trust-600' : calc.color === 'growth' ? 'bg-growth-600' : 'bg-accent-600'}`} />
+                                        <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{feature}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <Link
+                                    href={calc.route}
+                                    className="flex-1 px-6 py-4 bg-trust-950 text-white rounded-2xl font-bold text-center hover:bg-trust-900 transition-all shadow-md active:scale-95"
+                                >
+                                    Activate Tool
+                                </Link>
+                                <button className="p-4 border border-gray-100 rounded-2xl text-gray-400 hover:text-trust-900 hover:bg-gray-50 transition-all">
+                                    <Download className="h-5 w-5" />
+                                </button>
                             </div>
                         </div>
-                    );
+                    )
                 })}
             </div>
 
-            {/* Professional Features */}
-            <div className="bg-gray-50 rounded-lg p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Professional Features</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="text-center">
-                        <div className="bg-blue-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                            <FileText className="h-8 w-8 text-blue-600" />
+            {/* Professional Features Section */}
+            <div className="rounded-[3rem] bg-gray-50/50 border border-gray-100 p-12 lg:p-16">
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl font-heading font-bold text-trust-900 mb-4">Enterprise-Grade Architecture</h2>
+                    <p className="text-gray-400">Our sandbox environment mirrors the precision of our enterprise batch processing engine.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                    {[
+                        { icon: FileText, title: 'Session Persistence', desc: 'Auto-save your session variables and calculation history for auditing.', color: 'text-trust-600' },
+                        { icon: Download, title: 'Multi-Format Export', desc: 'Generate executive PDFs or raw CSV exports for external verification.', color: 'text-growth-600' },
+                        { icon: BarChart3, title: 'Comparative Logic', desc: 'Analyze results side-by-side with historical runs and industry benchmarks.', color: 'text-accent-600' }
+                    ].map((feature, i) => (
+                        <div key={i} className="flex flex-col items-center text-center group">
+                            <div className="h-16 w-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-6 border border-gray-100 group-hover:shadow-md transition-shadow">
+                                <feature.icon className={`h-8 w-8 ${feature.color}`} />
+                            </div>
+                            <h3 className="text-lg font-bold text-trust-900 mb-2">{feature.title}</h3>
+                            <p className="text-sm text-gray-400 leading-relaxed">{feature.desc}</p>
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Save to Workspace</h3>
-                        <p className="text-gray-600">Save calculation results and assumptions for future reference</p>
-                    </div>
-                    <div className="text-center">
-                        <div className="bg-green-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                            <Download className="h-8 w-8 text-green-600" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Export Results</h3>
-                        <p className="text-gray-600">Export calculations to PDF or CSV for reporting and analysis</p>
-                    </div>
-                    <div className="text-center">
-                        <div className="bg-purple-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                            <BarChart3 className="h-8 w-8 text-purple-600" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">History Tracking</h3>
-                        <p className="text-gray-600">Track recent calculations and compare results over time</p>
-                    </div>
+                    ))}
                 </div>
             </div>
 
-            {/* Integration Notice */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <div className="flex items-center space-x-3">
-                    <TrendingUp className="h-6 w-6 text-green-600" />
-                    <div>
-                        <h3 className="text-lg font-semibold text-green-800">Integration with Batch Processing</h3>
-                        <p className="text-green-700">
-                            Use these calculators to validate assumptions and test scenarios before running
-                            batch valuations on your full dataset.
-                        </p>
-                    </div>
+            {/* Regulatory Alignment */}
+            <div className="flex flex-col md:flex-row items-center gap-4 justify-center py-6">
+                <div className="h-px bg-gray-100 flex-1" />
+                <div className="flex items-center gap-6 opacity-40 hover:opacity-100 transition-opacity grayscale hover:grayscale-0">
+                    <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">Aligned with:</div>
+                    <div className="text-sm font-heading font-black text-trust-900">IFRS 17</div>
+                    <div className="text-sm font-heading font-black text-trust-900">SOLVENCY II</div>
+                    <div className="text-sm font-heading font-black text-trust-900">BaFin COMPLIANT</div>
                 </div>
+                <div className="h-px bg-gray-100 flex-1" />
             </div>
         </div>
     );

@@ -41,86 +41,110 @@ export default function AnalyticsDashboard() {
     });
 
     useEffect(() => {
-        // Simulate API fetch or actually fetch from backend
-        // const fetchData = async () => {
-        //   const result = await data.getAnalytics();
-        //   setDashboardData(result);
-        // };
-        // fetchData();
         const timer = setTimeout(() => setLoading(false), 1000);
         return () => clearTimeout(timer);
     }, []);
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+                <div className="h-12 w-12 border-4 border-trust-100 border-t-trust-900 rounded-full animate-spin"></div>
+                <p className="text-sm font-bold text-trust-900 uppercase tracking-widest animate-pulse">Analyzing Portfolio...</p>
             </div>
         );
     }
 
     return (
-        <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">Portfolio Analytics</h1>
-                <p className="text-gray-600">Real-time insights and actuarial projections</p>
+        <div className="space-y-10">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <div className="px-4 py-1.5 bg-trust-50 text-trust-600 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-4 inline-block border border-trust-100">
+                        Live Actuarial Ledger
+                    </div>
+                    <h1 className="text-4xl font-heading font-bold text-trust-900">Portfolio Performance</h1>
+                    <p className="text-gray-400 font-medium">Deep-dive analytics and risk projections for current assets.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <button className="px-6 py-3 bg-white border border-gray-100 rounded-2xl text-sm font-bold text-trust-900 shadow-sm hover:shadow-md transition-all active:scale-95 flex items-center gap-2">
+                        <Download className="h-4 w-4 text-gray-400" />
+                        Export Data
+                    </button>
+                    <button className="px-6 py-3 bg-trust-950 text-white rounded-2xl text-sm font-bold shadow-lg shadow-trust-900/20 hover:bg-trust-900 transition-all active:scale-95">
+                        Refresh Run
+                    </button>
+                </div>
             </div>
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <KPICard
-                    title="Total CSM"
+                    title="Gross CSM"
                     value={formatCurrency(dashboardData.kpis.totalCSM)}
-                    change="+2.5%"
+                    change="+2.4%"
                     icon={TrendingUp}
-                    color="blue"
+                    color="trust"
                 />
                 <KPICard
                     title="Solvency Ratio"
                     value={formatPercentage(dashboardData.kpis.solvencyRatio)}
                     change="-0.5%"
                     icon={Shield}
-                    color="green"
+                    color="growth"
                 />
                 <KPICard
-                    title="Fulfillment Cash Flows"
+                    title="Aggregate FCF"
                     value={formatCurrency(dashboardData.kpis.totalFCF)}
-                    change="+1.2%"
+                    change="+1.8%"
                     icon={DollarSign}
-                    color="purple"
+                    color="accent"
                 />
                 <KPICard
-                    title="Active Policies"
+                    title="Policy Velocity"
                     value={dashboardData.kpis.portfolioSize.toLocaleString()}
-                    change="+12"
+                    change="+14"
                     icon={Activity}
-                    color="orange"
+                    color="trust"
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* CSM Projection Chart */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">CSM & Liability Projection</h3>
+                <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 className="text-lg font-heading font-bold text-trust-900">Liability Projection</h3>
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">IFRS 17 Projections (CSM/RA/BEL)</p>
+                        </div>
+                    </div>
                     <div className="h-80">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={dashboardData.projections}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="year" />
-                                <YAxis />
-                                <Tooltip formatter={(value) => formatCurrency(value)} />
-                                <Legend />
-                                <Bar dataKey="bel" stackId="a" fill="#94a3b8" name="Best Estimate Liability" />
-                                <Bar dataKey="ra" stackId="a" fill="#f59e0b" name="Risk Adjustment" />
-                                <Bar dataKey="csm" stackId="a" fill="#3b82f6" name="Contractual Service Margin" />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 700, fill: '#94a3b8' }} />
+                                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 700, fill: '#94a3b8' }} tickFormatter={(val) => `${val / 1000000}M`} />
+                                <Tooltip
+                                    cursor={{ fill: '#f8fafc' }}
+                                    contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', padding: '1rem' }}
+                                    formatter={(value) => formatCurrency(value)}
+                                />
+                                <Legend iconType="circle" wrapperStyle={{ paddingTop: '2rem', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
+                                <Bar dataKey="bel" stackId="a" fill="#e2e8f0" name="BEL" radius={[0, 0, 0, 0]} />
+                                <Bar dataKey="ra" stackId="a" fill="#c084fc" name="Risk Adjustment" />
+                                <Bar dataKey="csm" stackId="a" fill="#0f172a" name="CSM" radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
                 {/* Risk Composition Chart */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Risk Capital Composition (SCR)</h3>
+                <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 className="text-lg font-heading font-bold text-trust-900">SCR Risk Weighting</h3>
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Capital Composition breakdown</p>
+                        </div>
+                    </div>
                     <div className="h-80">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -128,18 +152,25 @@ export default function AnalyticsDashboard() {
                                     data={dashboardData.riskComposition}
                                     cx="50%"
                                     cy="50%"
-                                    labelLine={false}
-                                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                    innerRadius={70}
                                     outerRadius={100}
-                                    fill="#8884d8"
+                                    paddingAngle={5}
                                     dataKey="value"
                                 >
-                                    {dashboardData.riskComposition.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    {[
+                                        '#0f172a', // deep navy
+                                        '#10b981', // growth green
+                                        '#f59e0b', // accent gold
+                                        '#64748b'  // gray
+                                    ].map((color, index) => (
+                                        <Cell key={`cell-${index}`} fill={color} stroke="none" />
                                     ))}
                                 </Pie>
-                                <Tooltip formatter={(value) => formatCurrency(value)} />
-                                <Legend />
+                                <Tooltip
+                                    contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', padding: '1rem' }}
+                                    formatter={(value) => formatCurrency(value)}
+                                />
+                                <Legend verticalAlign="middle" align="right" layout="vertical" iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
@@ -147,18 +178,18 @@ export default function AnalyticsDashboard() {
             </div>
 
             {/* Recent Alerts / Warnings */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Alerts</h3>
+            <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
+                <h3 className="text-lg font-heading font-bold text-trust-900 mb-6">System Surveillance</h3>
                 <div className="space-y-4">
                     <AlertItem
                         type="warning"
-                        message="Solvency ratio dropped below internal target (190%)"
-                        timestamp="2 hours ago"
+                        message="Internal capital target breached (185% < 190% threshold)"
+                        timestamp="12:42 PM"
                     />
                     <AlertItem
                         type="info"
-                        message="New policy batch (Batch #2024-12) imported successfully"
-                        timestamp="5 hours ago"
+                        message="Nightly valuation for Batch #AZ-99 completed"
+                        timestamp="04:15 AM"
                     />
                 </div>
             </div>
@@ -167,26 +198,28 @@ export default function AnalyticsDashboard() {
 }
 
 function KPICard({ title, value, change, icon: Icon, color }) {
-    const colorClasses = {
-        blue: 'bg-blue-50 text-blue-600',
-        green: 'bg-green-50 text-green-600',
-        purple: 'bg-purple-50 text-purple-600',
-        orange: 'bg-orange-50 text-orange-600',
+    const colors = {
+        trust: { bg: 'bg-trust-50', text: 'text-trust-900', icon: 'bg-trust-900 text-white' },
+        growth: { bg: 'bg-growth-50', text: 'text-growth-600', icon: 'bg-growth-600 text-white' },
+        accent: { bg: 'bg-accent-50', text: 'text-accent-700', icon: 'bg-accent-600 text-white' },
     };
 
+    const isPositive = change.startsWith('+');
+
     return (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
+        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+            <div className="flex justify-between items-start mb-6">
+                <div className={`p-4 rounded-2xl shadow-sm ${colors[color].icon}`}>
                     <Icon size={24} />
                 </div>
-                <span className={`text-sm font-medium ${change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black tracking-tighter shadow-sm ${isPositive ? 'bg-growth-50 text-growth-700' : 'bg-accent-50 text-accent-700'
+                    }`}>
                     {change}
-                </span>
+                </div>
             </div>
             <div>
-                <p className="text-sm text-gray-500 font-medium">{title}</p>
-                <h3 className="text-2xl font-bold text-gray-900 mt-1">{value}</h3>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{title}</p>
+                <h3 className="text-3xl font-heading font-extrabold text-trust-900 mt-1">{value}</h3>
             </div>
         </div>
     );
@@ -195,14 +228,19 @@ function KPICard({ title, value, change, icon: Icon, color }) {
 function AlertItem({ type, message, timestamp }) {
     const isWarning = type === 'warning';
     return (
-        <div className={`flex items-start p-4 rounded-lg border ${isWarning ? 'bg-yellow-50 border-yellow-200' : 'bg-blue-50 border-blue-200'
+        <div className={`flex items-center justify-between p-6 rounded-2xl border transition-colors ${isWarning ? 'bg-accent-50/50 border-accent-100' : 'bg-trust-50/50 border-trust-100'
             }`}>
-            <div className="mr-3 mt-1">
-                {isWarning ? <AlertTriangle size={18} className="text-yellow-600" /> : <Activity size={18} className="text-blue-600" />}
+            <div className="flex items-center gap-4">
+                <div className={`p-2 rounded-xl ${isWarning ? 'bg-accent-600 text-white' : 'bg-trust-900 text-white'}`}>
+                    {isWarning ? <AlertTriangle size={18} /> : <Activity size={18} />}
+                </div>
+                <div>
+                    <p className={`text-sm font-bold ${isWarning ? 'text-accent-900' : 'text-trust-900'}`}>{message}</p>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Audit Log • {timestamp}</p>
+                </div>
             </div>
-            <div>
-                <p className={`text-sm font-medium ${isWarning ? 'text-yellow-800' : 'text-blue-800'}`}>{message}</p>
-                <p className={`text-xs mt-1 ${isWarning ? 'text-yellow-600' : 'text-blue-600'}`}>{timestamp}</p>
+            <div className="text-[10px] font-black text-trust-600 uppercase tracking-widest bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm cursor-pointer hover:bg-trust-900 hover:text-white transition-all">
+                Acknowledge
             </div>
         </div>
     );

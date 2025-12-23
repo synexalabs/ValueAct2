@@ -29,15 +29,14 @@ const FormulaExplainer = ({
 
   const renderVariable = (variable) => {
     const isSelected = selectedVariable?.symbol === variable.symbol;
-    
+
     return (
       <span
         key={variable.symbol}
-        className={`inline-block px-2 py-1 mx-1 rounded cursor-pointer transition-all duration-200 ${
-          isSelected
-            ? 'bg-blue-100 text-blue-800 border-2 border-blue-300'
-            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
-        }`}
+        className={`inline-block px-3 py-1 mx-1 rounded-xl cursor-pointer transition-all duration-300 font-bold ${isSelected
+          ? 'bg-trust-950 text-growth-400 border border-trust-950 shadow-md'
+          : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border border-gray-100'
+          }`}
         onClick={() => handleVariableClick(variable)}
         title={`${variable.name} details`}
       >
@@ -50,13 +49,13 @@ const FormulaExplainer = ({
     // Simple regex to extract variable symbols from LaTeX
     const variablePattern = /\\[a-zA-Z]+|([a-zA-Z]+(?:_[a-zA-Z0-9]+)*)/g;
     const matches = formula.match(variablePattern) || [];
-    
+
     // Filter out LaTeX commands and common mathematical symbols
     const latexCommands = ['\\max', '\\min', '\\sum', '\\int', '\\frac', '\\sqrt', '\\log', '\\ln', '\\exp', '\\sin', '\\cos', '\\tan'];
     const mathSymbols = ['alpha', 'beta', 'gamma', 'delta', 'epsilon', 'theta', 'lambda', 'mu', 'pi', 'sigma', 'tau', 'phi', 'psi', 'omega'];
-    
-    return matches.filter(match => 
-      !latexCommands.includes(match) && 
+
+    return matches.filter(match =>
+      !latexCommands.includes(match) &&
       !mathSymbols.includes(match) &&
       match.length > 1 &&
       !match.startsWith('\\')
@@ -68,19 +67,19 @@ const FormulaExplainer = ({
   const undefinedVariables = formulaVariables.filter(symbol => !variables.find(v => v.symbol === symbol));
 
   return (
-    <div className={`card border-l-4 border-purple-500 ${className}`}>
+    <div className={`bg-white/90 backdrop-blur-xl rounded-[2.5rem] border border-trust-50 shadow-glass overflow-hidden ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4">
-        <div className="flex items-center space-x-3">
-          <div className="bg-purple-100 p-2 rounded-lg">
-            <Calculator className="h-5 w-5 text-purple-600" />
+      <div className="flex items-center justify-between p-8 border-b border-gray-50">
+        <div className="flex items-center space-x-4">
+          <div className="bg-trust-50 p-3 rounded-2xl">
+            <Calculator className="h-6 w-6 text-trust-600" />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-800">Formula Details</h3>
-            <div className="flex items-center space-x-4 text-sm text-gray-600">
-              <span>Version {version}</span>
+            <h3 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-1">Mathematical Architecture</h3>
+            <div className="flex items-center space-x-4">
+              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Version {version}</span>
               {lastUpdated && (
-                <span>Updated {new Date(lastUpdated).toLocaleDateString()}</span>
+                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-2 border-l border-gray-200">Validated {new Date(lastUpdated).toLocaleDateString()}</span>
               )}
             </div>
           </div>
@@ -98,28 +97,31 @@ const FormulaExplainer = ({
       </div>
 
       {/* Formula Display */}
-      <div className="px-4 pb-4">
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <div className="text-center">
+      <div className="p-8">
+        <div className="bg-gray-50/50 p-10 rounded-[2rem] border border-gray-100 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-trust-500/5 blur-[60px] rounded-full -mr-16 -mt-16" />
+          <div className="text-center relative z-10 transition-transform duration-500 hover:scale-[1.02]">
             <BlockMath math={formula} />
           </div>
           {description && (
-            <p className="text-sm text-gray-600 mt-3 text-center">{description}</p>
+            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-6 text-center leading-relaxed">
+              {description}
+            </p>
           )}
         </div>
 
         {/* Variables */}
-        <div className="mt-4">
-          <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
-            <Info className="h-4 w-4 mr-2 text-blue-600" />
-            Variables Used
+        <div className="mt-10">
+          <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-4 flex items-center px-1">
+            <Info className="h-4 w-4 mr-2 text-trust-500" />
+            Active Parameters
           </h4>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 px-1">
             {definedVariables.map(variable => renderVariable(variable))}
             {undefinedVariables.map(symbol => (
               <span
                 key={symbol}
-                className="inline-block px-2 py-1 mx-1 rounded bg-red-100 text-red-700 border border-red-300"
+                className="inline-block px-3 py-1 mx-1 rounded-xl bg-accent-50 text-accent-700 border border-accent-100 text-[10px] font-black"
                 title="Variable not defined"
               >
                 <InlineMath math={symbol} />
@@ -130,47 +132,29 @@ const FormulaExplainer = ({
 
         {/* Variable Details */}
         {selectedVariable && (
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h5 className="font-semibold text-blue-800 mb-2">
-              <InlineMath math={selectedVariable.symbol} /> - {selectedVariable.name}
+          <div className="mt-8 p-6 bg-trust-950 rounded-2xl border border-trust-900 shadow-xl animate-in fade-in slide-in-from-top-4 duration-300">
+            <h5 className="text-[13px] font-heading font-black text-growth-400 uppercase tracking-tight mb-3">
+              <InlineMath math={selectedVariable.symbol} /> — {selectedVariable.name}
             </h5>
-            <p className="text-sm text-blue-700 mb-2">{selectedVariable.description}</p>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="font-medium text-blue-800">Type:</span>
-                <span className="ml-2 text-blue-700">{selectedVariable.type}</span>
+            <p className="text-xs text-gray-400 font-medium leading-relaxed mb-4">{selectedVariable.description}</p>
+            <div className="grid grid-cols-2 gap-4 text-[10px]">
+              <div className="bg-white/5 p-3 rounded-xl">
+                <span className="font-black text-gray-400 uppercase tracking-widest block mb-1">Data Type</span>
+                <span className="text-white font-bold">{selectedVariable.type}</span>
               </div>
               {selectedVariable.unit && (
-                <div>
-                  <span className="font-medium text-blue-800">Unit:</span>
-                  <span className="ml-2 text-blue-700">{selectedVariable.unit}</span>
+                <div className="bg-white/5 p-3 rounded-xl">
+                  <span className="font-black text-gray-400 uppercase tracking-widest block mb-1">Standard Unit</span>
+                  <span className="text-white font-bold">{selectedVariable.unit}</span>
                 </div>
               )}
               {selectedVariable.range && (
-                <div className="col-span-2">
-                  <span className="font-medium text-blue-800">Range:</span>
-                  <span className="ml-2 text-blue-700">{selectedVariable.range}</span>
-                </div>
-              )}
-              {selectedVariable.defaultValue && (
-                <div className="col-span-2">
-                  <span className="font-medium text-blue-800">Default:</span>
-                  <span className="ml-2 text-blue-700">{selectedVariable.defaultValue}</span>
+                <div className="col-span-2 bg-white/5 p-3 rounded-xl">
+                  <span className="font-black text-gray-400 uppercase tracking-widest block mb-1">Domain Range</span>
+                  <span className="text-white font-bold">{selectedVariable.range}</span>
                 </div>
               )}
             </div>
-            {selectedVariable.typicalValues && selectedVariable.typicalValues.length > 0 && (
-              <div className="mt-2">
-                <span className="font-medium text-blue-800">Typical Values:</span>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {selectedVariable.typicalValues.map((value, index) => (
-                    <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                      {value}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </div>
@@ -180,15 +164,15 @@ const FormulaExplainer = ({
         <div className="px-4 pb-4 space-y-4 border-t border-gray-200 pt-4">
           {/* Conditions */}
           {conditions.length > 0 && (
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
-                <AlertCircle className="h-4 w-4 mr-2 text-orange-600" />
-                Conditions
+            <div className="p-8 border-t border-gray-50">
+              <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-4 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-2 text-accent-500" />
+                Contextual Constraints
               </h4>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {conditions.map((condition, index) => (
-                  <div key={index} className="bg-orange-50 p-3 rounded-lg border border-orange-200">
-                    <p className="text-sm text-orange-800">{condition}</p>
+                  <div key={index} className="bg-accent-50/30 p-4 rounded-2xl border border-accent-100">
+                    <p className="text-[11px] font-bold text-accent-950 uppercase tracking-tight">{condition}</p>
                   </div>
                 ))}
               </div>
@@ -197,33 +181,32 @@ const FormulaExplainer = ({
 
           {/* Examples */}
           {examples.length > 0 && (
-            <div>
-              <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
-                <BookOpen className="h-4 w-4 mr-2 text-green-600" />
-                Examples
+            <div className="p-8 border-t border-gray-50">
+              <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-6 flex items-center">
+                <BookOpen className="h-4 w-4 mr-2 text-growth-500" />
+                Operational Examples
               </h4>
-              <div className="space-y-3">
+              <div className="space-y-6">
                 {examples.map((example, index) => (
-                  <div key={index} className="bg-green-50 p-3 rounded-lg border border-green-200">
-                    <h5 className="font-medium text-green-800 mb-1">{example.title}</h5>
-                    <p className="text-sm text-green-700 mb-2">{example.description}</p>
+                  <div key={index} className="bg-growth-50/30 p-6 rounded-[2rem] border border-growth-100">
+                    <h5 className="text-[13px] font-heading font-black text-growth-800 uppercase tracking-tight mb-3">{example.title}</h5>
+                    <p className="text-[11px] font-bold text-growth-900/60 uppercase tracking-widest mb-4">{example.description}</p>
                     {example.inputs && (
-                      <div className="mb-2">
-                        <span className="font-medium text-green-800">Inputs:</span>
-                        <div className="mt-1 grid grid-cols-2 gap-2 text-xs">
+                      <div className="mb-4">
+                        <div className="mt-1 grid grid-cols-2 gap-4">
                           {Object.entries(example.inputs).map(([key, value]) => (
-                            <div key={key} className="flex justify-between">
-                              <span className="text-green-700">{key}:</span>
-                              <span className="font-medium text-green-800">{value}</span>
+                            <div key={key} className="flex justify-between bg-white/50 p-2 rounded-xl border border-white">
+                              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{key}</span>
+                              <span className="text-[9px] font-black text-growth-800 uppercase tracking-widest">{value}</span>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
                     {example.result && (
-                      <div>
-                        <span className="font-medium text-green-800">Result:</span>
-                        <span className="ml-2 font-semibold text-green-800">{example.result}</span>
+                      <div className="flex justify-between items-center bg-growth-800 text-white p-4 rounded-2xl shadow-lg shadow-growth-100">
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em]">Validated Result</span>
+                        <span className="text-sm font-black tracking-tighter">{example.result}</span>
                       </div>
                     )}
                   </div>
@@ -234,41 +217,40 @@ const FormulaExplainer = ({
 
           {/* Validation Rules */}
           {validationRules.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-gray-800 flex items-center">
-                  <CheckCircle className="h-4 w-4 mr-2 text-purple-600" />
-                  Validation Rules
+            <div className="p-8 border-t border-gray-50 bg-gray-50/50">
+              <div className="flex items-center justify-between mb-6">
+                <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] flex items-center">
+                  <CheckCircle className="h-4 w-4 mr-2 text-trust-500" />
+                  Audit & Compliance Rules
                 </h4>
                 <button
                   onClick={() => setShowValidation(!showValidation)}
-                  className="text-sm text-purple-600 hover:text-purple-800"
+                  className="text-[9px] font-black text-trust-600 uppercase tracking-widest hover:text-trust-950 transition-colors"
                 >
-                  {showValidation ? 'Hide' : 'Show'} Details
+                  {showValidation ? 'Hide Protocol' : 'Review Protocol'}
                 </button>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {validationRules.map((rule, index) => (
-                  <div key={index} className="bg-purple-50 p-3 rounded-lg border border-purple-200">
-                    <div className="flex items-center justify-between">
-                      <h5 className="font-medium text-purple-800">{rule.name}</h5>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        rule.severity === 'error' ? 'bg-red-100 text-red-800' :
-                        rule.severity === 'warning' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>
+                  <div key={index} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <h5 className="text-[11px] font-black text-trust-950 uppercase tracking-widest">{rule.name}</h5>
+                      <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${rule.severity === 'error' ? 'bg-accent-50 text-accent-700 border-accent-100' :
+                        rule.severity === 'warning' ? 'bg-trust-50 text-trust-700 border-trust-100' :
+                          'bg-growth-50 text-growth-700 border-growth-100'
+                        }`}>
                         {rule.severity}
                       </span>
                     </div>
-                    <p className="text-sm text-purple-700 mt-1">{rule.description}</p>
+                    <p className="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-tight">{rule.description}</p>
                     {showValidation && (
-                      <div className="mt-2 text-xs text-purple-600">
-                        <div><strong>Type:</strong> {rule.type}</div>
+                      <div className="mt-4 pt-4 border-t border-gray-50 grid grid-cols-2 gap-4 text-[9px] font-bold uppercase tracking-widest">
+                        <div><span className="text-gray-400">Target Type:</span> <span className="text-trust-950 ml-1">{rule.type}</span></div>
                         {rule.errorMessage && (
-                          <div><strong>Error:</strong> {rule.errorMessage}</div>
+                          <div className="col-span-2 text-accent-600">Protocol Failure: {rule.errorMessage}</div>
                         )}
                         {rule.warningMessage && (
-                          <div><strong>Warning:</strong> {rule.warningMessage}</div>
+                          <div className="col-span-2 text-trust-600">Compliance Warning: {rule.warningMessage}</div>
                         )}
                       </div>
                     )}

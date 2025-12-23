@@ -52,21 +52,21 @@ const FileUploader = ({ onFilesChange, className = '' }) => {
 
   const detectFileType = useCallback((filename, headers = []) => {
     const filenameLower = filename.toLowerCase();
-    
+
     // Check filename keywords
     if (filenameLower.includes('meta') || filenameLower.includes('metadata')) return 'meta';
     if (filenameLower.includes('assumption')) return 'assumptions';
     if (filenameLower.includes('policy')) return 'policies';
     if (filenameLower.includes('actual')) return 'actuals';
-    
+
     // Check headers for required columns
     const headersLower = headers.map(h => h.toLowerCase());
-    
+
     if (headersLower.includes('run_id') && headersLower.includes('user_id')) return 'meta';
     if (headersLower.includes('category') && headersLower.includes('parameter')) return 'assumptions';
     if (headersLower.includes('policy_id') && headersLower.includes('issue_age')) return 'policies';
     if (headersLower.includes('policy_id') && headersLower.includes('period')) return 'actuals';
-    
+
     return 'unknown';
   }, []);
 
@@ -94,11 +94,11 @@ const FileUploader = ({ onFilesChange, className = '' }) => {
 
     setFiles(prevFiles => {
       const updatedFiles = [...prevFiles];
-      
+
       newFiles.forEach(newFile => {
         // Check if file type already exists
         const existingIndex = updatedFiles.findIndex(f => f.type === newFile.type);
-        
+
         if (existingIndex >= 0) {
           // Replace existing file of same type
           updatedFiles[existingIndex] = newFile;
@@ -107,7 +107,7 @@ const FileUploader = ({ onFilesChange, className = '' }) => {
           updatedFiles.push(newFile);
         }
       });
-      
+
       return updatedFiles;
     });
 
@@ -127,7 +127,7 @@ const FileUploader = ({ onFilesChange, className = '' }) => {
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     setIsDragOver(false);
-    
+
     const droppedFiles = e.dataTransfer.files;
     if (droppedFiles.length > 0) {
       handleFileSelect(droppedFiles);
@@ -189,44 +189,44 @@ const FileUploader = ({ onFilesChange, className = '' }) => {
         {Object.entries(fileTypes).map(([type, info]) => {
           const uploadedFile = files.find(f => f.type === type);
           const isUploaded = !!uploadedFile;
-          
+
           return (
             <motion.div
               key={type}
-              className={`p-4 rounded-lg border-2 transition-all duration-200 ${
-                isUploaded 
-                  ? 'border-green-200 bg-green-50' 
-                  : info.required 
-                    ? 'border-red-200 bg-red-50' 
-                    : 'border-gray-200 bg-gray-50'
-              }`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              className={`p-5 rounded-2xl border-2 transition-all duration-300 ${isUploaded
+                  ? 'border-growth-200 bg-growth-50/50'
+                  : info.required
+                    ? 'border-accent-200 bg-accent-50/30 shadow-sm'
+                    : 'border-gray-100 bg-white'
+                }`}
+              whileHover={{ y: -4, shadow: '0 10px 25px -5px rgba(0,0,0,0.05)' }}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <span className="text-2xl">{info.icon}</span>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-xl ${isUploaded ? 'bg-growth-100' : 'bg-gray-50'}`}>
+                    <span className="text-xl">{info.icon}</span>
+                  </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">{info.name}</h3>
-                    {info.required && (
-                      <span className="text-xs text-red-600 font-medium">Required</span>
+                    <h3 className="font-heading font-bold text-trust-900 text-sm">{info.name}</h3>
+                    {info.required && !isUploaded && (
+                      <span className="text-[10px] text-accent-600 font-bold uppercase tracking-wider">Required</span>
                     )}
                   </div>
                 </div>
                 {isUploaded && (
-                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <CheckCircle className="h-5 w-5 text-growth-600" />
                 )}
               </div>
-              
-              <p className="text-sm text-gray-600 mb-3">{info.description}</p>
-              
+
+              <p className="text-xs text-gray-400 mb-4 truncate">{info.description}</p>
+
               <div className="flex space-x-2">
                 <button
                   onClick={() => downloadTemplate(type)}
-                  className="flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
+                  className="flex items-center space-x-1.5 text-[10px] font-bold uppercase tracking-wider text-trust-600 hover:text-trust-900 transition-colors"
                 >
                   <Download className="h-3 w-3" />
-                  <span>Template</span>
+                  <span>Get Template</span>
                 </button>
               </div>
             </motion.div>
@@ -236,55 +236,56 @@ const FileUploader = ({ onFilesChange, className = '' }) => {
 
       {/* Upload Area */}
       <motion.div
-        className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200 ${
-          isDragOver
-            ? 'border-blue-400 bg-blue-50'
+        className={`relative border-2 border-dashed rounded-[2rem] p-12 text-center transition-all duration-300 ${isDragOver
+            ? 'border-trust-400 bg-trust-50'
             : allRequiredUploaded
-              ? 'border-green-400 bg-green-50'
-              : 'border-gray-300 bg-gray-50'
-        }`}
+              ? 'border-growth-400 bg-growth-50/20'
+              : 'border-gray-200 bg-white'
+          }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        whileHover={{ scale: 1.01 }}
       >
         <input
           type="file"
           multiple
           accept=".csv,.xlsx,.xls"
           onChange={(e) => handleFileSelect(e.target.files)}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
         />
-        
+
         <motion.div
-          animate={{ scale: isDragOver ? 1.1 : 1 }}
+          animate={{ y: isDragOver ? -10 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          <Upload className={`h-12 w-12 mx-auto mb-4 ${
-            isDragOver ? 'text-blue-500' : 'text-gray-400'
-          }`} />
+          <div className={`h-16 w-16 mx-auto mb-6 rounded-2xl flex items-center justify-center transition-colors ${isDragOver ? 'bg-trust-900 text-white' : 'bg-gray-50 text-gray-400'
+            }`}>
+            <Upload className="h-8 w-8" />
+          </div>
         </motion.div>
-        
-        <div className="space-y-2">
-          <h3 className="text-lg font-medium text-gray-900">
-            {isDragOver ? 'Drop files here' : 'Upload your data files'}
+
+        <div className="space-y-3">
+          <h3 className="text-xl font-heading font-bold text-trust-900">
+            {isDragOver ? 'Drop files now' : 'Secure Data Gateway'}
           </h3>
-          <p className="text-sm text-gray-600">
-            Drag and drop your CSV or Excel files, or click to browse
+          <p className="text-sm text-gray-400 max-w-sm mx-auto leading-relaxed">
+            Drag and drop your actuarial datasets (CSV, XLSX) or click to browse system directories.
           </p>
-          <p className="text-xs text-gray-500">
-            Accepted formats: CSV, XLSX, XLS
-          </p>
+          <div className="flex items-center justify-center gap-3 pt-2">
+            {['CSV', 'XLSX', 'XLS'].map(fmt => (
+              <span key={fmt} className="px-2 py-1 bg-gray-50 text-gray-400 text-[10px] font-bold rounded-lg border border-gray-100">{fmt}</span>
+            ))}
+          </div>
         </div>
-        
+
         {allRequiredUploaded && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-4 flex items-center justify-center space-x-2 text-green-600"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mt-8 inline-flex items-center space-x-2 px-4 py-2 bg-growth-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-growth-600/20"
           >
-            <CheckCircle className="h-5 w-5" />
-            <span className="text-sm font-medium">All required files uploaded!</span>
+            <CheckCircle className="h-4 w-4" />
+            <span>Ready for Processing</span>
           </motion.div>
         )}
       </motion.div>
@@ -299,10 +300,10 @@ const FileUploader = ({ onFilesChange, className = '' }) => {
             className="space-y-3"
           >
             <h3 className="text-lg font-medium text-gray-900">Uploaded Files</h3>
-            
+
             {files.map((file) => {
               const typeInfo = getFileTypeInfo(file.type);
-              
+
               return (
                 <motion.div
                   key={file.id}
@@ -320,17 +321,17 @@ const FileUploader = ({ onFilesChange, className = '' }) => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     {file.status === 'uploading' && (
                       <div className="w-16 bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                           style={{ width: `${file.progress}%` }}
                         />
                       </div>
                     )}
-                    
+
                     <button
                       onClick={() => removeFile(file.id)}
                       className="p-1 text-gray-400 hover:text-red-500 transition-colors"
@@ -362,13 +363,13 @@ const FileUploader = ({ onFilesChange, className = '' }) => {
                 {allRequiredUploaded ? ' • All required files present' : ''}
               </p>
             </div>
-            
+
             <div className="text-right">
               <p className="text-sm font-medium text-blue-900">
                 {uploadedRequiredFiles.length}/{requiredFiles.length} required
               </p>
               <div className="w-20 bg-blue-200 rounded-full h-2 mt-1">
-                <div 
+                <div
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${(uploadedRequiredFiles.length / requiredFiles.length) * 100}%` }}
                 />

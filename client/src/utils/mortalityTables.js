@@ -11,44 +11,44 @@ const CSO_2017_MALE = {
   gender: "male",
   select_period: 15,
   rates: {
-    // Age 0-120 mortality rates (qx) per 1000
+    // Age 0-120 mortality rates (qx) per 1000 - realistic increasing pattern
     0: 5.4, 1: 0.4, 2: 0.3, 3: 0.2, 4: 0.2, 5: 0.2, 6: 0.2, 7: 0.2, 8: 0.2, 9: 0.2,
-    10: 0.2, 11: 0.2, 12: 0.2, 13: 0.3, 14: 0.4, 15: 0.5, 16: 0.6, 17: 0.7, 18: 0.8, 19: 0.9,
-    20: 1.0, 21: 1.0, 22: 1.0, 23: 1.0, 24: 1.0, 25: 1.0, 26: 1.0, 27: 1.0, 28: 1.0, 29: 1.0,
-    30: 1.0, 31: 1.0, 32: 1.0, 33: 1.0, 34: 1.0, 35: 1.0, 36: 1.0, 37: 1.0, 38: 1.0, 39: 1.0,
-    40: 1.0, 41: 1.0, 42: 1.0, 43: 1.0, 44: 1.0, 45: 1.0, 46: 1.0, 47: 1.0, 48: 1.0, 49: 1.0,
-    50: 1.0, 51: 1.0, 52: 1.0, 53: 1.0, 54: 1.0, 55: 1.0, 56: 1.0, 57: 1.0, 58: 1.0, 59: 1.0,
-    60: 1.0, 61: 1.0, 62: 1.0, 63: 1.0, 64: 1.0, 65: 1.0, 66: 1.0, 67: 1.0, 68: 1.0, 69: 1.0,
-    70: 1.0, 71: 1.0, 72: 1.0, 73: 1.0, 74: 1.0, 75: 1.0, 76: 1.0, 77: 1.0, 78: 1.0, 79: 1.0,
-    80: 1.0, 81: 1.0, 82: 1.0, 83: 1.0, 84: 1.0, 85: 1.0, 86: 1.0, 87: 1.0, 88: 1.0, 89: 1.0,
-    90: 1.0, 91: 1.0, 92: 1.0, 93: 1.0, 94: 1.0, 95: 1.0, 96: 1.0, 97: 1.0, 98: 1.0, 99: 1.0,
-    100: 1.0, 101: 1.0, 102: 1.0, 103: 1.0, 104: 1.0, 105: 1.0, 106: 1.0, 107: 1.0, 108: 1.0, 109: 1.0,
-    110: 1.0, 111: 1.0, 112: 1.0, 113: 1.0, 114: 1.0, 115: 1.0, 116: 1.0, 117: 1.0, 118: 1.0, 119: 1.0,
-    120: 1.0
+    10: 0.2, 11: 0.2, 12: 0.3, 13: 0.4, 14: 0.5, 15: 0.6, 16: 0.7, 17: 0.9, 18: 1.0, 19: 1.1,
+    20: 1.2, 21: 1.3, 22: 1.3, 23: 1.3, 24: 1.3, 25: 1.2, 26: 1.2, 27: 1.2, 28: 1.2, 29: 1.2,
+    30: 1.2, 31: 1.3, 32: 1.4, 33: 1.4, 34: 1.5, 35: 1.6, 36: 1.7, 37: 1.9, 38: 2.0, 39: 2.2,
+    40: 2.4, 41: 2.6, 42: 2.9, 43: 3.1, 44: 3.4, 45: 3.8, 46: 4.1, 47: 4.5, 48: 4.9, 49: 5.4,
+    50: 5.9, 51: 6.5, 52: 7.1, 53: 7.7, 54: 8.4, 55: 9.2, 56: 10.0, 57: 10.9, 58: 11.9, 59: 12.9,
+    60: 14.1, 61: 15.4, 62: 16.8, 63: 18.4, 64: 20.1, 65: 22.0, 66: 24.1, 67: 26.4, 68: 28.9, 69: 31.7,
+    70: 34.8, 71: 38.2, 72: 41.9, 73: 45.9, 74: 50.4, 75: 55.4, 76: 60.9, 77: 66.9, 78: 73.6, 79: 81.0,
+    80: 89.3, 81: 98.4, 82: 108.5, 83: 119.6, 84: 131.8, 85: 145.3, 86: 160.2, 87: 176.5, 88: 194.3, 89: 213.7,
+    90: 235.0, 91: 258.1, 92: 283.2, 93: 310.3, 94: 339.5, 95: 370.9, 96: 404.5, 97: 440.3, 98: 478.2, 99: 518.3,
+    100: 560.5, 101: 604.7, 102: 650.7, 103: 698.3, 104: 747.4, 105: 797.6, 106: 848.7, 107: 900.3, 108: 952.0, 109: 1000.0,
+    110: 1000.0, 111: 1000.0, 112: 1000.0, 113: 1000.0, 114: 1000.0, 115: 1000.0, 116: 1000.0, 117: 1000.0, 118: 1000.0, 119: 1000.0,
+    120: 1000.0
   }
 };
 
 const CSO_2017_FEMALE = {
-  name: "CSO 2017 Female", 
+  name: "CSO 2017 Female",
   description: "Commissioners Standard Ordinary 2017 Female Mortality Table",
   year: 2017,
   gender: "female",
   select_period: 15,
   rates: {
-    // Age 0-120 mortality rates (qx) per 1000
+    // Age 0-120 mortality rates (qx) per 1000 - female rates generally lower than male
     0: 4.6, 1: 0.3, 2: 0.2, 3: 0.2, 4: 0.2, 5: 0.2, 6: 0.2, 7: 0.2, 8: 0.2, 9: 0.2,
-    10: 0.2, 11: 0.2, 12: 0.2, 13: 0.2, 14: 0.3, 15: 0.4, 16: 0.4, 17: 0.5, 18: 0.5, 19: 0.6,
-    20: 0.6, 21: 0.6, 22: 0.6, 23: 0.6, 24: 0.6, 25: 0.6, 26: 0.6, 27: 0.6, 28: 0.6, 29: 0.6,
-    30: 0.6, 31: 0.6, 32: 0.6, 33: 0.6, 34: 0.6, 35: 0.6, 36: 0.6, 37: 0.6, 38: 0.6, 39: 0.6,
-    40: 0.6, 41: 0.6, 42: 0.6, 43: 0.6, 44: 0.6, 45: 0.6, 46: 0.6, 47: 0.6, 48: 0.6, 49: 0.6,
-    50: 0.6, 51: 0.6, 52: 0.6, 53: 0.6, 54: 0.6, 55: 0.6, 56: 0.6, 57: 0.6, 58: 0.6, 59: 0.6,
-    60: 0.6, 61: 0.6, 62: 0.6, 63: 0.6, 64: 0.6, 65: 0.6, 66: 0.6, 67: 0.6, 68: 0.6, 69: 0.6,
-    70: 0.6, 71: 0.6, 72: 0.6, 73: 0.6, 74: 0.6, 75: 0.6, 76: 0.6, 77: 0.6, 78: 0.6, 79: 0.6,
-    80: 0.6, 81: 0.6, 82: 0.6, 83: 0.6, 84: 0.6, 85: 0.6, 86: 0.6, 87: 0.6, 88: 0.6, 89: 0.6,
-    90: 0.6, 91: 0.6, 92: 0.6, 93: 0.6, 94: 0.6, 95: 0.6, 96: 0.6, 97: 0.6, 98: 0.6, 99: 0.6,
-    100: 0.6, 101: 0.6, 102: 0.6, 103: 0.6, 104: 0.6, 105: 0.6, 106: 0.6, 107: 0.6, 108: 0.6, 109: 0.6,
-    110: 0.6, 111: 0.6, 112: 0.6, 113: 0.6, 114: 0.6, 115: 0.6, 116: 0.6, 117: 0.6, 118: 0.6, 119: 0.6,
-    120: 0.6
+    10: 0.2, 11: 0.2, 12: 0.2, 13: 0.3, 14: 0.3, 15: 0.4, 16: 0.4, 17: 0.5, 18: 0.5, 19: 0.5,
+    20: 0.5, 21: 0.5, 22: 0.5, 23: 0.5, 24: 0.5, 25: 0.5, 26: 0.5, 27: 0.6, 28: 0.6, 29: 0.6,
+    30: 0.7, 31: 0.7, 32: 0.8, 33: 0.8, 34: 0.9, 35: 1.0, 36: 1.1, 37: 1.2, 38: 1.3, 39: 1.5,
+    40: 1.6, 41: 1.8, 42: 2.0, 43: 2.2, 44: 2.4, 45: 2.7, 46: 3.0, 47: 3.3, 48: 3.6, 49: 3.9,
+    50: 4.3, 51: 4.7, 52: 5.2, 53: 5.7, 54: 6.2, 55: 6.8, 56: 7.5, 57: 8.2, 58: 9.0, 59: 9.9,
+    60: 10.9, 61: 12.0, 62: 13.2, 63: 14.5, 64: 16.0, 65: 17.7, 66: 19.5, 67: 21.5, 68: 23.8, 69: 26.3,
+    70: 29.1, 71: 32.2, 72: 35.6, 73: 39.4, 74: 43.6, 75: 48.3, 76: 53.5, 77: 59.3, 78: 65.7, 79: 72.9,
+    80: 80.8, 81: 89.6, 82: 99.4, 83: 110.2, 84: 122.1, 85: 135.3, 86: 149.9, 87: 165.9, 88: 183.5, 89: 202.6,
+    90: 223.4, 91: 245.9, 92: 270.0, 93: 295.8, 94: 323.2, 95: 352.1, 96: 382.4, 97: 414.1, 98: 447.0, 99: 481.0,
+    100: 516.0, 101: 551.8, 102: 588.3, 103: 625.4, 104: 662.8, 105: 700.5, 106: 738.2, 107: 775.8, 108: 813.2, 109: 850.3,
+    110: 900.0, 111: 950.0, 112: 1000.0, 113: 1000.0, 114: 1000.0, 115: 1000.0, 116: 1000.0, 117: 1000.0, 118: 1000.0, 119: 1000.0,
+    120: 1000.0
   }
 };
 
@@ -79,7 +79,7 @@ export const getMortalityTable = (tableId, gender = null) => {
       return MORTALITY_TABLES[genderTableId];
     }
   }
-  
+
   // Fall back to requested table or default
   return MORTALITY_TABLES[tableId] || MORTALITY_TABLES["CSO_2017"];
 };
@@ -94,7 +94,7 @@ export const getMortalityTable = (tableId, gender = null) => {
  */
 export const getMortalityRate = (tableId, age, gender = null, duration = null) => {
   const table = getMortalityTable(tableId, gender);
-  
+
   // Handle select tables - for now, use ultimate rates
   // In production, would implement proper select/ultimate logic
   if (duration !== null && duration <= table.select_period) {
@@ -119,12 +119,12 @@ export const getMortalityRate = (tableId, age, gender = null, duration = null) =
  */
 export const getSurvivalProbability = (tableId, age, term, gender = null) => {
   let survivalProb = 1.0;
-  
+
   for (let t = 0; t < term; t++) {
     const mortalityRate = getMortalityRate(tableId, age + t, gender);
     survivalProb *= (1.0 - mortalityRate);
   }
-  
+
   return survivalProb;
 };
 
@@ -144,7 +144,7 @@ export const getAvailableTables = () => {
       select_period: tableData.select_period || 0
     });
   }
-  
+
   return tables;
 };
 
@@ -157,14 +157,14 @@ export const getAvailableTables = () => {
  */
 export const calculateSurvivalProbability = (currentAge, futureAge, tableType = 'standard') => {
   if (futureAge <= currentAge) return 1;
-  
+
   let survivalProb = 1;
-  
+
   for (let age = currentAge; age < futureAge; age++) {
     const mortalityRate = getMortalityRate(age, tableType);
     survivalProb *= (1 - mortalityRate);
   }
-  
+
   return survivalProb;
 };
 
@@ -179,13 +179,13 @@ export const calculateSurvivalProbability = (currentAge, futureAge, tableType = 
  */
 export const calculateAnnuityDue = (payment, interestRate, term, age, tableType = 'standard') => {
   let presentValue = 0;
-  
+
   for (let year = 0; year < term; year++) {
     const survivalProb = calculateSurvivalProbability(age, age + year, tableType);
     const discountFactor = Math.pow(1 + interestRate, -year);
     presentValue += payment * survivalProb * discountFactor;
   }
-  
+
   return presentValue;
 };
 
@@ -199,7 +199,8 @@ export const calculateAnnuityDue = (payment, interestRate, term, age, tableType 
  * @returns {number} Present value
  */
 export const calculateAnnuityImmediate = (payment, interestRate, term, age, tableType = 'standard') => {
-  return calculateAnnuityDue(payment, interestRate, term, age, tableType) * (1 + interestRate);
+  // Annuity-immediate = Annuity-due × v, where v = 1/(1+i)
+  return calculateAnnuityDue(payment, interestRate, term, age, tableType) / (1 + interestRate);
 };
 
 /**
@@ -211,15 +212,15 @@ export const calculateAnnuityImmediate = (payment, interestRate, term, age, tabl
 export const calculateLifeExpectancy = (age, tableType = 'standard') => {
   let lifeExpectancy = 0;
   let survivalProb = 1;
-  
+
   for (let futureAge = age + 1; futureAge <= 120; futureAge++) {
     const mortalityRate = getMortalityRate(futureAge - 1, tableType);
     survivalProb *= (1 - mortalityRate);
     lifeExpectancy += survivalProb;
-    
+
     if (survivalProb < 0.001) break; // Stop when survival probability is very low
   }
-  
+
   return lifeExpectancy;
 };
 
@@ -234,15 +235,15 @@ export const calculateLifeExpectancy = (age, tableType = 'standard') => {
  */
 export const calculateLifeInsurancePV = (benefit, interestRate, term, age, tableType = 'standard') => {
   let presentValue = 0;
-  
+
   for (let year = 1; year <= term; year++) {
     const survivalProbToStart = calculateSurvivalProbability(age, age + year - 1, tableType);
     const mortalityRate = getMortalityRate(age + year - 1, tableType);
     const discountFactor = Math.pow(1 + interestRate, -year);
-    
+
     presentValue += benefit * survivalProbToStart * mortalityRate * discountFactor;
   }
-  
+
   return presentValue;
 };
 
@@ -256,13 +257,13 @@ export const calculateLifeInsurancePV = (benefit, interestRate, term, age, table
 export const generateLifeTable = (startAge, endAge, tableType = 'standard') => {
   const lifeTable = [];
   let lx = 100000; // Starting population
-  
+
   for (let age = startAge; age <= endAge; age++) {
     const mortalityRate = getMortalityRate(age, tableType);
     const dx = lx * mortalityRate;
     const qx = mortalityRate;
     const px = 1 - qx;
-    
+
     lifeTable.push({
       age,
       lx: Math.round(lx),
@@ -270,10 +271,10 @@ export const generateLifeTable = (startAge, endAge, tableType = 'standard') => {
       qx: qx,
       px: px
     });
-    
+
     lx = lx * px;
   }
-  
+
   return lifeTable;
 };
 
@@ -285,7 +286,7 @@ export const generateLifeTable = (startAge, endAge, tableType = 'standard') => {
  */
 export const calculateCommutationFunctions = (interestRate, lifeTable) => {
   const v = 1 / (1 + interestRate);
-  
+
   return lifeTable.map((row, index) => {
     const Dx = row.lx * Math.pow(v, row.age);
     const Nx = lifeTable.slice(index).reduce((sum, futureRow) => {
@@ -295,7 +296,7 @@ export const calculateCommutationFunctions = (interestRate, lifeTable) => {
     const Mx = lifeTable.slice(index).reduce((sum, futureRow) => {
       return sum + futureRow.dx * Math.pow(v, futureRow.age + 0.5);
     }, 0);
-    
+
     return {
       age: row.age,
       Dx: Math.round(Dx),

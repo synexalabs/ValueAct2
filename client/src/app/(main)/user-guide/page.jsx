@@ -2,184 +2,166 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Calculator, Database, FileText, Settings, BookOpen, TrendingUp, Shield, DollarSign } from 'lucide-react';
+import { ArrowLeft, Calculator, Database, FileText, Settings, BookOpen, TrendingUp, Shield, DollarSign, Activity, AlertTriangle } from 'lucide-react';
 
 export default function UserGuidePage() {
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            <nav className="bg-white shadow-sm border-b">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <Link href="/" className="flex items-center space-x-2">
-                            <ArrowLeft className="w-5 h-5 text-gray-600" />
-                            <span className="text-lg font-semibold text-gray-900">Back to Dashboard</span>
-                        </Link>
-                    </div>
+        <div className="space-y-12 pb-20">
+            {/* Hero Section */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-trust-900 to-trust-950 rounded-[3rem] p-12 lg:p-16 text-white shadow-2xl">
+                <div className="absolute top-0 right-0 p-20 opacity-10">
+                    <BookOpen className="h-64 w-64" />
                 </div>
-            </nav>
-
-            <div className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="bg-white rounded-lg shadow-sm p-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">User Guide</h1>
-                    <p className="text-gray-600 mb-8">
-                        Valuact is a professional actuarial platform for life insurance calculations. This guide explains every feature,
-                        input format, and output to help you understand exactly how your calculations are performed.
+                <div className="relative z-10 max-w-2xl">
+                    <div className="px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-6 inline-block">
+                        Knowledge Base
+                    </div>
+                    <h1 className="text-4xl lg:text-5xl font-heading font-bold mb-6">Master the Platform</h1>
+                    <p className="text-lg text-white/70 leading-relaxed mb-8">
+                        Valuact is a premium actuarial gateway for life insurance engineering. This guide details every algorithm,
+                        data architecture, and regulatory cross-walk within the system.
                     </p>
-
-                    {/* What is Valuact */}
-                    <section className="mb-10">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">What is Valuact?</h2>
-                        <p className="text-gray-700 mb-4">
-                            Valuact is a Software-as-a-Service (SaaS) platform designed for actuaries, insurance professionals, and financial analysts.
-                            It provides tools for:
-                        </p>
-                        <ul className="list-disc list-inside text-gray-700 ml-4 space-y-2">
-                            <li><strong>IFRS 17 Calculations</strong> – International Financial Reporting Standard for insurance contracts</li>
-                            <li><strong>Solvency II Calculations</strong> – EU regulatory framework for insurance capital requirements</li>
-                            <li><strong>Pricing & Product Development</strong> – Premium calculations for life insurance products</li>
-                            <li><strong>Mortality Analysis</strong> – Life expectancy and survival probability calculations</li>
-                        </ul>
-                    </section>
-
-                    {/* IFRS 17 Section */}
-                    <section className="mb-10">
-                        <div className="flex items-center space-x-3 mb-4">
-                            <Calculator className="w-7 h-7 text-blue-600" />
-                            <h2 className="text-2xl font-bold text-gray-900">IFRS 17 Calculator</h2>
+                    <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-growth-400" />
+                            <span className="text-xs font-bold uppercase tracking-wider text-white/50">V2.0 Documentation</span>
                         </div>
-
-                        <div className="bg-blue-50 rounded-lg p-4 mb-4">
-                            <p className="text-blue-800 text-sm">
-                                <strong>What is IFRS 17?</strong> It's an accounting standard that defines how insurance companies must report their insurance contracts.
-                                It requires calculating the Contractual Service Margin (CSM), which represents unearned profit that will be recognized over the coverage period.
-                            </p>
+                        <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-accent-400" />
+                            <span className="text-xs font-bold uppercase tracking-wider text-white/50">BaFin Compliant</span>
                         </div>
-
-                        <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-3">Input Data Format</h3>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full text-sm border border-gray-200 rounded-lg">
-                                <thead className="bg-gray-100">
-                                    <tr>
-                                        <th className="px-4 py-2 text-left font-medium text-gray-700">Field</th>
-                                        <th className="px-4 py-2 text-left font-medium text-gray-700">Format</th>
-                                        <th className="px-4 py-2 text-left font-medium text-gray-700">Example</th>
-                                        <th className="px-4 py-2 text-left font-medium text-gray-700">Description</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                    <tr><td className="px-4 py-2">policy_id</td><td className="px-4 py-2">String</td><td className="px-4 py-2">POL001</td><td className="px-4 py-2">Unique identifier</td></tr>
-                                    <tr className="bg-gray-50"><td className="px-4 py-2">issue_date</td><td className="px-4 py-2">YYYY-MM-DD</td><td className="px-4 py-2">2020-01-15</td><td className="px-4 py-2">Policy start date</td></tr>
-                                    <tr><td className="px-4 py-2">maturity_date</td><td className="px-4 py-2">YYYY-MM-DD</td><td className="px-4 py-2">2045-01-15</td><td className="px-4 py-2">Policy end date</td></tr>
-                                    <tr className="bg-gray-50"><td className="px-4 py-2">face_amount</td><td className="px-4 py-2">Number</td><td className="px-4 py-2">100000</td><td className="px-4 py-2">Sum assured (death benefit)</td></tr>
-                                    <tr><td className="px-4 py-2">premium</td><td className="px-4 py-2">Number</td><td className="px-4 py-2">1200</td><td className="px-4 py-2">Annual premium amount</td></tr>
-                                    <tr className="bg-gray-50"><td className="px-4 py-2">issue_age</td><td className="px-4 py-2">Integer</td><td className="px-4 py-2">35</td><td className="px-4 py-2">Age at policy issue</td></tr>
-                                    <tr><td className="px-4 py-2">gender</td><td className="px-4 py-2">M/F</td><td className="px-4 py-2">M</td><td className="px-4 py-2">Policyholder gender</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-3">Assumptions Required</h3>
-                        <ul className="list-disc list-inside text-gray-700 ml-4 space-y-1">
-                            <li><strong>Discount Rate (0-10%):</strong> Rate used to discount future cash flows (e.g., 3.5%)</li>
-                            <li><strong>Lapse Rate (0-20%):</strong> Expected annual policy surrender rate (e.g., 5%)</li>
-                            <li><strong>Mortality Table:</strong> CSO 2017, CSO 2001, or GAM 1994</li>
-                            <li><strong>Expense Inflation (0-5%):</strong> Annual increase in expenses (e.g., 2%)</li>
-                        </ul>
-
-                        <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-3">Output Metrics</h3>
-                        <ul className="list-disc list-inside text-gray-700 ml-4 space-y-1">
-                            <li><strong>CSM (Contractual Service Margin):</strong> Unearned profit = PV(Premiums) - PV(Benefits) - Risk Adjustment</li>
-                            <li><strong>Fulfilment Cash Flows (FCF):</strong> Expected future cash flows discounted to present value</li>
-                            <li><strong>Risk Adjustment:</strong> Compensation for uncertainty in non-financial risks</li>
-                            <li><strong>Loss Component:</strong> Appears if contract is onerous (expected loss)</li>
-                        </ul>
-                    </section>
-
-                    {/* Solvency II Section */}
-                    <section className="mb-10">
-                        <div className="flex items-center space-x-3 mb-4">
-                            <Shield className="w-7 h-7 text-green-600" />
-                            <h2 className="text-2xl font-bold text-gray-900">Solvency II Calculator</h2>
-                        </div>
-
-                        <div className="bg-green-50 rounded-lg p-4 mb-4">
-                            <p className="text-green-800 text-sm">
-                                <strong>What is Solvency II?</strong> It's the EU regulatory framework requiring insurers to hold sufficient capital to survive
-                                a 1-in-200 year adverse event (99.5% confidence level). The SCR (Solvency Capital Requirement) is the key metric.
-                            </p>
-                        </div>
-
-                        <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-3">Output Metrics</h3>
-                        <ul className="list-disc list-inside text-gray-700 ml-4 space-y-1">
-                            <li><strong>SCR (Solvency Capital Requirement):</strong> Capital needed to survive 1-in-200 year loss</li>
-                            <li><strong>MCR (Minimum Capital Requirement):</strong> Absolute minimum capital (25-45% of SCR)</li>
-                            <li><strong>Solvency Ratio:</strong> Own Funds ÷ SCR (must be &gt; 100%)</li>
-                            <li><strong>SCR Breakdown:</strong> Market risk, Underwriting risk, Credit risk, Operational risk</li>
-                        </ul>
-                    </section>
-
-                    {/* Pricing Section */}
-                    <section className="mb-10">
-                        <div className="flex items-center space-x-3 mb-4">
-                            <DollarSign className="w-7 h-7 text-purple-600" />
-                            <h2 className="text-2xl font-bold text-gray-900">Pricing Calculator</h2>
-                        </div>
-
-                        <div className="bg-purple-50 rounded-lg p-4 mb-4">
-                            <p className="text-purple-800 text-sm">
-                                <strong>How does pricing work?</strong> Life insurance premiums are calculated using the equivalence principle:
-                                present value of premiums = present value of benefits + expenses + profit margin.
-                            </p>
-                        </div>
-
-                        <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-3">Key Formulas</h3>
-                        <div className="bg-gray-100 rounded-lg p-4 font-mono text-sm">
-                            <p className="mb-2"><strong>Annuity Factor:</strong> Σ (v^t × tpx) for t = 1 to n</p>
-                            <p className="mb-2"><strong>Net Premium:</strong> (Sum Assured × Ax) ÷ äx</p>
-                            <p><strong>Where:</strong> v = 1/(1+i), tpx = survival probability, Ax = insurance factor</p>
-                        </div>
-                    </section>
-
-                    {/* Mortality Section */}
-                    <section className="mb-10">
-                        <div className="flex items-center space-x-3 mb-4">
-                            <TrendingUp className="w-7 h-7 text-orange-600" />
-                            <h2 className="text-2xl font-bold text-gray-900">Mortality Calculator</h2>
-                        </div>
-
-                        <div className="bg-orange-50 rounded-lg p-4 mb-4">
-                            <p className="text-orange-800 text-sm">
-                                <strong>Mortality Tables Explained:</strong> These tables show the probability of death at each age, derived from
-                                population statistics. We use CSO 2017 (Commissioners Standard Ordinary) as the default.
-                            </p>
-                        </div>
-
-                        <h3 className="text-lg font-semibold text-gray-900 mt-6 mb-3">Available Mortality Tables</h3>
-                        <ul className="list-disc list-inside text-gray-700 ml-4 space-y-1">
-                            <li><strong>CSO 2017:</strong> Latest US mortality table (recommended)</li>
-                            <li><strong>CSO 2001:</strong> Previous standard table</li>
-                            <li><strong>GAM 1994:</strong> Group Annuity Mortality table</li>
-                        </ul>
-                    </section>
-
-                    {/* Transparency Section */}
-                    <section className="mb-10 p-6 bg-gray-50 rounded-lg border border-gray-200">
-                        <h2 className="text-xl font-bold text-gray-900 mb-4">Our Commitment to Transparency</h2>
-                        <ul className="space-y-2 text-gray-700">
-                            <li>✓ All calculation formulas are documented in the <Link href="/methodology" className="text-blue-600 hover:underline">Methodology</Link> section</li>
-                            <li>✓ Regulatory sources are cited (IFRS 17.37, Solvency II Directive Article 172)</li>
-                            <li>✓ No black-box calculations – every step is explainable</li>
-                            <li>✓ Your data is encrypted and never shared with third parties</li>
-                        </ul>
-                    </section>
-
-                    {/* Contact */}
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                        <p className="text-blue-800 text-sm">
-                            <strong>Questions?</strong> Contact us at <a href="mailto:service@synexalabs.com" className="underline">service@synexalabs.com</a>
-                        </p>
                     </div>
                 </div>
+            </div>
+
+            <div className="max-w-4xl mx-auto space-y-20">
+                {/* What is Valuact */}
+                <section>
+                    <div className="flex items-center gap-4 mb-8">
+                        <div className="h-10 w-10 bg-trust-50 rounded-xl flex items-center justify-center">
+                            <Activity className="h-5 w-5 text-trust-600" />
+                        </div>
+                        <h2 className="text-3xl font-heading font-bold text-trust-900 uppercase tracking-tight">Core Architecture</h2>
+                    </div>
+                    <div className="prose prose-slate max-w-none">
+                        <p className="text-lg text-gray-500 leading-relaxed mb-10">
+                            Our platform serves as a unified digital layer for actuaries and risk handlers,
+                            built on four primary structural pillars:
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {[
+                                { title: 'IFRS 17 Gateway', desc: 'Full-spectrum reporting engine for unearned profit and risk adjustment.' },
+                                { title: 'Solvency II Audit', desc: 'Real-time capital requirement validation and Pillar 3 reporting.' },
+                                { title: 'Dynamic Pricing', desc: 'Algorithmic premium modeling with integrated profit margin testing.' },
+                                { title: 'Actuarial Logic', desc: 'Proprietary mortality curve processing using global benchmarks.' }
+                            ].map((item, i) => (
+                                <div key={i} className="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                                    <h4 className="font-bold text-trust-900 mb-2">{item.title}</h4>
+                                    <p className="text-sm text-gray-400 leading-relaxed">{item.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* IFRS 17 Section */}
+                <section className="bg-white rounded-[2.5rem] border border-gray-100 p-10 shadow-sm">
+                    <div className="flex items-center space-x-4 mb-8">
+                        <div className="p-3 bg-trust-900 rounded-2xl text-white">
+                            <Calculator className="w-6 h-6" />
+                        </div>
+                        <h2 className="text-2xl font-heading font-bold text-trust-900">IFRS 17 Master Specs</h2>
+                    </div>
+
+                    <div className="bg-trust-50/50 rounded-2xl p-6 border border-trust-100 mb-10">
+                        <p className="text-trust-900/70 text-sm leading-relaxed">
+                            <strong className="text-trust-900">Technical Context:</strong> The system computes the Contractual Service Margin (CSM)
+                            following the General Model (BBA) as defined in IFRS 17 Appendix C. All cash flows are discounted using the bottom-up approach.
+                        </p>
+                    </div>
+
+                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Required Data Architecture</h3>
+                    <div className="overflow-hidden border border-gray-50 rounded-2xl">
+                        <table className="min-w-full text-sm">
+                            <thead className="bg-gray-50/50">
+                                <tr>
+                                    <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Field ID</th>
+                                    <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Type</th>
+                                    <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Logic</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50 bg-white">
+                                {[
+                                    { id: 'policy_id', type: 'UUID/String', desc: 'Primary key for actuarial ledger' },
+                                    { id: 'face_amount', type: 'Numeric', desc: 'Total death benefit liability' },
+                                    { id: 'premium', type: 'Numeric', desc: 'Gross annual premium intake' },
+                                    { id: 'issue_age', type: 'Int', desc: 'Policyholder risk age at entry' }
+                                ].map((row, i) => (
+                                    <tr key={i} className="hover:bg-trust-50/20 transition-colors">
+                                        <td className="px-6 py-4 font-mono text-trust-600 font-bold">{row.id}</td>
+                                        <td className="px-6 py-4 text-gray-400">{row.type}</td>
+                                        <td className="px-6 py-4 text-gray-900 font-medium">{row.desc}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                {/* Solvency II Section */}
+                <section className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <div className="flex items-center space-x-3 mb-6">
+                            <div className="p-3 bg-growth-600 rounded-2xl text-white">
+                                <Shield className="w-6 h-6" />
+                            </div>
+                            <h2 className="text-2xl font-heading font-bold text-trust-900">Solvency II Logic</h2>
+                        </div>
+                        <p className="text-gray-400 leading-relaxed mb-6">
+                            Our SCR engine executes a 99.5% VaR (Value-at-Risk) over a 1-year horizon,
+                            aligning with the Standard Formula approach.
+                        </p>
+                        <ul className="space-y-4">
+                            {[
+                                { label: 'SCR Calibration', icon: TrendingUp },
+                                { label: 'MCR Absolute Floors', icon: AlertTriangle },
+                                { label: 'Pillar 3 Disclosure', icon: FileText }
+                            ].map((item, i) => (
+                                <li key={i} className="flex items-center gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                                    <item.icon className="h-4 w-4 text-growth-600" />
+                                    <span className="text-sm font-bold text-trust-900 uppercase tracking-wider">{item.label}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="bg-growth-50/50 p-8 rounded-[2.5rem] border border-growth-100">
+                        <div className="space-y-4">
+                            <h4 className="font-bold text-growth-900">Regulatory Target</h4>
+                            <div className="flex items-end gap-2">
+                                <span className="text-5xl font-heading font-bold text-growth-600">100%</span>
+                                <span className="text-xs font-bold text-growth-900/40 uppercase mb-2">SCR Threshold</span>
+                            </div>
+                            <p className="text-sm text-growth-900/60 leading-relaxed">
+                                Maintaining a ratio above 100% is mandatory. Our system flags any scenario reaching 115% as a "Compliance Alert" zone.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Transparency Commitment */}
+                <section className="p-12 bg-white border border-gray-100 rounded-[3rem] shadow-sm text-center">
+                    <h2 className="text-3xl font-heading font-bold text-trust-900 mb-6">Security & Decryption</h2>
+                    <p className="text-gray-400 max-w-xl mx-auto mb-10">
+                        We operate under a "Box Zero" transparency policy. Every actuarial factor is traced back to its regulatory or population source.
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-4">
+                        {['AES-256 Encrypted', 'BaFin Aligned', 'ISO 27001 Certified', 'GDPR Compliant'].map((tag, i) => (
+                            <span key={i} className="px-4 py-2 bg-trust-50 text-trust-600 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-trust-100 italic">
+                                {tag}
+                            </span>
+                        ))}
+                    </div>
+                </section>
             </div>
         </div>
     );

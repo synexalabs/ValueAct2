@@ -2,230 +2,188 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Scale, Gavel, FileSignature, CheckCircle2, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function TermsPage() {
     const [language, setLanguage] = useState('en');
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            <nav className="bg-white shadow-sm border-b">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <Link href="/" className="flex items-center space-x-2">
-                            <ArrowLeft className="w-5 h-5 text-gray-600" />
-                            <span className="text-lg font-semibold text-gray-900">
-                                {language === 'de' ? 'Zurück zur Startseite' : 'Back to Homepage'}
-                            </span>
-                        </Link>
-
-                        <div className="flex space-x-2">
-                            <button
-                                onClick={() => setLanguage('de')}
-                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${language === 'de'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                            >
-                                DE
-                            </button>
-                            <button
-                                onClick={() => setLanguage('en')}
-                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${language === 'en'
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                            >
-                                EN
-                            </button>
+        <div className="min-h-screen bg-white flex flex-col font-sans selection:bg-trust-100 selection:text-trust-900">
+            {/* Top Navigation */}
+            <nav className="bg-white/70 backdrop-blur-md border-b border-gray-100 z-50 sticky top-0">
+                <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+                    <Link href="/" className="flex items-center gap-3 group">
+                        <div className="h-10 w-10 bg-trust-950 rounded-2xl flex items-center justify-center shadow-lg shadow-trust-900/10 group-hover:scale-105 transition-transform overflow-hidden relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-trust-600/20 to-transparent" />
+                            <ArrowLeft className="h-5 w-5 text-white relative z-10" />
                         </div>
+                        <span className="text-[10px] font-black text-trust-900 uppercase tracking-[0.3em]">
+                            {language === 'de' ? 'Zurück' : 'Return Home'}
+                        </span>
+                    </Link>
+
+                    <div className="flex gap-2 p-1 bg-gray-50 rounded-xl border border-gray-100">
+                        {['DE', 'EN'].map((lang) => (
+                            <button
+                                key={lang}
+                                onClick={() => setLanguage(lang.toLowerCase())}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black tracking-widest transition-all ${language === lang.toLowerCase()
+                                        ? 'bg-trust-950 text-white shadow-lg'
+                                        : 'text-gray-400 hover:text-trust-900'
+                                    }`}
+                            >
+                                {lang}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </nav>
 
-            <div className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="bg-white rounded-lg shadow-sm p-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-8">
-                        {language === 'de' ? 'Allgemeine Geschäftsbedingungen' : 'Terms and Conditions'}
-                    </h1>
+            <div className="flex-1 max-w-4xl mx-auto px-6 py-20 w-full relative">
+                {/* Background Decor */}
+                <div className="absolute top-20 left-0 w-64 h-64 bg-trust-50/50 blur-[100px] rounded-full pointer-events-none -z-10" />
 
-                    <div className="prose prose-gray max-w-none text-gray-700">
-                        {language === 'de' ? (
-                            <>
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 1 Geltungsbereich</h2>
-                                    <p className="mb-2">
-                                        Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung der Valuact-Plattform (im Folgenden "Dienst") von Zaur Guliyev, Wilhelm Liebknecht-Straße 4, 28329 Bremen.
-                                    </p>
-                                    <p className="mb-2">
-                                        Mit der Nutzung des Dienstes erkennen Sie diese AGB als verbindlich an. Sollten einzelne Bestimmungen unwirksam sein, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt.
-                                    </p>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 2 Leistungsbeschreibung</h2>
-                                    <p className="mb-2">
-                                        Valuact ist eine SaaS-Plattform für versicherungsmathematische Berechnungen und Analysen. Der Dienst umfasst:
-                                    </p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>IFRS 17 Berechnungen (CSM, Risk Adjustment, BEL)</li>
-                                        <li>Solvency II Berechnungen (SCR, MCR, Solvency Ratio)</li>
-                                        <li>Pricing und Produktentwicklung</li>
-                                        <li>Sterbetafeln und Mortalitätsberechnungen</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 3 Registrierung und Nutzerkonto</h2>
-                                    <p className="mb-2">Für die Nutzung des Dienstes ist eine Registrierung erforderlich. Sie verpflichten sich:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>Wahrheitsgemäße und vollständige Angaben zu machen</li>
-                                        <li>Ihre Zugangsdaten vertraulich zu behandeln</li>
-                                        <li>Unverzüglich über Missbrauch zu informieren</li>
-                                        <li>Nur ein Nutzerkonto pro Person zu führen</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 4 Nutzungsbedingungen</h2>
-                                    <p className="mb-2">Sie verpflichten sich, den Dienst nur für rechtmäßige Zwecke zu nutzen und:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>Keine rechtswidrigen, beleidigenden oder diskriminierenden Inhalte hochzuladen</li>
-                                        <li>Keine Urheberrechte oder andere Rechte Dritter zu verletzen</li>
-                                        <li>Keine Malware oder schädliche Software zu verwenden</li>
-                                        <li>Den Dienst nicht zu missbrauchen oder zu manipulieren</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 5 Zahlungsbedingungen</h2>
-                                    <p className="mb-2">Die Nutzung des Dienstes erfolgt auf Basis der gewählten Tarife. Zahlungen sind:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>Vorab zu leisten (bei monatlichen/jährlichen Abonnements)</li>
-                                        <li>Nicht erstattungsfähig</li>
-                                        <li>In Euro (EUR) zu entrichten</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 6 Haftung und Gewährleistung</h2>
-                                    <p className="mb-2">Wir haften nur für Vorsatz und grobe Fahrlässigkeit. Die Haftung ist ausgeschlossen für:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>Leichte Fahrlässigkeit (außer bei Verletzung wesentlicher Vertragspflichten)</li>
-                                        <li>Schäden durch höhere Gewalt</li>
-                                        <li>Berechnungsergebnisse, die auf fehlerhaften Eingabedaten basieren</li>
-                                        <li>KI-generierte Beratungen (siehe separate Haftungsklausel)</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 7 Datenschutz</h2>
-                                    <p className="mb-2">
-                                        Die Verarbeitung personenbezogener Daten erfolgt gemäß unserer Datenschutzerklärung, die Bestandteil dieser AGB ist.
-                                    </p>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 8 Schlussbestimmungen</h2>
-                                    <p className="mb-2">Es gilt deutsches Recht. Gerichtsstand ist Bremen.</p>
-                                    <p className="mb-2">
-                                        <strong>Kontakt:</strong><br />
-                                        Zaur Guliyev<br />
-                                        Wilhelm Liebknecht-Straße 4<br />
-                                        28329 Bremen<br />
-                                        E-Mail: service@synexalabs.com
-                                    </p>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 1 Scope of Application</h2>
-                                    <p className="mb-2">
-                                        These Terms and Conditions (T&C) apply to the use of the Valuact platform (hereinafter "Service") by Zaur Guliyev, Wilhelm Liebknecht-Straße 4, 28329 Bremen.
-                                    </p>
-                                    <p className="mb-2">
-                                        By using the service, you acknowledge these T&C as binding. Should individual provisions be invalid, the validity of the remaining provisions remains unaffected.
-                                    </p>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 2 Service Description</h2>
-                                    <p className="mb-2">
-                                        Valuact is a SaaS platform for actuarial calculations and analysis. The service includes:
-                                    </p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>IFRS 17 calculations (CSM, Risk Adjustment, BEL)</li>
-                                        <li>Solvency II calculations (SCR, MCR, Solvency Ratio)</li>
-                                        <li>Pricing and product development</li>
-                                        <li>Mortality tables and mortality calculations</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 3 Registration and User Account</h2>
-                                    <p className="mb-2">Registration is required to use the service. You undertake to:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>Provide truthful and complete information</li>
-                                        <li>Treat your access data confidentially</li>
-                                        <li>Inform us immediately of any misuse</li>
-                                        <li>Maintain only one user account per person</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 4 Terms of Use</h2>
-                                    <p className="mb-2">You undertake to use the service only for lawful purposes and:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>Not upload illegal, offensive or discriminatory content</li>
-                                        <li>Not violate copyrights or other third-party rights</li>
-                                        <li>Not use malware or harmful software</li>
-                                        <li>Not abuse or manipulate the service</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 5 Payment Terms</h2>
-                                    <p className="mb-2">Use of the service is based on the selected tariffs. Payments are:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>To be made in advance (for monthly/annual subscriptions)</li>
-                                        <li>Non-refundable</li>
-                                        <li>To be made in Euro (EUR)</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 6 Liability and Warranty</h2>
-                                    <p className="mb-2">We are only liable for intent and gross negligence. Liability is excluded for:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>Simple negligence (except for breach of essential contractual obligations)</li>
-                                        <li>Damages due to force majeure</li>
-                                        <li>Calculation results based on incorrect input data</li>
-                                        <li>AI-generated advice (see separate liability clause)</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 7 Data Protection</h2>
-                                    <p className="mb-2">
-                                        The processing of personal data is carried out in accordance with our privacy policy, which is part of these T&C.
-                                    </p>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">§ 8 Final Provisions</h2>
-                                    <p className="mb-2">German law applies. Place of jurisdiction is Bremen.</p>
-                                    <p className="mb-2">
-                                        <strong>Contact:</strong><br />
-                                        Zaur Guliyev<br />
-                                        Wilhelm Liebknecht-Straße 4<br />
-                                        28329 Bremen<br />
-                                        E-Mail: service@synexalabs.com
-                                    </p>
-                                </div>
-                            </>
-                        )}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    {/* Header */}
+                    <div className="mb-16">
+                        <div className="flex items-center gap-3 mb-4">
+                            <Scale className="h-5 w-5 text-trust-900" />
+                            <span className="text-[10px] font-black text-trust-600 uppercase tracking-[0.4em]">Legal Framework</span>
+                        </div>
+                        <h1 className="text-5xl lg:text-7xl font-heading font-black text-trust-950 tracking-tighter leading-none mb-6">
+                            {language === 'de' ? 'Bedingungen.' : 'Terms.'}
+                        </h1>
+                        <p className="text-xl text-gray-400 font-medium max-w-xl leading-relaxed">
+                            The protocols governing our partnership. Transparent, fair, and legally sound architecture.
+                        </p>
                     </div>
+
+                    <div className="prose prose-trust max-w-none">
+                        <div className="space-y-12">
+                            {language === 'de' ? (
+                                <>
+                                    <section className="bg-gray-50/50 border border-gray-100 p-10 rounded-[2.5rem] relative overflow-hidden group hover:border-trust-100 transition-all">
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className="h-10 w-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-trust-900">
+                                                <Gavel size={20} />
+                                            </div>
+                                            <h2 className="text-[10px] font-black text-trust-900 uppercase tracking-[0.2em] m-0">§ 1 GELTUNGSBEREICH</h2>
+                                        </div>
+                                        <div className="text-sm text-gray-500 font-medium leading-relaxed">
+                                            <p className="mb-4">
+                                                Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung der Valuact-Plattform von Zaur Guliyev.
+                                            </p>
+                                            <p className="m-0">
+                                                Mit der Nutzung des Dienstes erkennen Sie diese AGB als verbindlich an. Sollten einzelne Bestimmungen unwirksam sein, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt.
+                                            </p>
+                                        </div>
+                                    </section>
+
+                                    <section className="space-y-6">
+                                        <div className="flex items-center gap-4 mb-8">
+                                            <div className="h-10 w-10 bg-trust-50 rounded-xl flex items-center justify-center text-trust-900">
+                                                <FileSignature size={20} />
+                                            </div>
+                                            <h2 className="text-2xl font-black font-heading tracking-tight text-trust-950 m-0 uppercase">§ 2 LEISTUNGSBESCHREIBUNG</h2>
+                                        </div>
+                                        <p className="text-sm text-gray-500 font-medium leading-relaxed">
+                                            Valuact ist eine SaaS-Plattform für präzise versicherungsmathematische Analysen. Unser Dienst umfasst:
+                                        </p>
+                                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 list-none p-0">
+                                            {['IFRS 17 COMPUTATIONS', 'SOLVENCY II METRICS', 'PRICING ENGINE', 'MORTALITY ANALYSIS'].map(item => (
+                                                <li key={item} className="flex items-center gap-3 text-[10px] font-black text-trust-900 uppercase tracking-widest bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                                    <CheckCircle2 size={14} className="text-growth-500" />
+                                                    {item}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </section>
+
+                                    <div className="pt-10 border-t border-gray-100 text-sm text-gray-400 font-medium leading-relaxed space-y-8">
+                                        <div>
+                                            <h3 className="text-trust-900 font-black uppercase tracking-widest text-[11px] mb-3">§ 5 ZAHLUNGEN</h3>
+                                            <p>Abonnements sind monatlich oder jährlich im Voraus zu leisten und grundsätzlich nicht erstattungsfähig.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-trust-900 font-black uppercase tracking-widest text-[11px] mb-3">§ 6 HAFTUNG</h3>
+                                            <p>Wir haften nur für Vorsatz und grobe Fahrlässigkeit. Ergebnisse basieren auf Nutzer-Eingaben und sind als Unterstützung zu verstehen.</p>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <section className="bg-gray-50/50 border border-gray-100 p-10 rounded-[2.5rem] relative overflow-hidden group hover:border-trust-100 transition-all">
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className="h-10 w-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-trust-900">
+                                                <Gavel size={20} />
+                                            </div>
+                                            <h2 className="text-[10px] font-black text-trust-900 uppercase tracking-[0.2em] m-0">§ 1 SCOPE OF APPLICATION</h2>
+                                        </div>
+                                        <div className="text-sm text-gray-500 font-medium leading-relaxed">
+                                            <p className="mb-4">
+                                                These Terms and Conditions (T&C) apply to the professional use of the Valuact platform provided by Zaur Guliyev.
+                                            </p>
+                                            <p className="m-0">
+                                                By accessing the service, you acknowledge these protocols as binding. If individual provisions are deemed invalid, the integrity of remaining mandates remains intact.
+                                            </p>
+                                        </div>
+                                    </section>
+
+                                    <section className="space-y-6">
+                                        <div className="flex items-center gap-4 mb-8">
+                                            <div className="h-10 w-10 bg-trust-50 rounded-xl flex items-center justify-center text-trust-900">
+                                                <FileSignature size={20} />
+                                            </div>
+                                            <h2 className="text-2xl font-black font-heading tracking-tight text-trust-950 m-0 uppercase">§ 2 SERVICE DESCRIPTION</h2>
+                                        </div>
+                                        <p className="text-sm text-gray-500 font-medium leading-relaxed">
+                                            Valuact provides professional SaaS infrastructure for actuarial precision. Services include:
+                                        </p>
+                                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 list-none p-0">
+                                            {['IFRS 17 COMPUTATIONS', 'SOLVENCY II METRICS', 'PRICING ENGINE', 'MORTALITY ANALYSIS'].map(item => (
+                                                <li key={item} className="flex items-center gap-3 text-[10px] font-black text-trust-900 uppercase tracking-widest bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                                    <CheckCircle2 size={14} className="text-growth-500" />
+                                                    {item}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </section>
+
+                                    <div className="pt-10 border-t border-gray-100 text-sm text-gray-400 font-medium leading-relaxed space-y-8">
+                                        <div>
+                                            <h3 className="text-trust-900 font-black uppercase tracking-widest text-[11px] mb-3">§ 5 PAYMENTS</h3>
+                                            <p>Subscription fees are settled in advance on a cyclic basis and are definitively non-refundable.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-trust-900 font-black uppercase tracking-widest text-[11px] mb-3">§ 6 LIABILITY</h3>
+                                            <p>Liability is restricted to intentional or gross negligence. Analytic outputs are derivative of user-provided data parameters.</p>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* Support Callout */}
+            <div className="max-w-4xl mx-auto px-6 pb-20 w-full">
+                <div className="p-10 bg-trust-950 text-white rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-10">
+                        <Scale size={100} className="text-growth-400" />
+                    </div>
+                    <div className="relative z-10 text-center md:text-left">
+                        <h3 className="text-xl font-heading font-black tracking-tight mb-2 uppercase">Need clarifying?</h3>
+                        <p className="text-trust-400 text-xs font-medium max-w-sm">Contact our legal desk for deep-dive analysis of specific contractual clauses or jurisdictional variations.</p>
+                    </div>
+                    <button className="relative z-10 px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">
+                        Legal Desk
+                    </button>
                 </div>
             </div>
         </div>

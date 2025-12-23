@@ -97,34 +97,34 @@ export default function SensitivityAnalysis({
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex justify-between items-center mb-6">
+        <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
+            <div className="flex justify-between items-start mb-10">
                 <div>
-                    <h2 className="text-xl font-bold text-gray-900">Sensitivity Analysis</h2>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Analyze impact of assumption changes on {calculationType.toUpperCase()} metrics
+                    <h2 className="text-3xl font-heading font-black text-trust-950 uppercase tracking-tight mb-2">Sensitivity Analysis</h2>
+                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                        Assumption Shock Modeling ({calculationType.toUpperCase()} Standard)
                     </p>
                 </div>
                 <button
                     onClick={handleRunAnalysis}
                     disabled={loading || selectedScenarios.length === 0 || !portfolio}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="bg-trust-950 text-white px-8 py-4 rounded-2xl hover:bg-trust-900 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-2"
                 >
-                    {loading ? 'Running...' : 'Run Analysis'}
+                    {loading ? 'Processing Shock...' : 'Run Analysis'}
                 </button>
             </div>
 
             {/* Scenario Selection */}
-            <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Select Scenarios</h3>
+            <div className="mb-10">
+                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Select Stress Vectors</h3>
                 <div className="flex flex-wrap gap-2">
                     {DEFAULT_SCENARIOS.map(scenario => (
                         <button
                             key={scenario.id}
                             onClick={() => toggleScenario(scenario.id)}
-                            className={`px-3 py-1 rounded-full text-sm transition-colors ${selectedScenarios.includes(scenario.id)
-                                ? 'bg-blue-100 text-blue-800 border border-blue-300'
-                                : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
+                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 border ${selectedScenarios.includes(scenario.id)
+                                ? 'bg-trust-950 text-growth-400 border-trust-950 shadow-md'
+                                : 'bg-gray-50 text-gray-400 border-gray-100 hover:text-trust-950 hover:bg-gray-100'
                                 }`}
                         >
                             {scenario.name}
@@ -134,22 +134,26 @@ export default function SensitivityAnalysis({
             </div>
 
             {!portfolio && (
-                <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg mb-4">
-                    Please select or upload a portfolio to run sensitivity analysis.
+                <div className="text-center py-16 bg-gray-50/50 rounded-3xl border border-dashed border-gray-100 mb-4">
+                    <div className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Data Injection Required</div>
+                    <p className="text-xs text-gray-400 mt-2">Please select or upload a portfolio to run sensitivity analysis.</p>
                 </div>
             )}
 
             {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                    {error}
+                <div className="mb-6 p-6 bg-accent-50/50 border border-accent-100 rounded-2xl text-accent-700 text-[11px] font-bold uppercase tracking-widest">
+                    <span className="flex items-center gap-2 text-accent-900">
+                        <span className="w-1 h-1 bg-accent-500 rounded-full animate-pulse" />
+                        {error}
+                    </span>
                 </div>
             )}
 
             {results && chartData.length > 0 && (
                 <>
                     {/* Bar Chart */}
-                    <div className="mb-8">
-                        <h3 className="text-lg font-semibold mb-4">CSM Impact by Scenario</h3>
+                    <div className="mb-12">
+                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6 px-1">Risk Exposure Delta (CSM)</h3>
                         <ResponsiveContainer width="100%" height={400}>
                             <BarChart data={chartData} layout="vertical">
                                 <CartesianGrid strokeDasharray="3 3" />
@@ -160,55 +164,45 @@ export default function SensitivityAnalysis({
                                 />
                                 <Legend />
                                 <ReferenceLine x={chartData[0]?.csm || 0} stroke="#666" strokeDasharray="3 3" />
-                                <Bar dataKey="csm" fill="#3B82F6" name="CSM" />
+                                <Bar dataKey="csm" fill="#0A0F1D" radius={[0, 8, 8, 0]} name="CSM" />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
 
                     {/* Results Table */}
-                    <div className="mb-8">
-                        <h3 className="text-lg font-semibold mb-4">Impact Analysis</h3>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                            Scenario
-                                        </th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                                            CSM
-                                        </th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                                            Change
-                                        </th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                                            % Change
-                                        </th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                                            FCF
-                                        </th>
+                    <div className="mb-12">
+                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-6 px-1">Scenario Sensitivity matrix</h3>
+                        <div className="overflow-x-auto -mx-10 px-10">
+                            <table className="min-w-full">
+                                <thead>
+                                    <tr className="bg-gray-50/50">
+                                        <th className="px-6 py-4 text-left text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Scenario</th>
+                                        <th className="px-6 py-4 text-right text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">CSM Delta</th>
+                                        <th className="px-6 py-4 text-right text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Abs Change</th>
+                                        <th className="px-6 py-4 text-right text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">% Impact</th>
+                                        <th className="px-6 py-4 text-right text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">FCF Effect</th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="divide-y divide-gray-100">
                                     {chartData.map((row, idx) => (
-                                        <tr key={row.scenario} className={idx === 0 ? 'bg-blue-50' : ''}>
-                                            <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                        <tr key={row.scenario} className={`hover:bg-gray-50/30 transition-colors ${idx === 0 ? 'bg-trust-50/50' : ''}`}>
+                                            <td className="px-6 py-4 text-[11px] font-black text-trust-950 uppercase tracking-tight">
                                                 {row.scenario}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-right font-mono">
+                                            <td className="px-6 py-4 text-sm text-right font-bold text-trust-950">
                                                 {formatCurrency(row.csm)}
                                             </td>
-                                            <td className={`px-4 py-3 text-sm text-right font-mono ${row.absoluteChange > 0 ? 'text-green-600' :
-                                                row.absoluteChange < 0 ? 'text-red-600' : ''
+                                            <td className={`px-6 py-4 text-[11px] text-right font-black tracking-tighter ${row.absoluteChange > 0 ? 'text-growth-600' :
+                                                row.absoluteChange < 0 ? 'text-accent-600' : 'text-gray-400'
                                                 }`}>
-                                                {idx === 0 ? '-' : formatCurrency(row.absoluteChange)}
+                                                {idx === 0 ? 'BASELINE' : formatCurrency(row.absoluteChange)}
                                             </td>
-                                            <td className={`px-4 py-3 text-sm text-right font-mono ${row.change > 0 ? 'text-green-600' :
-                                                row.change < 0 ? 'text-red-600' : ''
+                                            <td className={`px-6 py-4 text-[11px] text-right font-black tracking-tighter ${row.change > 0 ? 'text-growth-600' :
+                                                row.change < 0 ? 'text-accent-600' : 'text-gray-400'
                                                 }`}>
-                                                {idx === 0 ? '-' : formatPercentage(row.change)}
+                                                {idx === 0 ? '0.00%' : formatPercentage(row.change)}
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-right font-mono">
+                                            <td className="px-6 py-4 text-sm text-right font-medium text-gray-400">
                                                 {formatCurrency(row.fcf)}
                                             </td>
                                         </tr>
@@ -219,11 +213,12 @@ export default function SensitivityAnalysis({
                     </div>
 
                     {/* Methodology Note */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Methodology</h4>
-                        <p className="text-sm text-gray-600">
-                            Sensitivity analysis applies shocks to base assumptions and recalculates all metrics
-                            using the server-side calculation engine. Changes shown are relative to the base scenario.
+                    {/* Methodology Note */}
+                    <div className="bg-trust-950 p-8 rounded-3xl border border-trust-900 shadow-xl overflow-hidden relative">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-growth-400/10 blur-[100px] rounded-full -mr-32 -mt-32" />
+                        <h4 className="text-[10px] font-black text-growth-400 uppercase tracking-[0.2em] mb-3 relative z-10">Actuarial Methodology Note</h4>
+                        <p className="text-sm text-gray-400 leading-relaxed font-medium relative z-10">
+                            The sensitivity engine applies granular shocks to the base assumption vectors (discount, lapse, mortality, expense) and executes full re-estimations of the FCF, CSM, and Risk Adjustment under the specified methodology ({calculationType.toUpperCase()}). All deltas are computed relative to the baseline production scenario.
                         </p>
                     </div>
                 </>

@@ -111,71 +111,72 @@ const AuditTrailViewer = ({
     };
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5 text-blue-600" />
-              <span className="font-medium text-blue-800">Steps</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="p-6 bg-trust-50 border border-trust-100 rounded-3xl group hover:bg-trust-100 transition-all duration-300">
+            <div className="flex items-center space-x-2 mb-3">
+              <CheckCircle className="h-4 w-4 text-trust-600" />
+              <span className="text-[10px] font-black text-trust-950 uppercase tracking-widest">Steps</span>
             </div>
-            <div className="text-2xl font-bold text-blue-600 mt-1">{summary.totalSteps}</div>
+            <div className="text-3xl font-heading font-black text-trust-600">{summary.totalSteps}</div>
           </div>
 
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-center space-x-2">
-              <FileText className="h-5 w-5 text-green-600" />
-              <span className="font-medium text-green-800">Formulas</span>
+          <div className="p-6 bg-growth-50 border border-growth-100 rounded-3xl group hover:bg-growth-100 transition-all duration-300">
+            <div className="flex items-center space-x-2 mb-3">
+              <FileText className="h-4 w-4 text-growth-600" />
+              <span className="text-[10px] font-black text-growth-950 uppercase tracking-widest">Formulas</span>
             </div>
-            <div className="text-2xl font-bold text-green-600 mt-1">{summary.totalFormulasUsed}</div>
+            <div className="text-3xl font-heading font-black text-growth-600">{summary.totalFormulasUsed}</div>
           </div>
 
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-600" />
-              <span className="font-medium text-yellow-800">Warnings</span>
+          <div className="p-6 bg-accent-50 border border-accent-100 rounded-3xl group hover:bg-accent-100 transition-all duration-300">
+            <div className="flex items-center space-x-2 mb-3">
+              <AlertTriangle className="h-4 w-4 text-accent-600" />
+              <span className="text-[10px] font-black text-accent-950 uppercase tracking-widest">Warnings</span>
             </div>
-            <div className="text-2xl font-bold text-yellow-600 mt-1">{summary.totalWarnings}</div>
+            <div className="text-3xl font-heading font-black text-accent-600">{summary.totalWarnings}</div>
           </div>
 
-          <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
-            <div className="flex items-center space-x-2">
-              <Info className="h-5 w-5 text-purple-600" />
-              <span className="font-medium text-purple-800">Assumptions</span>
+          <div className="p-6 bg-trust-900 border border-trust-950 rounded-3xl group hover:bg-trust-950 transition-all duration-300">
+            <div className="flex items-center space-x-2 mb-3">
+              <Info className="h-4 w-4 text-growth-400" />
+              <span className="text-[10px] font-black text-white uppercase tracking-widest">Assumptions</span>
             </div>
-            <div className="text-2xl font-bold text-purple-600 mt-1">{summary.totalAssumptionsUsed}</div>
+            <div className="text-3xl font-heading font-black text-white">{summary.totalAssumptionsUsed}</div>
           </div>
         </div>
 
         {/* Methodology Info */}
-        <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-          <h4 className="font-semibold text-gray-800 mb-2">Methodology Information</h4>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="font-medium text-gray-700">Version:</span>
-              <span className="ml-2 text-gray-600">{summary.methodologyVersion}</span>
+        <div className="p-8 bg-gray-50/50 border border-gray-100 rounded-3xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-trust-500/5 blur-[50px] rounded-full -mr-16 -mt-16" />
+          <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-4">Methodology Framework</h4>
+          <div className="grid grid-cols-2 gap-8 text-[11px]">
+            <div className="flex justify-between items-center bg-white/80 p-3 rounded-xl border border-white">
+              <span className="font-black text-gray-400 uppercase tracking-widest">Protocol Version</span>
+              <span className="text-trust-950 font-black">{summary.methodologyVersion}</span>
             </div>
-            <div>
-              <span className="font-medium text-gray-700">Validation Status:</span>
-              <span className={`ml-2 px-2 py-1 rounded text-xs ${summary.hasValidationIssues ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+            <div className="flex justify-between items-center bg-white/80 p-3 rounded-xl border border-white">
+              <span className="font-black text-gray-400 uppercase tracking-widest">Compliance Status</span>
+              <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${summary.hasValidationIssues ? 'bg-accent-50 text-accent-700 border-accent-100' : 'bg-growth-50 text-growth-700 border-growth-100'
                 }`}>
-                {summary.hasValidationIssues ? 'Issues Found' : 'All Passed'}
+                {summary.hasValidationIssues ? 'Deviation Found' : 'Compliant'}
               </span>
             </div>
           </div>
         </div>
 
         {/* Quick Stats */}
-        <div className="p-4 bg-white border border-gray-200 rounded-lg">
-          <h4 className="font-semibold text-gray-800 mb-3">Calculation Statistics</h4>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="font-medium text-gray-700">Total Intermediate Results:</span>
-              <span className="ml-2 text-gray-600">{summary.totalIntermediateResults}</span>
+        <div className="p-8 bg-white border border-gray-100 rounded-3xl shadow-sm">
+          <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-6 px-1">Deep Logic validation</h4>
+          <div className="grid grid-cols-2 gap-8 text-[11px]">
+            <div className="flex justify-between items-center px-1">
+              <span className="font-black text-gray-400 uppercase tracking-widest">Intermediate Data Points</span>
+              <span className="text-trust-950 font-black">{summary.totalIntermediateResults}</span>
             </div>
-            <div>
-              <span className="font-medium text-gray-700">Total Validation Checks:</span>
-              <span className="ml-2 text-gray-600">{summary.totalValidationResults}</span>
+            <div className="flex justify-between items-center px-1">
+              <span className="font-black text-gray-400 uppercase tracking-widest">Validation Test Suite</span>
+              <span className="text-trust-950 font-black">{summary.totalValidationResults}</span>
             </div>
           </div>
         </div>
@@ -187,25 +188,29 @@ const AuditTrailViewer = ({
     if (!auditTrail.calculationInputs) return null;
 
     return (
-      <div className="space-y-4">
-        <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-          <h4 className="font-semibold text-gray-800 mb-3">Calculation Inputs</h4>
-          <div className="grid grid-cols-2 gap-4">
+      <div className="space-y-6">
+        <div className="p-8 bg-gray-50/50 border border-gray-100 rounded-3xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-trust-500/5 blur-[50px] rounded-full -mr-16 -mt-16" />
+          <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-6 px-1">Raw Input Vector</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(auditTrail.calculationInputs).filter(([key]) => key !== 'timestamp').map(([key, value]) => (
-              <div key={key} className="flex justify-between">
-                <span className="font-medium text-gray-700">{key}:</span>
-                <span className="text-gray-600">
-                  {typeof value === 'number' ? value.toLocaleString() : value}
+              <div key={key} className="flex justify-between items-center bg-white/80 p-4 rounded-2xl border border-white shadow-sm">
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                <span className="text-[11px] font-black text-trust-950 truncate max-w-[150px]">
+                  {typeof value === 'number' ? value.toLocaleString() : String(value)}
                 </span>
               </div>
             ))}
           </div>
           {auditTrail.calculationInputs.timestamp && (
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Clock className="h-4 w-4" />
-                <span>Captured: {new Date(auditTrail.calculationInputs.timestamp).toLocaleString()}</span>
+            <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between px-1">
+              <div className="flex items-center space-x-2 text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                <Clock className="h-3 w-3" />
+                <span>Ingestion Timestamp</span>
               </div>
+              <span className="text-[9px] font-black text-trust-600 uppercase tracking-widest">
+                {new Date(auditTrail.calculationInputs.timestamp).toLocaleString()}
+              </span>
             </div>
           )}
         </div>
@@ -237,38 +242,44 @@ const AuditTrailViewer = ({
   const renderFormulas = () => {
     if (!auditTrail.formulasUsed || auditTrail.formulasUsed.length === 0) {
       return (
-        <div className="text-center py-8 text-gray-500">
-          <CheckCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p>No formulas recorded</p>
+        <div className="text-center py-16 bg-gray-50/50 rounded-3xl border border-gray-100">
+          <CheckCircle className="h-12 w-12 mx-auto mb-4 text-gray-200" />
+          <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No Formulas Injected</div>
         </div>
       );
     }
 
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         {auditTrail.formulasUsed.map((formula, index) => (
-          <div key={index} className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-semibold text-gray-800">{formula.name}</h4>
-              <div className="flex items-center space-x-2">
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                  v{formula.version}
-                </span>
-                <span className="text-sm text-gray-600">
-                  {new Date(formula.usedAt).toLocaleString()}
+          <div key={index} className="p-8 bg-white border border-gray-100 rounded-3xl shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h4 className="text-[13px] font-heading font-black text-trust-950 uppercase tracking-tight">{formula.name}</h4>
+                <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">ID: {formula.formulaId}</div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <span className="px-3 py-1 bg-trust-50 text-trust-700 rounded-full text-[9px] font-black uppercase tracking-widest border border-trust-100">
+                  VER {formula.version}
                 </span>
               </div>
             </div>
 
             {formula.latex && (
-              <div className="mb-3">
+              <div className="mb-8 p-10 bg-gray-50/50 rounded-2xl border border-gray-100 text-center">
                 <BlockMath math={formula.latex} />
               </div>
             )}
 
-            <div className="text-sm text-gray-600">
-              <div><strong>Formula ID:</strong> {formula.formulaId}</div>
-              <div><strong>Used At:</strong> {new Date(formula.usedAt).toLocaleString()}</div>
+            <div className="flex items-center justify-between text-[9px] font-black text-gray-400 uppercase tracking-widest pt-6 border-t border-gray-50">
+              <div className="flex items-center gap-2">
+                <Clock className="h-3 w-3" />
+                <span>Injected {new Date(formula.usedAt).toLocaleString()}</span>
+              </div>
+              <div className="flex items-center gap-2 text-growth-600">
+                <CheckCircle className="h-3 w-3" />
+                <span>Mathematical Integrity Verified</span>
+              </div>
             </div>
           </div>
         ))}
@@ -279,41 +290,42 @@ const AuditTrailViewer = ({
   const renderAssumptions = () => {
     if (!auditTrail.assumptionsUsed || auditTrail.assumptionsUsed.length === 0) {
       return (
-        <div className="text-center py-8 text-gray-500">
-          <Info className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p>No assumptions recorded</p>
+        <div className="text-center py-16 bg-gray-50/50 rounded-3xl border border-gray-100">
+          <Info className="h-12 w-12 mx-auto mb-4 text-gray-200" />
+          <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">No Assumptions Loaded</div>
         </div>
       );
     }
 
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         {auditTrail.assumptionsUsed.map((assumption, index) => (
-          <div key={index} className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold text-gray-800">{assumption.name}</h4>
-              <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
-                {assumption.source}
+          <div key={index} className="p-8 bg-white border border-gray-100 rounded-3xl shadow-sm hover:border-trust-200 transition-all duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <h4 className="text-[13px] font-heading font-black text-trust-950 uppercase tracking-tight">{assumption.name}</h4>
+              <span className="px-3 py-1 bg-gray-50 text-gray-500 rounded-full text-[9px] font-black uppercase tracking-widest border border-gray-100">
+                Source: {assumption.source}
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="font-medium text-gray-700">Value:</span>
-                <span className="ml-2 text-gray-600">{assumption.value}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="bg-trust-50/50 p-4 rounded-2xl border border-trust-100">
+                <span className="text-[9px] font-black text-trust-950/40 uppercase tracking-widest block mb-1">Effective Value</span>
+                <span className="text-sm font-black text-trust-950">{assumption.value}</span>
               </div>
-              <div>
-                <span className="font-medium text-gray-700">Source:</span>
-                <span className="ml-2 text-gray-600">{assumption.source}</span>
+              <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1">Verification Reference</span>
+                <span className="text-xs font-bold text-gray-600">{assumption.source}</span>
               </div>
-              <div className="col-span-2">
-                <span className="font-medium text-gray-700">Justification:</span>
-                <span className="ml-2 text-gray-600">{assumption.justification}</span>
+              <div className="col-span-full bg-growth-50/30 p-4 rounded-2xl border border-growth-100">
+                <span className="text-[9px] font-black text-growth-900/40 uppercase tracking-widest block mb-1">Actuarial Justification</span>
+                <p className="text-[11px] font-bold text-growth-900 leading-relaxed italic">"{assumption.justification}"</p>
               </div>
             </div>
 
-            <div className="mt-2 text-xs text-gray-500">
-              Used: {new Date(assumption.usedAt).toLocaleString()}
+            <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+              <Clock className="h-3 w-3" />
+              <span>Assumed at {new Date(assumption.usedAt).toLocaleString()}</span>
             </div>
           </div>
         ))}
@@ -324,51 +336,74 @@ const AuditTrailViewer = ({
   const renderValidation = () => {
     if (!resultValidation) {
       return (
-        <div className="text-center py-8 text-gray-500">
-          <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p>No validation results available</p>
+        <div className="text-center py-16 bg-gray-50/50 rounded-3xl border border-gray-100">
+          <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-gray-200" />
+          <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Validation Matrix Offline</div>
         </div>
       );
     }
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-10">
         {/* Overall Status */}
-        <div className={`p-4 rounded-lg border ${resultValidation.passedAll ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+        <div className={`p-8 rounded-3xl border-2 shadow-xl overflow-hidden relative ${resultValidation.passedAll
+          ? 'bg-growth-50/30 border-growth-100 shadow-growth-100/10'
+          : 'bg-accent-50/30 border-accent-100 shadow-accent-100/10'
           }`}>
-          <div className="flex items-center space-x-2">
-            {resultValidation.passedAll ? (
-              <CheckCircle className="h-5 w-5 text-green-600" />
-            ) : (
-              <AlertTriangle className="h-5 w-5 text-red-600" />
-            )}
-            <span className={`font-semibold ${resultValidation.passedAll ? 'text-green-800' : 'text-red-800'
-              }`}>
-              {resultValidation.passedAll ? 'All Validations Passed' : 'Validation Issues Found'}
-            </span>
+          <div className="absolute top-0 right-0 w-32 h-32 opacity-10 blur-[40px] rounded-full -mr-16 -mt-16 bg-current" />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className={`p-3 rounded-2xl ${resultValidation.passedAll ? 'bg-growth-100' : 'bg-accent-100'}`}>
+              {resultValidation.passedAll ? (
+                <CheckCircle className="h-6 w-6 text-growth-700" />
+              ) : (
+                <AlertTriangle className="h-6 w-6 text-accent-700" />
+              )}
+            </div>
+            <div>
+              <span className={`text-[10px] font-black uppercase tracking-[0.2em] block mb-1 ${resultValidation.passedAll ? 'text-growth-700' : 'text-accent-700'}`}>
+                Integrity Scan Result
+              </span>
+              <h4 className={`text-xl font-heading font-black uppercase tracking-tight ${resultValidation.passedAll ? 'text-growth-900' : 'text-accent-900'}`}>
+                {resultValidation.passedAll ? 'Standard Conformity Confirmed' : 'Anomalous Variance Detected'}
+              </h4>
+            </div>
           </div>
         </div>
 
         {/* Range Checks */}
         {resultValidation.rangeChecks && resultValidation.rangeChecks.length > 0 && (
           <div>
-            <h4 className="font-semibold text-gray-800 mb-3">Range Checks</h4>
-            <div className="space-y-2">
+            <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-6 px-1">Dimensional Constraints</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {resultValidation.rangeChecks.map((check, index) => (
-                <div key={index} className={`p-3 rounded-lg border ${check.passed ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                <div key={index} className={`p-6 rounded-2xl border transition-all duration-300 ${check.passed
+                  ? 'bg-white border-gray-100 hover:border-growth-200'
+                  : 'bg-accent-50 border-accent-100'
                   }`}>
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-800">{check.variable}</span>
-                    <span className={`px-2 py-1 rounded text-xs ${check.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[11px] font-black text-trust-950 uppercase tracking-widest">{check.variable}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${check.passed
+                      ? 'bg-growth-50 text-growth-700 border-growth-100'
+                      : 'bg-accent-600 text-white border-accent-700'
                       }`}>
-                      {check.passed ? 'Passed' : 'Failed'}
+                      {check.passed ? 'VALID' : 'OUT OF RANGE'}
                     </span>
                   </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    Value: {check.value} (Range: {check.minValue} - {check.maxValue})
+                  <div className="bg-gray-50/50 p-3 rounded-xl border border-gray-100 mb-3">
+                    <div className="flex justify-between text-[9px] font-black uppercase tracking-widest mb-1">
+                      <span className="text-gray-400">Effective Value</span>
+                      <span className="text-trust-950">{check.value}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 h-1 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full ${check.passed ? 'bg-growth-500' : 'bg-accent-500'}`} style={{ width: '70%' }} />
+                    </div>
+                    <div className="flex justify-between text-[8px] font-black text-gray-400 uppercase tracking-widest mt-2 font-mono">
+                      <span>MIN: {check.minValue}</span>
+                      <span>MAX: {check.maxValue}</span>
+                    </div>
                   </div>
                   {check.message && (
-                    <div className="text-sm text-gray-700 mt-1">{check.message}</div>
+                    <p className="text-[9px] font-bold text-gray-500 italic mt-2">{check.message}</p>
                   )}
                 </div>
               ))}
@@ -376,58 +411,61 @@ const AuditTrailViewer = ({
           </div>
         )}
 
-        {/* Consistency Checks */}
-        {resultValidation.consistencyChecks && resultValidation.consistencyChecks.length > 0 && (
-          <div>
-            <h4 className="font-semibold text-gray-800 mb-3">Consistency Checks</h4>
-            <div className="space-y-2">
-              {resultValidation.consistencyChecks.map((check, index) => (
-                <div key={index} className={`p-3 rounded-lg border ${check.passed ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-                  }`}>
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-800">{check.checkName}</span>
-                    <span className={`px-2 py-1 rounded text-xs ${check.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                      {check.passed ? 'Passed' : 'Failed'}
-                    </span>
+        {/* Consistency & Reasonableness */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          {/* Consistency Checks */}
+          {resultValidation.consistencyChecks && resultValidation.consistencyChecks.length > 0 && (
+            <div>
+              <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-6 px-1">Cross-logic Consistency</h4>
+              <div className="space-y-4">
+                {resultValidation.consistencyChecks.map((check, index) => (
+                  <div key={index} className="p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <h5 className="text-[11px] font-black text-trust-950 uppercase tracking-widest">{check.checkName}</h5>
+                      <div className={`w-2 h-2 rounded-full ${check.passed ? 'bg-growth-500' : 'bg-accent-500'} shadow-sm shadow-current`} />
+                    </div>
+                    <p className="text-[10px] font-bold text-gray-400 leading-relaxed">{check.description}</p>
+                    {check.message && (
+                      <div className={`mt-3 p-2 rounded-xl text-[9px] font-black uppercase tracking-widest border ${check.passed ? 'bg-growth-50 text-growth-700 border-growth-100' : 'bg-accent-50 text-accent-700 border-accent-100'}`}>
+                        {check.message}
+                      </div>
+                    )}
                   </div>
-                  <div className="text-sm text-gray-600 mt-1">{check.description}</div>
-                  {check.message && (
-                    <div className="text-sm text-gray-700 mt-1">{check.message}</div>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Reasonableness Tests */}
-        {resultValidation.reasonablenessTests && resultValidation.reasonablenessTests.length > 0 && (
-          <div>
-            <h4 className="font-semibold text-gray-800 mb-3">Reasonableness Tests</h4>
-            <div className="space-y-2">
-              {resultValidation.reasonablenessTests.map((test, index) => (
-                <div key={index} className={`p-3 rounded-lg border ${test.passed ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-                  }`}>
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-800">{test.testName}</span>
-                    <span className={`px-2 py-1 rounded text-xs ${test.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                      {test.passed ? 'Passed' : 'Failed'}
-                    </span>
+          {/* Reasonableness Tests */}
+          {resultValidation.reasonablenessTests && resultValidation.reasonablenessTests.length > 0 && (
+            <div>
+              <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-6 px-1">Economic Rationality</h4>
+              <div className="space-y-4">
+                {resultValidation.reasonablenessTests.map((test, index) => (
+                  <div key={index} className="p-5 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                    <div className="flex items-center justify-between mb-3">
+                      <h5 className="text-[11px] font-black text-trust-950 uppercase tracking-widest">{test.testName}</h5>
+                      <span className={`text-[9px] font-black ${test.passed ? 'text-growth-600' : 'text-accent-600'}`}>
+                        {test.passed ? 'RATIONAL' : 'IRRATIONAL'}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      <div className="bg-gray-50 p-2 rounded-xl text-center">
+                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Observed</span>
+                        <span className="text-[11px] font-black text-trust-950">{test.actualValue}</span>
+                      </div>
+                      <div className="bg-gray-50 p-2 rounded-xl text-center">
+                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Benchmark</span>
+                        <span className="text-[11px] font-black text-trust-950">{test.benchmark}</span>
+                      </div>
+                    </div>
+                    <p className="text-[10px] font-bold text-gray-400 leading-relaxed italic">"{test.description}"</p>
                   </div>
-                  <div className="text-sm text-gray-600 mt-1">{test.description}</div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    Actual: {test.actualValue} | Benchmark: {test.benchmark}
-                  </div>
-                  {test.message && (
-                    <div className="text-sm text-gray-700 mt-1">{test.message}</div>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     );
   };
@@ -435,27 +473,29 @@ const AuditTrailViewer = ({
   const renderWarnings = () => {
     if (!auditTrail.warnings || auditTrail.warnings.length === 0) {
       return (
-        <div className="text-center py-8 text-gray-500">
-          <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p>No warnings recorded</p>
+        <div className="text-center py-16 bg-gray-50/50 rounded-3xl border border-gray-100">
+          <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-gray-200" />
+          <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Protocol Nominal</div>
         </div>
       );
     }
 
     return (
-      <div className="space-y-3">
+      <div className="space-y-4">
         {auditTrail.warnings.map((warning, index) => (
-          <div key={index} className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-start space-x-2">
-              <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
+          <div key={index} className="p-6 bg-accent-50/30 border border-accent-100 rounded-[2rem] animate-in fade-in slide-in-from-left-4 duration-300">
+            <div className="flex items-start space-x-4">
+              <div className="p-2 rounded-xl bg-accent-100">
+                <AlertTriangle className="h-4 w-4 text-accent-700" />
+              </div>
               <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-yellow-800">{warning.category}</span>
-                  <span className="text-xs text-yellow-600">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-black text-accent-950 uppercase tracking-widest">{warning.category}</span>
+                  <span className="text-[9px] font-black text-accent-600 uppercase tracking-widest">
                     {new Date(warning.timestamp).toLocaleString()}
                   </span>
                 </div>
-                <p className="text-yellow-700 mt-1">{warning.message}</p>
+                <p className="text-[11px] font-bold text-accent-800 leading-relaxed">{warning.message}</p>
               </div>
             </div>
           </div>
@@ -467,51 +507,55 @@ const AuditTrailViewer = ({
   const renderExecutionLog = () => {
     if (!auditTrail.executionLog || auditTrail.executionLog.length === 0) {
       return (
-        <div className="text-center py-8 text-gray-500">
-          <Clock className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p>No execution log available</p>
+        <div className="text-center py-16 bg-gray-50/50 rounded-3xl border border-gray-100">
+          <Clock className="h-12 w-12 mx-auto mb-4 text-gray-200" />
+          <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Execution Buffer Empty</div>
         </div>
       );
     }
 
     return (
-      <div className="space-y-2">
+      <div className="space-y-3">
         {auditTrail.executionLog.map((log, index) => (
-          <div key={index} className={`p-3 rounded-lg border ${log.level === 'error' ? 'bg-red-50 border-red-200' :
+          <div key={index} className={`p-4 rounded-2xl border transition-all duration-300 flex items-start gap-4 ${log.level === 'error' ? 'bg-accent-50 border-accent-100' :
             log.level === 'warning' ? 'bg-yellow-50 border-yellow-200' :
-              log.level === 'info' ? 'bg-blue-50 border-blue-200' :
-                'bg-gray-50 border-gray-200'
+              log.level === 'info' ? 'bg-trust-50 border-trust-100' :
+                'bg-gray-50 border-gray-100'
             }`}>
-            <div className="flex items-start space-x-2">
-              <Clock className="h-4 w-4 text-gray-600 mt-0.5" />
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <span className={`font-medium ${log.level === 'error' ? 'text-red-800' :
-                    log.level === 'warning' ? 'text-yellow-800' :
-                      log.level === 'info' ? 'text-blue-800' :
-                        'text-gray-800'
-                    }`}>
-                    {log.level.toUpperCase()}
-                  </span>
-                  <span className="text-xs text-gray-600">
-                    {new Date(log.timestamp).toLocaleString()}
-                  </span>
-                </div>
-                <p className={`mt-1 ${log.level === 'error' ? 'text-red-700' :
-                  log.level === 'warning' ? 'text-yellow-700' :
-                    log.level === 'info' ? 'text-blue-700' :
-                      'text-gray-700'
+            <div className={`p-2 rounded-xl ${log.level === 'error' ? 'bg-accent-100 text-accent-700' :
+              log.level === 'warning' ? 'bg-yellow-100 text-yellow-700' :
+                log.level === 'info' ? 'bg-trust-100 text-trust-700' :
+                  'bg-gray-200 text-gray-600'
+              }`}>
+              <Clock className="h-3 w-3" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-1">
+                <span className={`text-[9px] font-black uppercase tracking-widest ${log.level === 'error' ? 'text-accent-800' :
+                  log.level === 'warning' ? 'text-yellow-800' :
+                    log.level === 'info' ? 'text-trust-800' :
+                      'text-gray-800'
                   }`}>
-                  {log.message}
-                </p>
-                {log.data && (
-                  <div className="mt-2 text-xs text-gray-600">
-                    <pre className="bg-white p-2 rounded border overflow-x-auto">
-                      {JSON.stringify(log.data, null, 2)}
-                    </pre>
-                  </div>
-                )}
+                  {log.level}
+                </span>
+                <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono">
+                  {new Date(log.timestamp).toLocaleTimeString()}
+                </span>
               </div>
+              <p className={`text-[11px] font-bold leading-relaxed truncate ${log.level === 'error' ? 'text-accent-700' :
+                log.level === 'warning' ? 'text-yellow-700' :
+                  log.level === 'info' ? 'text-trust-700' :
+                    'text-gray-700'
+                }`}>
+                {log.message}
+              </p>
+              {log.data && (
+                <div className="mt-3 overflow-hidden rounded-xl border border-gray-100/10">
+                  <pre className="p-3 bg-trust-950 text-growth-400 text-[9px] font-mono leading-tight overflow-x-auto custom-scrollbar">
+                    {JSON.stringify(log.data, null, 2)}
+                  </pre>
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -521,65 +565,68 @@ const AuditTrailViewer = ({
 
   if (!auditTrail) {
     return (
-      <div className={`card ${className}`}>
-        <div className="text-center py-8 text-gray-500">
-          <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p>No audit trail data available</p>
+      <div className={`bg-white/90 backdrop-blur-xl rounded-[2.5rem] border border-trust-50 shadow-glass p-12 overflow-hidden ${className}`}>
+        <div className="text-center py-8 text-gray-400">
+          <FileText className="h-12 w-12 mx-auto mb-4 opacity-20" />
+          <div className="text-[10px] font-black uppercase tracking-[0.2em]">Audit Buffer Empty</div>
+          <p className="text-xs mt-2 font-medium">No calculation audit trail data available for the current context.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`card ${className}`}>
+    <div className={`bg-white/90 backdrop-blur-xl rounded-[2.5rem] border border-trust-50 shadow-glass p-10 overflow-hidden ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <div className="bg-blue-100 p-2 rounded-lg">
-            <FileText className="h-5 w-5 text-blue-600" />
+      <div className="flex items-center justify-between mb-10">
+        <div className="flex items-center space-x-4">
+          <div className="bg-trust-50 p-3 rounded-2xl">
+            <FileText className="h-6 w-6 text-trust-600" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-            <p className="text-sm text-gray-600">Complete calculation audit trail</p>
+            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight">{title}</h3>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Full Immutable Ledger of Actuarial Operations</p>
           </div>
         </div>
         <button
           onClick={handleExport}
-          className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+          className="bg-trust-950 text-white px-6 py-3 rounded-xl hover:bg-trust-900 transition-all duration-300 font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-2 shadow-sm"
         >
-          <Download className="h-4 w-4" />
-          <span>Export</span>
+          <Download className="h-4 w-4 text-growth-400" />
+          <span>Export PDF</span>
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8 overflow-x-auto">
+      <div className="border-b border-gray-100 mb-10 overflow-x-auto no-scrollbar">
+        <nav className="-mb-px flex space-x-8">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === tab.id
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              className={`flex items-center space-x-2 py-4 px-1 border-b-2 transition-all duration-300 whitespace-nowrap ${activeTab === tab.id
+                ? 'border-trust-900 text-trust-950'
+                : 'border-transparent text-gray-400 hover:text-trust-950 hover:border-gray-200'
                 }`}
             >
-              <tab.icon className="h-4 w-4" />
-              <span>{tab.label}</span>
+              <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? 'text-trust-600' : 'text-gray-300'}`} />
+              <span className="text-[10px] font-black uppercase tracking-widest">{tab.label}</span>
             </button>
           ))}
         </nav>
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'overview' && renderOverview()}
-      {activeTab === 'inputs' && renderInputs()}
-      {activeTab === 'steps' && renderSteps()}
-      {activeTab === 'formulas' && renderFormulas()}
-      {activeTab === 'assumptions' && renderAssumptions()}
-      {activeTab === 'validation' && renderValidation()}
-      {activeTab === 'warnings' && renderWarnings()}
-      {activeTab === 'execution' && renderExecutionLog()}
+      <div className="relative">
+        {activeTab === 'overview' && renderOverview()}
+        {activeTab === 'inputs' && renderInputs()}
+        {activeTab === 'steps' && renderSteps()}
+        {activeTab === 'formulas' && renderFormulas()}
+        {activeTab === 'assumptions' && renderAssumptions()}
+        {activeTab === 'validation' && renderValidation()}
+        {activeTab === 'warnings' && renderWarnings()}
+        {activeTab === 'execution' && renderExecutionLog()}
+      </div>
     </div>
   );
 };

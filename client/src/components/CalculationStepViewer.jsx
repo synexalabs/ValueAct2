@@ -43,35 +43,36 @@ const CalculationStepViewer = ({
     const hasDetails = step.formula || step.explanation || step.validation || step.intermediateResults;
 
     return (
-      <div key={index} className="border border-gray-200 rounded-lg mb-3">
+      <div key={index} className="bg-white/50 border border-gray-100/50 rounded-3xl mb-4 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
         {/* Step Header */}
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-t-lg">
-          <div className="flex items-center space-x-3">
-            <div className="bg-blue-100 p-2 rounded-lg">
-              <Calculator className="h-4 w-4 text-blue-600" />
+        <div className="flex items-center justify-between p-6 bg-gray-50/50">
+          <div className="flex items-center space-x-4">
+            <div className={`p-2.5 rounded-xl ${step.status === 'completed' ? 'bg-growth-100 text-growth-700' : 'bg-trust-50 text-trust-700'}`}>
+              <Calculator className="h-4 w-4" />
             </div>
             <div>
-              <h4 className="font-semibold text-gray-800">
-                Step {index + 1}: {step.name}
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Operation {index + 1}</span>
+                {step.status && (
+                  <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${step.status === 'completed' ? 'bg-growth-50 text-growth-700 border-growth-100' :
+                      step.status === 'error' ? 'bg-accent-50 text-accent-700 border-accent-100' :
+                        step.status === 'warning' ? 'bg-trust-50 text-trust-700 border-trust-100' :
+                          'bg-gray-100 text-gray-500 border-gray-100'
+                    }`}>
+                    {step.status}
+                  </span>
+                )}
+              </div>
+              <h4 className="text-[13px] font-heading font-black text-trust-950 uppercase tracking-tight">
+                {step.name}
               </h4>
-              <p className="text-sm text-gray-600">{step.description}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            {step.status && (
-              <span className={`px-2 py-1 rounded text-xs ${
-                step.status === 'completed' ? 'bg-green-100 text-green-800' :
-                step.status === 'error' ? 'bg-red-100 text-red-800' :
-                step.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-gray-100 text-gray-800'
-              }`}>
-                {step.status}
-              </span>
-            )}
             {hasDetails && (
               <button
                 onClick={() => toggleStep(index)}
-                className="p-1 hover:bg-gray-200 rounded transition-colors"
+                className="p-2 hover:bg-gray-200/50 rounded-xl transition-colors"
               >
                 {isExpanded ? (
                   <ChevronUp className="h-4 w-4 text-gray-400" />
@@ -85,15 +86,13 @@ const CalculationStepViewer = ({
 
         {/* Step Content */}
         {isExpanded && hasDetails && (
-          <div className="p-4 space-y-4">
+          <div className="p-6 space-y-6 bg-white">
             {/* Formula */}
             {step.formula && showFormulas && (
-              <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
-                <h5 className="font-semibold text-purple-800 mb-2 flex items-center">
-                  <Calculator className="h-4 w-4 mr-2" />
-                  Formula
-                </h5>
-                <div className="text-center">
+              <div className="bg-trust-950 p-6 rounded-[2rem] border border-trust-900 shadow-xl text-center relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-growth-400/5 blur-[40px] rounded-full -mr-16 -mt-16" />
+                <h5 className="text-[9px] font-black text-growth-400 uppercase tracking-[0.2em] mb-4 text-left">Mathematical Core</h5>
+                <div className="text-white relative z-10 transition-transform hover:scale-105 duration-500">
                   <BlockMath math={step.formula} />
                 </div>
               </div>
@@ -101,14 +100,14 @@ const CalculationStepViewer = ({
 
             {/* Inputs */}
             {step.inputs && Object.keys(step.inputs).length > 0 && (
-              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                <h5 className="font-semibold text-blue-800 mb-2">Inputs</h5>
-                <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="bg-trust-50/50 p-6 rounded-2xl border border-trust-100">
+                <h5 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-4">Input Vector</h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {Object.entries(step.inputs).map(([key, value]) => (
-                    <div key={key} className="flex justify-between">
-                      <span className="text-blue-700">{key}:</span>
-                      <span className="font-medium text-blue-800">
-                        {typeof value === 'number' ? value.toLocaleString() : value}
+                    <div key={key} className="flex justify-between items-center bg-white p-3 rounded-xl border border-white shadow-sm">
+                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{key}</span>
+                      <span className="text-[10px] font-black text-trust-950">
+                        {typeof value === 'number' ? value.toLocaleString() : String(value)}
                       </span>
                     </div>
                   ))}
@@ -132,26 +131,34 @@ const CalculationStepViewer = ({
 
             {/* Output */}
             {step.output !== undefined && (
-              <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
-                <h5 className="font-semibold text-emerald-800 mb-2">Result</h5>
-                <div className="text-lg font-semibold text-emerald-800">
-                  {typeof step.output === 'number' ? step.output.toLocaleString() : step.output}
-                  {step.unit && <span className="text-sm text-emerald-600 ml-1">{step.unit}</span>}
+              <div className="bg-growth-800 p-6 rounded-2xl shadow-lg shadow-growth-100 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-growth-700 to-growth-800 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative z-10 flex justify-between items-center">
+                  <div>
+                    <h5 className="text-[9px] font-black text-white/50 uppercase tracking-[0.2em] mb-1">Step Result</h5>
+                    <div className="text-xl font-heading font-black text-white tracking-tight">
+                      {typeof step.output === 'number' ? step.output.toLocaleString() : step.output}
+                      {step.unit && <span className="text-xs font-bold text-growth-200 ml-1">{step.unit}</span>}
+                    </div>
+                  </div>
+                  <div className="bg-white/10 p-2 rounded-xl border border-white/10 backdrop-blur-sm">
+                    <CheckCircle className="h-5 w-5 text-growth-300" />
+                  </div>
                 </div>
               </div>
             )}
 
             {/* Intermediate Results */}
             {step.intermediateResults && showIntermediateResults && (
-              <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-                <h5 className="font-semibold text-yellow-800 mb-2">Intermediate Results</h5>
-                <div className="space-y-2">
+              <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+                <h5 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-4">Intermediate Metrics</h5>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {step.intermediateResults.map((result, resultIndex) => (
-                    <div key={resultIndex} className="flex justify-between items-center">
-                      <span className="text-yellow-700">{result.name}:</span>
-                      <span className="font-medium text-yellow-800">
+                    <div key={resultIndex} className="flex justify-between items-center bg-white p-3 rounded-xl border border-white shadow-sm">
+                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{result.name}</span>
+                      <span className="text-[10px] font-black text-trust-950">
                         {typeof result.value === 'number' ? result.value.toLocaleString() : result.value}
-                        {result.unit && <span className="text-sm text-yellow-600 ml-1">{result.unit}</span>}
+                        {result.unit && <span className="text-[8px] text-gray-400 ml-1">{result.unit}</span>}
                       </span>
                     </div>
                   ))}
@@ -161,19 +168,18 @@ const CalculationStepViewer = ({
 
             {/* Validation */}
             {step.validation && showValidation && (
-              <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
-                <h5 className="font-semibold text-orange-800 mb-2 flex items-center">
+              <div className="bg-growth-50/30 p-6 rounded-2xl border border-growth-100">
+                <h5 className="text-[10px] font-black text-growth-800 uppercase tracking-[0.2em] mb-4 flex items-center">
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Validation
+                  Logic Validation
                 </h5>
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {step.validation.map((validation, validationIndex) => (
-                    <div key={validationIndex} className="flex items-center justify-between">
-                      <span className="text-orange-700">{validation.check}:</span>
-                      <span className={`px-2 py-1 rounded text-xs ${
-                        validation.passed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {validation.passed ? 'Passed' : 'Failed'}
+                    <div key={validationIndex} className="flex items-center justify-between bg-white/50 p-3 rounded-xl border border-white shadow-sm">
+                      <span className="text-[10px] font-black text-growth-900 uppercase tracking-tight">{validation.check}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${validation.passed ? 'bg-growth-50 text-growth-700 border-growth-100' : 'bg-accent-50 text-accent-700 border-accent-100'
+                        }`}>
+                        {validation.passed ? 'PASSED' : 'FAILED'}
                       </span>
                     </div>
                   ))}
@@ -181,33 +187,35 @@ const CalculationStepViewer = ({
               </div>
             )}
 
-            {/* Explanation */}
-            {step.explanation && (
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <h5 className="font-semibold text-gray-800 mb-2 flex items-center">
-                  <Info className="h-4 w-4 mr-2" />
-                  Explanation
-                </h5>
-                <p className="text-sm text-gray-700">{step.explanation}</p>
-              </div>
-            )}
-
-            {/* Warnings */}
-            {step.warnings && step.warnings.length > 0 && (
-              <div className="bg-red-50 p-3 rounded-lg border border-red-200">
-                <h5 className="font-semibold text-red-800 mb-2 flex items-center">
-                  <AlertTriangle className="h-4 w-4 mr-2" />
-                  Warnings
-                </h5>
-                <div className="space-y-1">
-                  {step.warnings.map((warning, warningIndex) => (
-                    <p key={warningIndex} className="text-sm text-red-700">
-                      • {warning}
-                    </p>
-                  ))}
+            {/* Explanation & Warnings stack */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {step.explanation && (
+                <div className="bg-trust-50/30 p-6 rounded-2xl border border-trust-100">
+                  <h5 className="text-[10px] font-black text-trust-800 uppercase tracking-[0.2em] mb-3 flex items-center">
+                    <Info className="h-4 w-4 mr-2" />
+                    Analytical Context
+                  </h5>
+                  <p className="text-[11px] font-bold text-trust-950/70 leading-relaxed italic">"{step.explanation}"</p>
                 </div>
-              </div>
-            )}
+              )}
+
+              {step.warnings && step.warnings.length > 0 && (
+                <div className="bg-accent-50/30 p-6 rounded-2xl border border-accent-100">
+                  <h5 className="text-[10px] font-black text-accent-800 uppercase tracking-[0.2em] mb-3 flex items-center">
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Advisory Notices
+                  </h5>
+                  <div className="space-y-2">
+                    {step.warnings.map((warning, warningIndex) => (
+                      <p key={warningIndex} className="text-[10px] font-bold text-accent-950 flex gap-2">
+                        <span className="text-accent-400 opacity-50">•</span>
+                        {warning}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
@@ -216,68 +224,70 @@ const CalculationStepViewer = ({
 
   if (!steps || steps.length === 0) {
     return (
-      <div className={`card ${className}`}>
-        <div className="text-center py-8 text-gray-500">
-          <Calculator className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-          <p>No calculation steps available</p>
+      <div className={`bg-white/80 backdrop-blur-xl rounded-[2.5rem] border border-trust-50 shadow-glass p-12 overflow-hidden ${className}`}>
+        <div className="text-center py-8 text-gray-400">
+          <Calculator className="h-12 w-12 mx-auto mb-4 opacity-20" />
+          <div className="text-[10px] font-black uppercase tracking-[0.2em]">Sequence Missing</div>
+          <p className="text-xs mt-2 font-medium">No calculation steps were recorded for this transaction.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`card ${className}`}>
+    <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          <div className="bg-blue-100 p-2 rounded-lg">
-            <Play className="h-5 w-5 text-blue-600" />
+      <div className="flex items-center justify-between mb-8 px-1">
+        <div className="flex items-center space-x-4">
+          <div className="bg-trust-950 p-3 rounded-2xl shadow-lg ring-1 ring-white/10">
+            <Play className="h-5 w-5 text-growth-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-            <p className="text-sm text-gray-600">{steps.length} calculation steps</p>
+            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight">{title}</h3>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Foundational Computation Sequence</p>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
+        <div>
           <button
             onClick={toggleAllSteps}
-            className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+            className="px-5 py-2.5 text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] bg-white border border-gray-100 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-sm"
           >
-            {showAllSteps ? 'Collapse All' : 'Expand All'}
+            {showAllSteps ? 'Minimize Ledger' : 'Expand Details'}
           </button>
         </div>
       </div>
 
       {/* Steps */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {steps.map((step, index) => renderStep(step, index))}
       </div>
 
       {/* Summary */}
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-        <h4 className="font-semibold text-gray-800 mb-2">Calculation Summary</h4>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-gray-600">Total Steps:</span>
-            <span className="ml-2 font-semibold text-gray-800">{steps.length}</span>
+      <div className="mt-12 p-10 bg-trust-950 rounded-[2.5rem] border border-trust-900 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-growth-500/5 blur-[100px] rounded-full -mr-32 -mt-32" />
+        <h4 className="text-[10px] font-black text-growth-400 uppercase tracking-[0.2em] mb-8 relative z-10">Sequence Quality Audit</h4>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 relative z-10">
+          <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+            <div className="text-[8px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Total Operations</div>
+            <div className="text-2xl font-heading font-black text-white">{steps.length}</div>
           </div>
-          <div>
-            <span className="text-gray-600">Completed:</span>
-            <span className="ml-2 font-semibold text-green-600">
+          <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+            <div className="text-[8px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Verified Passes</div>
+            <div className="text-2xl font-heading font-black text-growth-500">
               {steps.filter(s => s.status === 'completed').length}
-            </span>
+            </div>
           </div>
-          <div>
-            <span className="text-gray-600">Warnings:</span>
-            <span className="ml-2 font-semibold text-yellow-600">
+          <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+            <div className="text-[8px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Risk Advisories</div>
+            <div className="text-2xl font-heading font-black text-accent-500">
               {steps.filter(s => s.status === 'warning').length}
-            </span>
+            </div>
           </div>
-          <div>
-            <span className="text-gray-600">Errors:</span>
-            <span className="ml-2 font-semibold text-red-600">
+          <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+            <div className="text-[8px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Critical Deviations</div>
+            <div className="text-2xl font-heading font-black text-red-500">
               {steps.filter(s => s.status === 'error').length}
-            </span>
+            </div>
           </div>
         </div>
       </div>

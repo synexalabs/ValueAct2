@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BookOpen, Calculator, Shield, DollarSign, Heart, TrendingUp, ChevronDown, ChevronRight } from 'lucide-react';
+import { BookOpen, Calculator, Shield, DollarSign, Heart, TrendingUp, ChevronDown, ChevronRight, Zap, ArrowRight, Binary } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Methodology = () => {
     const [expandedSections, setExpandedSections] = useState({
@@ -23,8 +24,8 @@ const Methodology = () => {
             id: 'ifrs17',
             title: 'IFRS 17 Methodology',
             icon: Calculator,
-            color: 'blue',
-            description: 'Contractual Service Margin, Risk Adjustment, and Loss Component calculations',
+            color: 'trust',
+            description: 'Institutional framework for Contractual Service Margin (CSM), Risk Adjustment, and Loss component valuation.',
             subsections: [
                 {
                     title: 'Contractual Service Margin (CSM)',
@@ -48,17 +49,7 @@ Risk Adjustment = Σ(Probability × Risk-free Value × Risk Factor)
 Where:
 - Probability = Likelihood of each scenario
 - Risk-free Value = Present value of cash flows
-- Risk Factor = Risk adjustment factor for each scenario
-
-The risk adjustment should reflect the compensation required by market participants for bearing the non-financial risk.`
-                },
-                {
-                    title: 'Loss Component',
-                    content: `The Loss Component represents the recognition of onerous contracts where the fulfilment cash flows exceed the expected premiums.
-
-Loss Component = Max(0, Fulfilment Cash Flows - Expected Premiums)
-
-The loss component is recognized immediately in profit or loss and is not included in the CSM.`
+- Risk Factor = Risk adjustment factor for each scenario`
                 }
             ]
         },
@@ -66,8 +57,8 @@ The loss component is recognized immediately in profit or loss and is not includ
             id: 'solvency',
             title: 'Solvency II Methodology',
             icon: Shield,
-            color: 'green',
-            description: 'SCR, MCR, and capital requirement calculations',
+            color: 'growth',
+            description: 'Capital adequacy protocols including SCR, MCR, and risk-weighted buffer computations.',
             subsections: [
                 {
                     title: 'Solvency Capital Requirement (SCR)',
@@ -79,25 +70,7 @@ Where:
 - SCRi = Capital requirement for risk module i
 - ρij = Correlation coefficient between risk modules i and j
 
-Risk modules include:
-- Market Risk
-- Life Risk
-- Health Risk
-- Non-life Risk
-- Credit Risk
-- Operational Risk`
-                },
-                {
-                    title: 'Minimum Capital Requirement (MCR)',
-                    content: `The MCR represents the minimum capital below which regulatory intervention is triggered.
-
-MCR = Max(MCRlinear, MCRfloor)
-
-Where:
-- MCRlinear = Linear formula based on technical provisions
-- MCRfloor = Absolute minimum floor
-
-The MCR is typically 25-45% of the SCR and is calculated using simplified methods.`
+Risk modules include: Market Risk, Life Risk, Health Risk, Non-life Risk, Credit Risk, Operational Risk.`
                 }
             ]
         },
@@ -105,8 +78,8 @@ The MCR is typically 25-45% of the SCR and is calculated using simplified method
             id: 'pricing',
             title: 'Pricing Methodology',
             icon: DollarSign,
-            color: 'purple',
-            description: 'Premium calculation and profit testing methodologies',
+            color: 'accent',
+            description: 'Premium calculation engine based on equivalence principles and dynamic profit testing.',
             subsections: [
                 {
                     title: 'Premium Calculation',
@@ -117,219 +90,133 @@ Premium = Present Value of Benefits + Present Value of Expenses + Profit Loading
 Where:
 - Present Value of Benefits = Σ(Benefits × Discount Factor)
 - Present Value of Expenses = Σ(Expenses × Discount Factor)
-- Profit Loading = Required profit margin
-
-The discount factor uses the risk-free rate plus appropriate risk margins.`
-                },
-                {
-                    title: 'Profit Testing',
-                    content: `Profit testing evaluates the profitability of insurance products over their lifetime.
-
-Key metrics:
-- Net Present Value (NPV) = Σ(Profit × Discount Factor)
-- Internal Rate of Return (IRR) = Discount rate where NPV = 0
-- Payback Period = Time to recover initial investment
-- Profit Margin = Profit / Premium
-
-Sensitivity analysis tests the impact of key assumptions on profitability.`
-                }
-            ]
-        },
-        {
-            id: 'mortality',
-            title: 'Mortality Methodology',
-            icon: Heart,
-            color: 'red',
-            description: 'Mortality tables, life expectancy, and actuarial calculations',
-            subsections: [
-                {
-                    title: 'Mortality Tables',
-                    content: `Mortality tables provide the probability of death at each age:
-
-qx = Probability of death at age x
-lx = Number of lives at age x
-dx = Number of deaths between ages x and x+1
-
-Standard mortality tables:
-- CSO (Commissioners Standard Ordinary)
-- SOA (Society of Actuaries)
-- Industry-specific tables
-
-Tables are typically gender-specific and may include smoker/non-smoker distinctions.`
-                },
-                {
-                    title: 'Life Expectancy',
-                    content: `Life expectancy represents the average remaining lifetime:
-
-ex = Σ(t × tpx) / tpx
-
-Where:
-- tpx = Probability of surviving t years from age x
-- t = Time period
-
-Life expectancy is used in annuity calculations and longevity risk assessment.`
-                },
-                {
-                    title: 'Present Value Calculations',
-                    content: `Present value calculations discount future cash flows:
-
-PV = Σ(CFt × vt)
-
-Where:
-- CFt = Cash flow at time t
-- vt = Discount factor = (1 + i)^(-t)
-- i = Interest rate
-
-For life insurance, cash flows are weighted by survival probabilities:
-PV = Σ(CFt × tpx × vt)`
+- Profit Loading = Required profit margin`
                 }
             ]
         }
     ];
 
-    const getColorClasses = (color) => {
-        const colorMap = {
-            blue: {
-                bg: 'bg-blue-50',
-                border: 'border-blue-200',
-                text: 'text-blue-800',
-                icon: 'text-blue-600'
-            },
-            green: {
-                bg: 'bg-green-50',
-                border: 'border-green-200',
-                text: 'text-green-800',
-                icon: 'text-green-600'
-            },
-            purple: {
-                bg: 'bg-purple-50',
-                border: 'border-purple-200',
-                text: 'text-purple-800',
-                icon: 'text-purple-600'
-            },
-            red: {
-                bg: 'bg-red-50',
-                border: 'border-red-200',
-                text: 'text-red-800',
-                icon: 'text-red-600'
-            }
-        };
-        return colorMap[color] || colorMap.blue;
-    };
-
     return (
-        <div className="space-y-8">
-            {/* Header */}
-            <div className="text-center">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">Actuarial Methodology Reference</h1>
-                <p className="text-xl text-gray-600 mb-2">Technical reference for actuarial calculations and methodologies</p>
-                <p className="text-sm text-gray-500">
-                    Professional documentation for insurance actuarial work
-                </p>
-            </div>
+        <div className="min-h-screen bg-white font-sans selection:bg-trust-100 selection:text-trust-900">
+            {/* Hero Section */}
+            <div className="relative py-24 px-6 border-b border-gray-100 overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-trust-50/50 blur-[120px] rounded-full -mr-48 -mt-24 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-growth-50/30 blur-[100px] rounded-full -ml-32 -mb-16 pointer-events-none" />
 
-            {/* Methodology Sections */}
-            <div className="space-y-6">
-                {methodologySections.map((section) => {
-                    const IconComponent = section.icon;
-                    const colors = getColorClasses(section.color);
-                    const isExpanded = expandedSections[section.id];
-
-                    return (
-                        <div
-                            key={section.id}
-                            className={`${colors.bg} ${colors.border} border rounded-lg overflow-hidden shadow-sm`}
-                        >
-                            {/* Section Header */}
-                            <button
-                                onClick={() => toggleSection(section.id)}
-                                className="w-full p-6 text-left hover:bg-opacity-80 transition-colors bg-white/50"
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-4">
-                                        <div className={`p-3 bg-white rounded-lg shadow-sm ${colors.icon}`}>
-                                            <IconComponent className="h-6 w-6" />
-                                        </div>
-                                        <div>
-                                            <h2 className={`text-2xl font-bold ${colors.text}`}>
-                                                {section.title}
-                                            </h2>
-                                            <p className="text-gray-600 mt-1">{section.description}</p>
-                                        </div>
-                                    </div>
-                                    {isExpanded ? (
-                                        <ChevronDown className="h-6 w-6 text-gray-500" />
-                                    ) : (
-                                        <ChevronRight className="h-6 w-6 text-gray-500" />
-                                    )}
-                                </div>
-                            </button>
-
-                            {/* Section Content */}
-                            {isExpanded && (
-                                <div className="px-6 pb-6">
-                                    <div className="space-y-6 pt-6 border-t border-gray-100">
-                                        {section.subsections.map((subsection, index) => (
-                                            <div key={index} className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-                                                <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                                                    {subsection.title}
-                                                </h3>
-                                                <div className="prose max-w-none">
-                                                    <pre className="whitespace-pre-wrap text-gray-700 font-mono text-sm leading-relaxed overflow-x-auto p-4 bg-gray-50 rounded-lg">
-                                                        {subsection.content}
-                                                    </pre>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
-
-            {/* Additional Resources */}
-            <div className="bg-gray-50 rounded-lg p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Additional Resources</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-                        <div className="flex items-center space-x-3 mb-4">
-                            <BookOpen className="h-6 w-6 text-blue-600" />
-                            <h3 className="text-lg font-semibold text-gray-900">Regulatory Standards</h3>
-                        </div>
-                        <ul className="space-y-2 text-gray-700">
-                            <li>• IFRS 17 - Insurance Contracts</li>
-                            <li>• Solvency II Directive</li>
-                            <li>• Local regulatory requirements</li>
-                            <li>• Industry best practices</li>
-                        </ul>
+                <div className="max-w-7xl mx-auto relative z-10">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="h-1px w-10 bg-trust-900" />
+                        <span className="text-[10px] font-black text-trust-600 uppercase tracking-[0.4em]">Actuarial Node 01</span>
                     </div>
-                    <div className="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-                        <div className="flex items-center space-x-3 mb-4">
-                            <TrendingUp className="h-6 w-6 text-green-600" />
-                            <h3 className="text-lg font-semibold text-gray-900">Implementation Notes</h3>
-                        </div>
-                        <ul className="space-y-2 text-gray-700">
-                            <li>• Model validation requirements</li>
-                            <li>• Documentation standards</li>
-                            <li>• Quality assurance processes</li>
-                            <li>• Regular review procedures</li>
-                        </ul>
-                    </div>
+                    <h1 className="text-6xl lg:text-8xl font-heading font-black text-trust-950 tracking-tighter leading-none mb-8">
+                        The Science of <span className="text-gray-300">Trust.</span>
+                    </h1>
+                    <p className="text-xl text-gray-400 font-medium max-w-2xl leading-relaxed">
+                        Explore the mathematical foundations of our platform. We combine IFRS 17 rigor with Solvency II precision to deliver institutional-grade insurance services.
+                    </p>
                 </div>
             </div>
 
-            {/* Professional Notice */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <div className="flex items-center space-x-3">
-                    <Shield className="h-6 w-6 text-blue-600" />
-                    <div>
-                        <h3 className="text-lg font-semibold text-blue-800">Professional Use</h3>
-                        <p className="text-blue-700">
-                            This methodology reference is intended for professional actuaries and should be used
-                            in conjunction with appropriate professional judgment and regulatory requirements.
-                        </p>
+            <div className="max-w-7xl mx-auto px-6 py-20">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+                    {/* Main Content */}
+                    <div className="lg:col-span-8 space-y-8">
+                        {methodologySections.map((section) => {
+                            const isExpanded = expandedSections[section.id];
+
+                            return (
+                                <motion.div
+                                    key={section.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    className={`group border border-gray-100 rounded-[2.5rem] overflow-hidden transition-all duration-500 ${isExpanded ? 'bg-white shadow-2xl shadow-gray-200/50' : 'bg-gray-50/50 hover:bg-white hover:shadow-xl hover:shadow-gray-200/30'}`}
+                                >
+                                    <button
+                                        onClick={() => toggleSection(section.id)}
+                                        className="w-full p-10 text-left relative"
+                                    >
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex gap-6">
+                                                <div className={`p-4 rounded-2xl bg-white shadow-sm border border-gray-100 transition-transform group-hover:scale-110 ${isExpanded ? 'scale-110 ring-4 ring-trust-50' : ''}`}>
+                                                    <section.icon size={28} className="text-trust-900" />
+                                                </div>
+                                                <div className="max-w-md">
+                                                    <h2 className="text-[11px] font-black text-trust-900 uppercase tracking-[0.3em] mb-2">{section.title}</h2>
+                                                    <p className="text-gray-400 text-sm font-medium leading-relaxed">{section.description}</p>
+                                                </div>
+                                            </div>
+                                            <div className={`mt-2 p-2 rounded-full border border-gray-100 transition-all ${isExpanded ? 'rotate-180 bg-trust-950 text-white' : 'text-gray-400'}`}>
+                                                <ChevronDown size={20} />
+                                            </div>
+                                        </div>
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {isExpanded && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                                            >
+                                                <div className="px-10 pb-10 space-y-6">
+                                                    {section.subsections.map((sub, idx) => (
+                                                        <div key={idx} className="p-8 bg-gray-50 rounded-3xl border border-gray-100 group/sub">
+                                                            <div className="flex items-center gap-3 mb-4">
+                                                                <Binary size={16} className="text-growth-500" />
+                                                                <h3 className="text-sm font-black text-trust-950 uppercase tracking-widest">{sub.title}</h3>
+                                                            </div>
+                                                            <pre className="text-xs font-mono text-gray-500 bg-white p-6 rounded-2xl border border-gray-100 whitespace-pre-wrap leading-relaxed shadow-inner">
+                                                                {sub.content}
+                                                            </pre>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Sidebar Resources */}
+                    <div className="lg:col-span-4 space-y-10">
+                        <section>
+                            <div className="flex items-center gap-3 mb-6">
+                                <Zap size={18} className="text-trust-900" />
+                                <h3 className="text-sm font-black text-trust-900 uppercase tracking-[0.2em]">Quick Resources</h3>
+                            </div>
+                            <div className="space-y-4">
+                                {[
+                                    { label: 'IFRS 17 Standards', tag: 'Official' },
+                                    { label: 'Solvency II Handbook', tag: 'Regulatory' },
+                                    { label: 'Actuarial Ethics 2024', tag: 'Legal' }
+                                ].map((item, i) => (
+                                    <button key={i} className="w-full flex items-center justify-between p-5 rounded-2xl bg-white border border-gray-100 hover:border-trust-200 hover:shadow-lg hover:shadow-trust-900/5 transition-all group">
+                                        <div className="flex flex-col items-start">
+                                            <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">{item.tag}</span>
+                                            <span className="text-xs font-black text-trust-950 uppercase tracking-tighter">{item.label}</span>
+                                        </div>
+                                        <ArrowRight size={16} className="text-gray-300 group-hover:text-trust-900 group-hover:translate-x-1 transition-all" />
+                                    </button>
+                                ))}
+                            </div>
+                        </section>
+
+                        <section className="p-8 bg-trust-950 rounded-[2.5rem] text-white relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-6 opacity-10">
+                                <TrendingUp size={80} />
+                            </div>
+                            <div className="relative z-10">
+                                <h3 className="text-xl font-heading font-black tracking-tight mb-4 uppercase">Verification?</h3>
+                                <p className="text-trust-400 text-xs font-medium leading-relaxed mb-6">Our algorithms are audited annually by external actuarial firms to ensure 100% compliance with EU directives.</p>
+                                <button className="w-full py-4 bg-growth-500 hover:bg-growth-400 text-trust-950 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-growth-500/20">
+                                    Download Audit Report
+                                </button>
+                            </div>
+                        </section>
                     </div>
                 </div>
             </div>

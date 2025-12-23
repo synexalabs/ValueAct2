@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Calculator, Database, TrendingUp, Clock, CheckCircle, XCircle, AlertTriangle, FileText, BarChart3, Users } from 'lucide-react';
+import { Calculator, Database, TrendingUp, Clock, CheckCircle, XCircle, AlertTriangle, FileText, BarChart3, Users, Cpu } from 'lucide-react';
 import Link from 'next/link';
 
 const Dashboard = () => {
@@ -71,21 +71,21 @@ const Dashboard = () => {
             description: 'Upload policy data for validation and processing',
             icon: Database,
             href: '/data',
-            color: 'bg-blue-600 hover:bg-blue-700'
+            color: 'bg-trust-900 hover:bg-trust-950'
         },
         {
             title: 'New Calculation',
             description: 'Run quick calculations using calculators',
             icon: Calculator,
             href: '/calculators',
-            color: 'bg-green-600 hover:bg-green-700'
+            color: 'bg-growth-600 hover:bg-growth-700'
         },
         {
             title: 'View Reports',
             description: 'Access valuation reports and analytics',
             icon: FileText,
-            href: '/reports',
-            color: 'bg-purple-600 hover:bg-purple-700'
+            href: '/valuations',
+            color: 'bg-accent-600 hover:bg-accent-700'
         }
     ];
 
@@ -93,62 +93,62 @@ const Dashboard = () => {
         <div className="space-y-8">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-                <p className="text-gray-600 mt-2">Actuarial platform overview and operations</p>
+                <h1 className="text-3xl font-heading font-bold text-trust-900">Actuarial Dashboard</h1>
+                <p className="text-gray-500 mt-2">Actuarial platform overview and operations</p>
             </div>
 
             {/* System Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-center">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                            <Database className="h-6 w-6 text-blue-600" />
+                        <div className="p-3 bg-trust-50 rounded-xl">
+                            <Database className="h-6 w-6 text-trust-600" />
                         </div>
                         <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-500">Total Policies</p>
-                            <p className="text-2xl font-semibold text-gray-900">
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Policies</p>
+                            <p className="text-2xl font-bold text-trust-900">
                                 {systemStats.totalPolicies.toLocaleString()}
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-center">
-                        <div className="p-2 bg-green-100 rounded-lg">
-                            <CheckCircle className="h-6 w-6 text-green-600" />
+                        <div className="p-3 bg-growth-50 rounded-xl">
+                            <CheckCircle className="h-6 w-6 text-growth-600" />
                         </div>
                         <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-500">Success Rate</p>
-                            <p className="text-2xl font-semibold text-gray-900">
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Success Rate</p>
+                            <p className="text-2xl font-bold text-trust-900">
                                 {systemStats.successRate}%
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-center">
-                        <div className="p-2 bg-purple-100 rounded-lg">
-                            <Clock className="h-6 w-6 text-purple-600" />
+                        <div className="p-3 bg-accent-50 rounded-xl">
+                            <Clock className="h-6 w-6 text-accent-600" />
                         </div>
                         <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-500">Avg Processing Time</p>
-                            <p className="text-2xl font-semibold text-gray-900">
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Avg Time</p>
+                            <p className="text-2xl font-bold text-trust-900">
                                 {systemStats.avgProcessingTime}h
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
+                <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-center">
-                        <div className="p-2 bg-orange-100 rounded-lg">
-                            <BarChart3 className="h-6 w-6 text-orange-600" />
+                        <div className="p-3 bg-trust-50 rounded-xl">
+                            <TrendingUp className="h-6 w-6 text-trust-600" />
                         </div>
                         <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-500">Data Quality Score</p>
-                            <p className="text-2xl font-semibold text-gray-900">
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Quality Score</p>
+                            <p className="text-2xl font-bold text-trust-900">
                                 {systemStats.dataQualityScore}%
                             </p>
                         </div>
@@ -157,8 +157,8 @@ const Dashboard = () => {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
+            <div className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm">
+                <h2 className="text-xl font-heading font-bold text-trust-900 mb-6">Quick Actions</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {quickActions.map((action, index) => {
                         const IconComponent = action.icon;
@@ -166,13 +166,15 @@ const Dashboard = () => {
                             <Link
                                 key={index}
                                 href={action.href}
-                                className={`${action.color} text-white rounded-lg p-6 hover:shadow-lg transition-all duration-200`}
+                                className={`${action.color} text-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}
                             >
                                 <div className="flex items-center space-x-4">
-                                    <IconComponent className="h-8 w-8" />
+                                    <div className="p-3 bg-white/10 rounded-xl backdrop-blur-md">
+                                        <IconComponent className="h-7 w-7" />
+                                    </div>
                                     <div>
-                                        <h3 className="text-lg font-semibold">{action.title}</h3>
-                                        <p className="text-white text-opacity-90 text-sm mt-1">
+                                        <h3 className="text-lg font-bold">{action.title}</h3>
+                                        <p className="text-white/80 text-xs mt-1 leading-relaxed">
                                             {action.description}
                                         </p>
                                     </div>
@@ -184,73 +186,72 @@ const Dashboard = () => {
             </div>
 
             {/* Recent Valuations */}
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200">
+            <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
+                <div className="px-8 py-6 border-b border-gray-100">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-semibold text-gray-900">Recent Valuation Runs</h2>
+                        <h2 className="text-xl font-heading font-bold text-trust-900">Recent Valuation Runs</h2>
                         <Link
                             href="/valuations"
-                            className="text-blue-600 hover:text-blue-800 font-medium"
+                            className="text-trust-600 hover:text-trust-800 font-bold text-sm flex items-center gap-1"
                         >
-                            View All
+                            View All <TrendingUp className="h-4 w-4" />
                         </Link>
                     </div>
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                    <table className="min-w-full divide-y divide-gray-100">
+                        <thead className="bg-gray-50/50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-8 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                     Valuation
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-8 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                     Status
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-8 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                     Date
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-8 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                     Policies
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-8 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                                     Duration
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-white divide-y divide-gray-50">
                             {recentValuations.map((valuation) => (
-                                <tr key={valuation.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">{valuation.name}</div>
-                                        <div className="text-sm text-gray-500">{valuation.id}</div>
+                                <tr key={valuation.id} className="hover:bg-trust-50/30 transition-colors">
+                                    <td className="px-8 py-5 whitespace-nowrap">
+                                        <div className="text-sm font-bold text-trust-900">{valuation.name}</div>
+                                        <div className="text-[10px] font-mono text-gray-400">{valuation.id}</div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-8 py-5 whitespace-nowrap">
                                         <div className="flex items-center">
                                             {getStatusIcon(valuation.status)}
-                                            <span className={`ml-2 text-sm font-medium ${getStatusColor(valuation.status)}`}>
+                                            <span className={`ml-2 text-xs font-bold uppercase tracking-wider ${getStatusColor(valuation.status)}`}>
                                                 {valuation.status}
                                             </span>
                                         </div>
                                         {valuation.status === 'running' && valuation.progress && (
-                                            <div className="mt-2">
-                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div className="mt-2 w-32">
+                                                <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
                                                     <div
-                                                        className="bg-blue-600 h-2 rounded-full"
+                                                        className="bg-trust-600 h-full rounded-full transition-all duration-500"
                                                         style={{ width: `${valuation.progress}%` }}
                                                     ></div>
                                                 </div>
-                                                <div className="text-xs text-gray-500 mt-1">{valuation.progress}% complete</div>
                                             </div>
                                         )}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td className="px-8 py-5 whitespace-nowrap text-sm font-medium text-gray-600">
                                         {new Date(valuation.date).toLocaleDateString()}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td className="px-8 py-5 whitespace-nowrap text-sm font-bold text-trust-700">
                                         {valuation.policyCount.toLocaleString()}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <td className="px-8 py-5 whitespace-nowrap text-sm text-gray-500">
                                         {valuation.duration}
                                     </td>
                                 </tr>
@@ -261,56 +262,46 @@ const Dashboard = () => {
             </div>
 
             {/* System Status */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">System Status</h3>
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Data Processing</span>
-                            <div className="flex items-center">
-                                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                <span className="text-sm text-green-600 font-medium">Operational</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm">
+                    <h3 className="text-xl font-heading font-bold text-trust-900 mb-6 flex items-center gap-2">
+                        <Cpu className="h-5 w-5 text-trust-600" />
+                        System Health
+                    </h3>
+                    <div className="space-y-4">
+                        {[
+                            { name: 'Data Processing', status: 'Operational', color: 'bg-growth-500' },
+                            { name: 'Calculation Engine', status: 'Operational', color: 'bg-growth-500' },
+                            { name: 'Database Clusters', status: 'Operational', color: 'bg-growth-500' },
+                            { name: 'API Gateway', status: 'Operational', color: 'bg-growth-500' },
+                        ].map((item, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-gray-50/50">
+                                <span className="text-sm font-medium text-gray-600">{item.name}</span>
+                                <div className="flex items-center gap-2">
+                                    <div className={`w-2 h-2 ${item.color} rounded-full animate-pulse`}></div>
+                                    <span className="text-xs font-bold text-growth-700 uppercase">{item.status}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Calculation Engine</span>
-                            <div className="flex items-center">
-                                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                <span className="text-sm text-green-600 font-medium">Operational</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Database</span>
-                            <div className="flex items-center">
-                                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                <span className="text-sm text-green-600 font-medium">Operational</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">API Services</span>
-                            <div className="flex items-center">
-                                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                <span className="text-sm text-green-600 font-medium">Operational</span>
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </div>
 
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Scheduled Runs</h3>
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Monthly Valuation</span>
-                            <span className="text-sm text-gray-900">Dec 31, 2024</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Quarterly Review</span>
-                            <span className="text-sm text-gray-900">Jan 15, 2025</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Annual Assessment</span>
-                            <span className="text-sm text-gray-900">Mar 1, 2025</span>
-                        </div>
+                <div className="bg-white rounded-[2rem] border border-gray-100 p-8 shadow-sm">
+                    <h3 className="text-xl font-heading font-bold text-trust-900 mb-6 flex items-center gap-2">
+                        <Clock className="h-5 w-5 text-trust-600" />
+                        Scheduled Events
+                    </h3>
+                    <div className="space-y-4">
+                        {[
+                            { name: 'Monthly Valuation', date: 'Dec 31, 2024' },
+                            { name: 'Quarterly Review', date: 'Jan 15, 2025' },
+                            { name: 'Annual Assessment', date: 'Mar 1, 2025' },
+                        ].map((item, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 border border-gray-100 rounded-2xl hover:bg-trust-50/50 transition-colors">
+                                <span className="text-sm font-bold text-trust-900">{item.name}</span>
+                                <span className="text-xs font-medium text-gray-500 bg-white px-3 py-1 rounded-full border border-gray-100 shadow-sm">{item.date}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>

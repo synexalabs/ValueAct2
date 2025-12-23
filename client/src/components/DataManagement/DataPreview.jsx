@@ -4,11 +4,11 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Eye, 
-  Download, 
-  Edit, 
-  Save, 
+import {
+  Eye,
+  Download,
+  Edit,
+  Save,
   X,
   FileText,
   BarChart3,
@@ -19,10 +19,10 @@ import {
  * DataPreview Component
  * Displays preview of uploaded data with tabbed interface
  */
-const DataPreview = ({ 
-  parsedFiles, 
+const DataPreview = ({
+  parsedFiles,
   onMetadataEdit,
-  className = '' 
+  className = ''
 }) => {
   const [activeTab, setActiveTab] = useState('meta');
   const [editingMetadata, setEditingMetadata] = useState(false);
@@ -51,15 +51,15 @@ const DataPreview = ({
     if (value === null || value === undefined || value === '') {
       return <span className="text-gray-400 italic">—</span>;
     }
-    
+
     // Format based on column name
     if (column.toLowerCase().includes('date')) {
       return new Date(value).toLocaleDateString();
     }
-    
-    if (column.toLowerCase().includes('amount') || 
-        column.toLowerCase().includes('premium') || 
-        column.toLowerCase().includes('sum_assured')) {
+
+    if (column.toLowerCase().includes('amount') ||
+      column.toLowerCase().includes('premium') ||
+      column.toLowerCase().includes('sum_assured')) {
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
@@ -67,13 +67,13 @@ const DataPreview = ({
         maximumFractionDigits: 0
       }).format(value);
     }
-    
-    if (column.toLowerCase().includes('ratio') || 
-        column.toLowerCase().includes('rate') ||
-        column.toLowerCase().includes('factor')) {
+
+    if (column.toLowerCase().includes('ratio') ||
+      column.toLowerCase().includes('rate') ||
+      column.toLowerCase().includes('factor')) {
       return `${(value * 100).toFixed(2)}%`;
     }
-    
+
     return String(value);
   };
 
@@ -110,18 +110,18 @@ const DataPreview = ({
   const downloadData = (tabId) => {
     const data = getTabData(tabId);
     if (!data) return;
-    
+
     // Convert to CSV
     const headers = data.columns.join(',');
-    const rows = data.data.map(row => 
+    const rows = data.data.map(row =>
       data.columns.map(col => {
         const value = row[col] || '';
         return `"${String(value).replace(/"/g, '""')}"`;
       }).join(',')
     );
-    
+
     const csvContent = [headers, ...rows].join('\n');
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -149,27 +149,27 @@ const DataPreview = ({
     return (
       <div className="space-y-4">
         {/* Table */}
-        <div className="overflow-x-auto border border-gray-200 rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-x-auto border border-gray-100 rounded-2xl shadow-sm">
+          <table className="min-w-full divide-y divide-gray-50">
+            <thead className="bg-gray-50/50">
               <tr>
                 {data.columns.map((column, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap"
                   >
                     {column}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-50">
               {displayData.map((row, rowIndex) => (
-                <tr key={rowIndex} className="hover:bg-gray-50">
+                <tr key={rowIndex} className="hover:bg-trust-50/30 transition-colors">
                   {data.columns.map((column, colIndex) => (
                     <td
                       key={colIndex}
-                      className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap"
+                      className="px-6 py-4 text-sm font-medium text-gray-700 whitespace-nowrap"
                     >
                       {formatValue(row[column], column)}
                     </td>
@@ -179,7 +179,7 @@ const DataPreview = ({
             </tbody>
           </table>
         </div>
-        
+
         {/* More data indicator */}
         {hasMore && (
           <div className="text-center text-sm text-gray-500">
@@ -206,7 +206,7 @@ const DataPreview = ({
               placeholder="run_20250125_001"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               User ID
@@ -218,7 +218,7 @@ const DataPreview = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Version
@@ -230,7 +230,7 @@ const DataPreview = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Scenario
@@ -245,7 +245,7 @@ const DataPreview = ({
               <option value="pessimistic">Pessimistic</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Valuation Date
@@ -257,7 +257,7 @@ const DataPreview = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Description
@@ -271,7 +271,7 @@ const DataPreview = ({
             />
           </div>
         </div>
-        
+
         <div className="flex justify-end space-x-2">
           <button
             onClick={cancelEditing}
@@ -293,32 +293,28 @@ const DataPreview = ({
   return (
     <div className={`bg-white border border-gray-200 rounded-lg overflow-hidden ${className}`}>
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200">
-        <nav className="flex space-x-8 px-6">
+      <div className="border-b border-gray-100 bg-gray-50/30 px-6 pt-2">
+        <nav className="flex space-x-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const data = getTabData(tab.id);
             const stats = getTabStats(data);
             const isActive = activeTab === tab.id;
-            
+
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 py-4 border-b-2 transition-colors ${
-                  isActive
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+                className={`flex items-center space-x-2 px-6 py-4 text-sm font-bold transition-all relative ${isActive
+                    ? 'text-trust-900 before:absolute before:bottom-0 before:left-0 before:right-0 before:h-1 before:bg-trust-900 before:rounded-t-full'
+                    : 'text-gray-400 hover:text-trust-600'
+                  }`}
               >
-                <Icon className="h-4 w-4" />
-                <span className="font-medium">{tab.name}</span>
-                {tab.required && (
-                  <span className="text-xs text-red-500">*</span>
-                )}
+                <Icon className={`h-4 w-4 ${isActive ? 'text-trust-900' : 'text-gray-300'}`} />
+                <span>{tab.name}</span>
                 {data && (
-                  <span className="text-xs text-gray-400">
-                    ({stats.rows} rows)
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono ${isActive ? 'bg-trust-100 text-trust-600' : 'bg-gray-100 text-gray-400'}`}>
+                    {stats.rows}
                   </span>
                 )}
               </button>
@@ -332,9 +328,9 @@ const DataPreview = ({
         {tabs.map((tab) => {
           const data = getTabData(tab.id);
           const stats = getTabStats(data);
-          
+
           if (activeTab !== tab.id) return null;
-          
+
           return (
             <motion.div
               key={tab.id}
@@ -352,7 +348,7 @@ const DataPreview = ({
                     {stats.rows} rows • {stats.columns} columns
                   </p>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   {tab.id === 'meta' && !editingMetadata && (
                     <button
@@ -363,7 +359,7 @@ const DataPreview = ({
                       <span>Edit</span>
                     </button>
                   )}
-                  
+
                   {data && (
                     <button
                       onClick={() => downloadData(tab.id)}

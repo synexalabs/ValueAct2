@@ -8,93 +8,75 @@ const SettingsPage = () => {
     const [activeTab, setActiveTab] = useState('storage');
 
     const tabs = [
-        { id: 'storage', label: 'Storage', icon: HardDrive },
-        { id: 'profile', label: 'Profile', icon: User },
-        { id: 'security', label: 'Security', icon: Shield },
-        { id: 'notifications', label: 'Notifications', icon: Bell },
-        { id: 'appearance', label: 'Appearance', icon: Palette },
+        { id: 'storage', label: 'Cloud Storage', icon: HardDrive },
+        { id: 'profile', label: 'Actuary Profile', icon: User },
+        { id: 'security', label: 'Security Audit', icon: Shield },
+        { id: 'notifications', label: 'System Alerts', icon: Bell },
+        { id: 'appearance', label: 'Interface Design', icon: Palette },
     ];
 
     const renderTabContent = () => {
         switch (activeTab) {
             case 'storage':
                 return <StorageManager />;
-            case 'profile':
-                return (
-                    <div className="bg-white rounded-lg shadow-sm border p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Profile Settings</h3>
-                        <p className="text-gray-600">Profile settings coming soon...</p>
-                    </div>
-                );
-            case 'security':
-                return (
-                    <div className="bg-white rounded-lg shadow-sm border p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Security Settings</h3>
-                        <p className="text-gray-600">Security settings coming soon...</p>
-                    </div>
-                );
-            case 'notifications':
-                return (
-                    <div className="bg-white rounded-lg shadow-sm border p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Notification Settings</h3>
-                        <p className="text-gray-600">Notification settings coming soon...</p>
-                    </div>
-                );
-            case 'appearance':
-                return (
-                    <div className="bg-white rounded-lg shadow-sm border p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Appearance Settings</h3>
-                        <p className="text-gray-600">Appearance settings coming soon...</p>
-                    </div>
-                );
             default:
-                return null;
+                return (
+                    <div className="bg-white rounded-[2rem] border border-gray-100 p-12 shadow-sm text-center">
+                        <div className="h-20 w-20 bg-trust-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                            <Settings className="h-10 w-10 text-trust-600 animate-pulse" />
+                        </div>
+                        <h3 className="text-2xl font-heading font-bold text-trust-900 mb-2">{tabs.find(t => t.id === activeTab)?.label}</h3>
+                        <p className="text-gray-400 max-w-sm mx-auto">This module is currently undergoing architectural refinement to meet V2.0 standards.</p>
+                    </div>
+                );
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header */}
-                <div className="mb-8">
-                    <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                            <Settings className="h-8 w-8 text-blue-600" />
-                        </div>
-                        <div>
-                            <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-                            <p className="text-gray-600">Manage your application preferences and storage</p>
-                        </div>
+        <div className="space-y-10">
+            {/* Header */}
+            <div>
+                <div className="flex items-center gap-4 mb-4">
+                    <div className="h-12 w-12 bg-trust-900 rounded-2xl flex items-center justify-center shadow-lg shadow-trust-900/20">
+                        <Settings className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                        <h1 className="text-4xl font-heading font-bold text-trust-900">Platform Settings</h1>
+                        <p className="text-gray-400 font-medium">Configure your actuarial environment and security protocols.</p>
                     </div>
                 </div>
+            </div>
 
-                <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Sidebar */}
-                    <div className="lg:w-64">
-                        <nav className="space-y-1">
-                            {tabs.map((tab) => {
-                                const Icon = tab.icon;
-                                return (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setActiveTab(tab.id)}
-                                        className={`w-full flex items-center space-x-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${activeTab === tab.id
-                                                ? 'bg-blue-600 text-white shadow-md'
-                                                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                                            }`}
-                                    >
-                                        <Icon className="h-5 w-5" />
+            <div className="flex flex-col lg:flex-row gap-10">
+                {/* Sidebar */}
+                <div className="lg:w-72">
+                    <nav className="space-y-2">
+                        {tabs.map((tab) => {
+                            const Icon = tab.icon;
+                            const isActive = activeTab === tab.id;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`w-full group flex items-center justify-between px-5 py-4 rounded-2xl transition-all duration-300 ${isActive
+                                            ? 'bg-trust-900 text-white shadow-xl shadow-trust-900/10'
+                                            : 'bg-white text-gray-500 hover:text-trust-900 border border-gray-100 hover:border-trust-200'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-4 text-sm font-bold">
+                                        <Icon className={`h-5 w-5 ${isActive ? 'text-growth-400' : 'text-gray-400 group-hover:text-trust-600'}`} />
                                         <span>{tab.label}</span>
-                                    </button>
-                                );
-                            })}
-                        </nav>
-                    </div>
+                                    </div>
+                                    <div className={`h-1.5 w-1.5 rounded-full transition-all ${isActive ? 'bg-growth-400 scale-125' : 'bg-transparent'}`} />
+                                </button>
+                            );
+                        })}
+                    </nav>
+                </div>
 
-                    {/* Main Content */}
-                    <div className="flex-1">
-                        {renderTabContent()}
-                    </div>
+                {/* Main Content */}
+                <div className="flex-1">
+                    {renderTabContent()}
                 </div>
             </div>
         </div>

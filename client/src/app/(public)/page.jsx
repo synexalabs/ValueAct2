@@ -18,80 +18,88 @@ export default function LandingPage() {
 
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-[800px] bg-gradient-to-br from-trust-50 to-white -z-10 rounded-b-[4rem]" />
+                <div className="absolute top-0 left-0 w-full h-[1000px] bg-gradient-to-br from-trust-50/50 to-white -z-10 rounded-b-[5rem]" />
+                <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-trust-100/20 blur-[120px] rounded-full -z-10" />
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid lg:grid-cols-2 gap-16 items-center">
+                    <div className="grid lg:grid-cols-2 gap-20 items-center">
                         <div className="animate-fade-in-up">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-growth-50 text-growth-700 rounded-full text-sm font-semibold mb-6 border border-growth-100">
+                            <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-growth-50 text-growth-700 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-8 border border-growth-100 shadow-sm">
                                 <span className="relative flex h-2 w-2">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-growth-400 opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-growth-500"></span>
                                 </span>
-                                #1 Rated for Digital Claims
+                                #1 Rated Digital Claims 2024
                             </div>
-                            <h1 className="text-5xl lg:text-7xl font-heading font-bold text-trust-950 leading-[1.1] mb-6">
-                                Life Insurance, <br />
-                                <span className="text-gradient-trust">Reimagined.</span>
+                            <h1 className="text-6xl lg:text-8xl font-heading font-black text-trust-950 leading-[0.95] mb-8 tracking-tighter">
+                                Life <span className="text-trust-600">Insurance</span> <br />
+                                <span className="italic font-light">Reimagined.</span>
                             </h1>
-                            <p className="text-xl text-trust-600 mb-8 max-w-lg leading-relaxed">
-                                Experience German engineering meets modern simplicity.
-                                Get fully digital coverage in under 5 minutes. No paperwork, just peace of mind.
+                            <p className="text-xl text-gray-400 mb-10 max-w-lg leading-relaxed font-medium">
+                                German engineering meets modern simplicity. Secure your legacy with a fully digital architecture in under 5 minutes.
                             </p>
 
-                            <div className="flex flex-col sm:flex-row gap-4 mb-12">
-                                <Link href="/get-quote" className="flex items-center justify-center px-8 py-4 bg-trust-600 text-white rounded-2xl font-bold text-lg hover:bg-trust-700 transition-all hover:-translate-y-1 shadow-warm hover:shadow-lg">
-                                    Check Your Price
-                                    <ArrowRight className="ml-2 h-5 w-5" />
+                            <div className="flex flex-col sm:flex-row gap-5 mb-14">
+                                <Link href="/get-quote" className="group flex items-center justify-center px-10 py-5 bg-trust-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-trust-900 transition-all hover:-translate-y-1 shadow-2xl shadow-trust-900/20 active:scale-95">
+                                    Calculate Coverage
+                                    <ArrowRight size={18} className="ml-3 text-growth-400 group-hover:translate-x-1 transition-transform" />
                                 </Link>
-                                <button className="flex items-center justify-center px-8 py-4 bg-white text-trust-700 border border-trust-200 rounded-2xl font-bold text-lg hover:bg-trust-50 transition-all">
-                                    How it Works
+                                <button className="flex items-center justify-center px-10 py-5 bg-white text-trust-900 border border-gray-100 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-gray-50 transition-all shadow-sm active:scale-95">
+                                    Core Architecture
                                 </button>
                             </div>
 
-                            <div className="flex gap-8 text-sm font-medium text-trust-500">
-                                <div className="flex items-center gap-2">
-                                    <Check className="h-5 w-5 text-growth-500" />
+                            <div className="flex flex-wrap gap-10 text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-2 w-2 rounded-full bg-growth-500" />
                                     BaFin Regulated
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Check className="h-5 w-5 text-growth-500" />
+                                <div className="flex items-center gap-3">
+                                    <div className="h-2 w-2 rounded-full bg-growth-500" />
                                     TÜV Certified
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <Check className="h-5 w-5 text-growth-500" />
-                                    Cancel Daily
+                                <div className="flex items-center gap-3">
+                                    <div className="h-2 w-2 rounded-full bg-growth-500" />
+                                    Instant Liquidity
                                 </div>
                             </div>
                         </div>
 
                         {/* Calculator Widget */}
                         <div className="relative animate-scale-in" style={{ animationDelay: '0.2s' }}>
-                            <div className="absolute -inset-4 bg-gradient-to-r from-trust-100 to-growth-100 rounded-[2.5rem] blur-2xl opacity-50"></div>
-                            <div className="relative bg-white rounded-[2rem] p-8 shadow-glass border border-trust-100">
-                                <div className="flex items-center justify-between mb-8">
-                                    <h3 className="text-2xl font-heading font-bold text-trust-900">Quick Estimate</h3>
-                                    <div className="p-2 bg-trust-50 rounded-full text-trust-600">
-                                        <Zap className="h-5 w-5" />
+                            <div className="absolute -inset-10 bg-gradient-to-tr from-trust-200/30 to-growth-200/30 rounded-[4rem] blur-[80px] opacity-40"></div>
+                            <div className="relative bg-white/80 backdrop-blur-2xl rounded-[3rem] p-10 shadow-glass border border-white/50">
+                                <div className="flex items-center justify-between mb-10">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-black text-trust-600 uppercase tracking-[0.3em] mb-1">Precision Quote</span>
+                                        <h3 className="text-3xl font-heading font-black text-trust-950 tracking-tight">Quick Estimate.</h3>
+                                    </div>
+                                    <div className="h-12 w-12 bg-trust-950 rounded-2xl flex items-center justify-center text-growth-400 shadow-lg">
+                                        <Zap size={24} className="fill-growth-400" />
                                     </div>
                                 </div>
 
-                                <div className="space-y-6">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-trust-700 mb-2">Age</label>
+                                <div className="space-y-10">
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-end">
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Target Age</label>
+                                            <span className="text-lg font-black text-trust-900">{age} <span className="text-[10px] text-gray-400 ml-0.5">YRS</span></span>
+                                        </div>
                                         <input
                                             type="range"
                                             min="18"
                                             max="65"
                                             value={age}
                                             onChange={(e) => setAge(parseInt(e.target.value))}
-                                            className="w-full h-2 bg-trust-100 rounded-lg appearance-none cursor-pointer accent-trust-600"
+                                            className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-trust-950"
                                         />
-                                        <div className="mt-2 text-right font-bold text-trust-900">{age} Years</div>
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-semibold text-trust-700 mb-2">Coverage Amount</label>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-end">
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Coverage Target</label>
+                                            <span className="text-lg font-black text-trust-900">€{amount.toLocaleString()}</span>
+                                        </div>
                                         <input
                                             type="range"
                                             min="50000"
@@ -99,21 +107,27 @@ export default function LandingPage() {
                                             step="10000"
                                             value={amount}
                                             onChange={(e) => setAmount(parseInt(e.target.value))}
-                                            className="w-full h-2 bg-trust-100 rounded-lg appearance-none cursor-pointer accent-trust-600"
+                                            className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-trust-950"
                                         />
-                                        <div className="mt-2 text-right font-bold text-trust-900">€{amount.toLocaleString()}</div>
                                     </div>
 
-                                    <div className="pt-6 border-t border-trust-50">
-                                        <div className="flex justify-between items-end mb-2">
-                                            <span className="text-trust-500 font-medium">Monthly Premium</span>
-                                            <span className="text-4xl font-bold text-trust-900">€{price}</span>
+                                    <div className="pt-8 border-t border-gray-100">
+                                        <div className="flex justify-between items-center mb-10">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Monthly Settlement</span>
+                                                <div className="flex items-baseline gap-1">
+                                                    <span className="text-5xl font-heading font-black text-trust-950 tracking-tighter">€{price}</span>
+                                                    <span className="text-[10px] font-bold text-gray-400 uppercase">/ Month</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <p className="text-xs text-trust-400 text-right mb-6">*Sample calculation for non-smoker</p>
 
-                                        <button className="w-full py-4 bg-trust-900 text-white rounded-xl font-bold text-lg hover:bg-trust-800 transition-colors shadow-lg">
-                                            Lock in this Price
+                                        <button className="w-full py-5 bg-trust-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-trust-900 transition-all shadow-2xl shadow-trust-900/20 active:scale-95">
+                                            Finalize Verification
                                         </button>
+                                        <p className="text-[8px] font-bold text-gray-400 text-center uppercase tracking-widest mt-6">
+                                            *Calculated for non-smoker based on dynamic health parameters.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -123,37 +137,37 @@ export default function LandingPage() {
             </section>
 
             {/* Features Grid */}
-            <section className="py-24 bg-white">
+            <section className="py-32 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center max-w-3xl mx-auto mb-16">
-                        <span className="text-growth-600 font-semibold tracking-wide uppercase">Why FairLife</span>
-                        <h2 className="mt-3 text-4xl font-heading font-bold text-trust-950">Insurance that actually works for you</h2>
+                    <div className="text-center max-w-3xl mx-auto mb-20">
+                        <span className="text-[10px] font-black text-growth-600 uppercase tracking-[0.4em]">Core Foundations</span>
+                        <h2 className="mt-4 text-5xl font-heading font-black text-trust-950 tracking-tight leading-[1.1]">The New Standard in <br />Financial Protection.</h2>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-3 gap-12">
                         {[
                             {
                                 icon: Shield,
-                                title: "Full Digital Protection",
-                                desc: "No paperwork, no fax machines. Manage everything from your phone."
+                                title: "Neural Architecture",
+                                desc: "Proprietary risk assessment engine for instantaneous, precise coverage allocation."
                             },
                             {
                                 icon: Heart,
-                                title: "Human Support",
-                                desc: "Real experts available 24/7 via chat or phone when you need them."
+                                title: "Bespoke Guidance",
+                                desc: "Elite advisors synchronized with your digital portfolio 24/7 for total visibility."
                             },
                             {
                                 icon: Check,
-                                title: "Daily Cancellation",
-                                desc: "Stay because you want to, not because you have to. Flexible contracts."
+                                title: "Infinite Flexibility",
+                                desc: "Policies that breathe with your life. Daily liquidity options with zero lock-in."
                             }
                         ].map((feature, i) => (
-                            <div key={i} className="p-8 rounded-3xl bg-trust-50/50 border border-trust-100 hover:bg-white hover:shadow-xl transition-all duration-300">
-                                <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-6 text-trust-600">
-                                    <feature.icon className="h-7 w-7" />
+                            <div key={i} className="p-10 rounded-[3rem] bg-gray-50/50 border border-gray-100 hover:bg-white hover:shadow-glass hover:-translate-y-2 transition-all duration-500 group">
+                                <div className="w-16 h-16 bg-white rounded-[1.5rem] flex items-center justify-center shadow-sm mb-8 text-trust-900 group-hover:bg-trust-950 group-hover:text-white transition-all duration-500">
+                                    <feature.icon size={32} />
                                 </div>
-                                <h3 className="text-xl font-bold text-trust-900 mb-3">{feature.title}</h3>
-                                <p className="text-trust-600 leading-relaxed">{feature.desc}</p>
+                                <h3 className="text-xl font-black font-heading text-trust-900 mb-4 uppercase tracking-tight">{feature.title}</h3>
+                                <p className="text-sm text-gray-500 font-medium leading-relaxed">{feature.desc}</p>
                             </div>
                         ))}
                     </div>

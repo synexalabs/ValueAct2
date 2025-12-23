@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 import logging
 from typing import List, Dict, Any
+from datetime import datetime, timezone
 import os
 
 from models.request import IFRS17Request, SolvencyRequest
@@ -79,7 +80,7 @@ async def health_check():
     """Detailed health check endpoint"""
     return {
         "status": "healthy",
-        "timestamp": "2024-01-01T00:00:00Z",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "version": "1.0.0",
         "environment": os.getenv("ENVIRONMENT", "development")
     }

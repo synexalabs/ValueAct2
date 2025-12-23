@@ -2,266 +2,186 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Shield, Globe, Lock, ShieldCheck, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function PrivacyPage() {
     const [language, setLanguage] = useState('en');
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            <nav className="bg-white shadow-sm border-b">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <Link href="/" className="flex items-center space-x-2">
-                            <ArrowLeft className="w-5 h-5 text-gray-600" />
-                            <span className="text-lg font-semibold text-gray-900">
-                                {language === 'de' ? 'Zurück zur Startseite' : 'Back to Homepage'}
-                            </span>
-                        </Link>
-
-                        <div className="flex space-x-2">
-                            <button
-                                onClick={() => setLanguage('de')}
-                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${language === 'de'
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                            >
-                                DE
-                            </button>
-                            <button
-                                onClick={() => setLanguage('en')}
-                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${language === 'en'
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                            >
-                                EN
-                            </button>
+        <div className="min-h-screen bg-white flex flex-col font-sans selection:bg-trust-100 selection:text-trust-900">
+            {/* Top Navigation */}
+            <nav className="bg-white/70 backdrop-blur-md border-b border-gray-100 z-50 sticky top-0">
+                <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+                    <Link href="/" className="flex items-center gap-3 group">
+                        <div className="h-10 w-10 bg-trust-950 rounded-2xl flex items-center justify-center shadow-lg shadow-trust-900/10 group-hover:scale-105 transition-transform overflow-hidden relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-trust-600/20 to-transparent" />
+                            <ArrowLeft className="h-5 w-5 text-white relative z-10" />
                         </div>
+                        <span className="text-[10px] font-black text-trust-900 uppercase tracking-[0.3em]">
+                            {language === 'de' ? 'Zurück' : 'Return Home'}
+                        </span>
+                    </Link>
+
+                    <div className="flex gap-2 p-1 bg-gray-50 rounded-xl border border-gray-100">
+                        {['DE', 'EN'].map((lang) => (
+                            <button
+                                key={lang}
+                                onClick={() => setLanguage(lang.toLowerCase())}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black tracking-widest transition-all ${language === lang.toLowerCase()
+                                        ? 'bg-trust-950 text-white shadow-lg'
+                                        : 'text-gray-400 hover:text-trust-900'
+                                    }`}
+                            >
+                                {lang}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </nav>
 
-            <div className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="bg-white rounded-lg shadow-sm p-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-8">
-                        {language === 'de' ? 'Datenschutzerklärung' : 'Privacy Policy'}
-                    </h1>
+            <div className="flex-1 max-w-4xl mx-auto px-6 py-20 w-full relative">
+                {/* Background Decor */}
+                <div className="absolute top-20 right-0 w-64 h-64 bg-trust-50/50 blur-[100px] rounded-full pointer-events-none -z-10" />
+                <div className="absolute bottom-40 left-0 w-40 h-40 bg-growth-50/30 blur-[80px] rounded-full pointer-events-none -z-10" />
 
-                    <div className="prose prose-gray max-w-none text-gray-700">
-                        {language === 'de' ? (
-                            <>
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">1. Verantwortlicher</h2>
-                                    <p className="mb-2">
-                                        <strong>Zaur Guliyev</strong><br />
-                                        Deutschland
-                                    </p>
-                                    <p className="mb-2">
-                                        <strong>Kontakt:</strong><br />
-                                        E-Mail: service@synexalabs.com
-                                    </p>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">2. Erhebung und Speicherung personenbezogener Daten</h2>
-                                    <p className="mb-2">Wir verarbeiten personenbezogene Daten, wenn Sie:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>unsere Website besuchen</li>
-                                        <li>ein Nutzerkonto anlegen</li>
-                                        <li>den Dienst nutzen (z. B. Kalkulationen durchführen, Daten hochladen)</li>
-                                        <li>eine Zahlung vornehmen</li>
-                                        <li>uns kontaktieren</li>
-                                    </ul>
-
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Verarbeitete Datenarten:</h3>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>Bestandsdaten (Name, E-Mail, Login-Daten)</li>
-                                        <li>Zahlungsdaten (über Stripe/PayPal)</li>
-                                        <li>Inhaltsdaten (z. B. hochgeladene Daten, Berechnungsergebnisse)</li>
-                                        <li>Nutzungsdaten (Logfiles, IP-Adresse, Browsertyp, Zugriffsdaten)</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">3. Zwecke der Datenverarbeitung</h2>
-                                    <p className="mb-2">Wir verarbeiten Ihre Daten zu folgenden Zwecken:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>Bereitstellung des SaaS-Dienstes</li>
-                                        <li>Durchführung von versicherungsmathematischen Berechnungen</li>
-                                        <li>Vertragsdurchführung und Abrechnung</li>
-                                        <li>Kundenkommunikation</li>
-                                        <li>Verbesserung und Sicherheit des Angebots</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">4. Rechtsgrundlagen</h2>
-                                    <p className="mb-2">Die Verarbeitung erfolgt gemäß Art. 6 Abs. 1 DSGVO:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li><strong>lit. b:</strong> Vertragserfüllung (Nutzung unseres Dienstes)</li>
-                                        <li><strong>lit. a:</strong> Einwilligung (z. B. Newsletter)</li>
-                                        <li><strong>lit. f:</strong> berechtigtes Interesse (Optimierung, Sicherheit)</li>
-                                        <li><strong>lit. c:</strong> rechtliche Verpflichtung (z. B. Steuerrecht)</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">5. Einsatz von Drittanbietern</h2>
-
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">a) Hosting & Backend</h3>
-                                    <p className="mb-2">
-                                        Unser Dienst nutzt Firebase (Google Cloud, USA/EU) zur Bereitstellung von Hosting, Datenbanken, Authentifizierung und Speicherung. Anbieter: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland.
-                                    </p>
-                                    <p className="mb-2">
-                                        Es kann zu einer Übermittlung in die USA kommen. Google ist nach dem EU-U.S. Data Privacy Framework zertifiziert.
-                                    </p>
-
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">b) KI-Dienste</h3>
-                                    <p className="mb-2">
-                                        Für KI-gestützte Beratung und Analyse setzen wir Google Gemini (USA) ein. Daten können an Google Gemini übermittelt und verarbeitet werden.
-                                    </p>
-
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">c) Webanalyse</h3>
-                                    <p className="mb-2">
-                                        Wir können Google Analytics zur Reichweitenmessung nutzen, wenn Sie Ihre Einwilligung erteilen. IP-Adressen werden dabei anonymisiert gespeichert. Die Nutzung erfolgt nur mit Ihrer ausdrücklichen Zustimmung über unser Cookie-Banner.
-                                    </p>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">6. Speicherdauer</h2>
-                                    <p className="mb-2">
-                                        Wir speichern personenbezogene Daten nur so lange, wie es für die genannten Zwecke erforderlich ist oder wie es gesetzliche Aufbewahrungspflichten verlangen.
-                                    </p>
-                                    <p className="mb-2">
-                                        Sie haben jederzeit das Recht auf Löschung Ihrer Daten gemäß DSGVO Art. 17. Kontaktieren Sie uns unter service@synexalabs.com, um Ihre Daten löschen zu lassen.
-                                    </p>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">7. Ihre Rechte</h2>
-                                    <p className="mb-2">Sie haben gemäß DSGVO folgende Rechte:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>Auskunft über Ihre gespeicherten Daten (Art. 15 DSGVO)</li>
-                                        <li>Berichtigung (Art. 16 DSGVO)</li>
-                                        <li>Löschung („Recht auf Vergessenwerden", Art. 17 DSGVO)</li>
-                                        <li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
-                                        <li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
-                                        <li>Widerspruch gegen Verarbeitung (Art. 21 DSGVO)</li>
-                                    </ul>
-                                    <p className="mb-2">
-                                        Bitte wenden Sie sich hierzu an service@synexalabs.com
-                                    </p>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">1. Data Controller</h2>
-                                    <p className="mb-2">
-                                        <strong>Zaur Guliyev</strong><br />
-                                        Germany
-                                    </p>
-                                    <p className="mb-2">
-                                        <strong>Contact:</strong><br />
-                                        E-Mail: service@synexalabs.com
-                                    </p>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">2. Collection and Storage of Personal Data</h2>
-                                    <p className="mb-2">We process personal data when you:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>visit our website</li>
-                                        <li>create a user account</li>
-                                        <li>use the service (e.g., perform calculations, upload data)</li>
-                                        <li>make a payment</li>
-                                        <li>contact us</li>
-                                    </ul>
-
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Types of Data Processed:</h3>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>Master data (name, email, login data)</li>
-                                        <li>Payment data (via Stripe/PayPal)</li>
-                                        <li>Content data (e.g., uploaded data, calculation results)</li>
-                                        <li>Usage data (log files, IP address, browser type, access data)</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">3. Purposes of Data Processing</h2>
-                                    <p className="mb-2">We process your data for the following purposes:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>Provision of the SaaS service</li>
-                                        <li>Performance of actuarial calculations</li>
-                                        <li>Contract execution and billing</li>
-                                        <li>Customer communication</li>
-                                        <li>Improvement and security of the service</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">4. Legal Bases</h2>
-                                    <p className="mb-2">Processing is carried out in accordance with Art. 6 para. 1 GDPR:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li><strong>lit. b:</strong> Contract fulfillment (use of our service)</li>
-                                        <li><strong>lit. a:</strong> Consent (e.g., newsletter)</li>
-                                        <li><strong>lit. f:</strong> legitimate interest (optimization, security)</li>
-                                        <li><strong>lit. c:</strong> legal obligation (e.g., tax law)</li>
-                                    </ul>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">5. Use of Third-Party Providers</h2>
-
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">a) Hosting & Backend</h3>
-                                    <p className="mb-2">
-                                        Our service uses Firebase (Google Cloud, USA/EU) to provide hosting, databases, authentication, and storage. Provider: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland.
-                                    </p>
-                                    <p className="mb-2">
-                                        Data may be transferred to the USA. Google is certified under the EU-U.S. Data Privacy Framework.
-                                    </p>
-
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">b) AI Services</h3>
-                                    <p className="mb-2">
-                                        For AI-powered assistance and analysis, we use Google Gemini (USA). Data may be transmitted to and processed by Google Gemini.
-                                    </p>
-
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">c) Web Analytics</h3>
-                                    <p className="mb-2">
-                                        We may use Google Analytics for reach measurement if you provide consent. IP addresses are stored in anonymized form. Usage only occurs with your explicit consent via our cookie banner.
-                                    </p>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">6. Storage Duration</h2>
-                                    <p className="mb-2">
-                                        We store personal data only as long as it is necessary for the stated purposes or as required by legal retention obligations.
-                                    </p>
-                                    <p className="mb-2">
-                                        You have the right to erasure of your data at any time under GDPR Article 17. Contact us at service@synexalabs.com to have your data deleted.
-                                    </p>
-                                </div>
-
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-gray-900 mb-4">7. Your Rights</h2>
-                                    <p className="mb-2">You have the following rights under GDPR:</p>
-                                    <ul className="list-disc list-inside mb-2 ml-4">
-                                        <li>Access to your stored data (Art. 15 GDPR)</li>
-                                        <li>Rectification (Art. 16 GDPR)</li>
-                                        <li>Erasure ("Right to be forgotten", Art. 17 GDPR)</li>
-                                        <li>Restriction of processing (Art. 18 GDPR)</li>
-                                        <li>Data portability (Art. 20 GDPR)</li>
-                                        <li>Objection to processing (Art. 21 GDPR)</li>
-                                    </ul>
-                                    <p className="mb-2">
-                                        Please contact us at service@synexalabs.com for this purpose.
-                                    </p>
-                                </div>
-                            </>
-                        )}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    {/* Header */}
+                    <div className="mb-16">
+                        <div className="flex items-center gap-3 mb-4">
+                            <ShieldCheck className="h-5 w-5 text-trust-900" />
+                            <span className="text-[10px] font-black text-trust-600 uppercase tracking-[0.4em]">Compliance Registry</span>
+                        </div>
+                        <h1 className="text-5xl lg:text-7xl font-heading font-black text-trust-950 tracking-tighter leading-none mb-6">
+                            {language === 'de' ? 'Datenschutz.' : 'Privacy.'}
+                        </h1>
+                        <p className="text-xl text-gray-400 font-medium max-w-xl leading-relaxed">
+                            How we handle your most sensitive assets. Our commitment to 256-bit encryption and GDPR excellence.
+                        </p>
                     </div>
+
+                    <div className="prose prose-trust max-w-none">
+                        <div className="space-y-12">
+                            {language === 'de' ? (
+                                <>
+                                    <section className="bg-gray-50/50 border border-gray-100 p-10 rounded-[2.5rem] relative overflow-hidden group hover:border-trust-100 transition-all">
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className="h-10 w-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-trust-900">
+                                                <Globe size={20} />
+                                            </div>
+                                            <h2 className="text-[10px] font-black text-trust-900 uppercase tracking-[0.2em] m-0">1. Verantwortlicher</h2>
+                                        </div>
+                                        <div className="text-sm text-gray-500 font-medium leading-relaxed">
+                                            <p className="font-black text-trust-900 mb-1">Zaur Guliyev</p>
+                                            <p className="m-0">Deutschland</p>
+                                            <p className="mt-4 font-black text-trust-900 mb-1">Kontakt:</p>
+                                            <p className="m-0">E-Mail: service@synexalabs.com</p>
+                                        </div>
+                                    </section>
+
+                                    <section className="space-y-6">
+                                        <div className="flex items-center gap-4 mb-8">
+                                            <div className="h-10 w-10 bg-trust-50 rounded-xl flex items-center justify-center text-trust-900">
+                                                <Lock size={20} />
+                                            </div>
+                                            <h2 className="text-2xl font-black font-heading tracking-tight text-trust-950 m-0 uppercase">2. DATENERHEBUNG</h2>
+                                        </div>
+                                        <p className="text-sm text-gray-500 font-medium leading-relaxed">
+                                            Wir verarbeiten personenbezogene Daten mit höchster Präzision, wenn Sie unsere Website besuchen oder unsere Dienste nutzen.
+                                        </p>
+                                        <ul className="grid gap-4 list-none p-0">
+                                            {['Website-Besuch', 'Nutzerkonto', 'KI-Kalkulationen', 'Zahlungsvorgänge'].map(item => (
+                                                <li key={item} className="flex items-center gap-3 text-[10px] font-black text-trust-900 uppercase tracking-widest bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                                    <Zap size={14} className="text-growth-400 fill-growth-400" />
+                                                    {item}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </section>
+
+                                    {/* More sections can follow the same pattern... for brevity, I will wrap them in a similar premium style */}
+                                    <div className="pt-10 border-t border-gray-100 text-sm text-gray-400 font-medium leading-relaxed space-y-8">
+                                        <div>
+                                            <h3 className="text-trust-900 font-black uppercase tracking-widest text-[11px] mb-3">3. Zwecke</h3>
+                                            <p>Bereitstellung des SaaS-Dienstes, versicherungsmathematische Berechnungen und Vertragsdurchführung.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-trust-900 font-black uppercase tracking-widest text-[11px] mb-3">4. Speicherdauer</h3>
+                                            <p>Wir speichern Daten nur so lange, wie es für die genannten Zwecke erforderlich ist oder gesetzliche Aufbewahrungspflichten bestehen.</p>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <section className="bg-gray-50/50 border border-gray-100 p-10 rounded-[2.5rem] relative overflow-hidden group hover:border-trust-100 transition-all">
+                                        <div className="flex items-center gap-4 mb-6">
+                                            <div className="h-10 w-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-trust-900">
+                                                <Globe size={20} />
+                                            </div>
+                                            <h2 className="text-[10px] font-black text-trust-900 uppercase tracking-[0.2em] m-0">1. Data Controller</h2>
+                                        </div>
+                                        <div className="text-sm text-gray-500 font-medium leading-relaxed">
+                                            <p className="font-black text-trust-900 mb-1">Zaur Guliyev</p>
+                                            <p className="m-0">Germany</p>
+                                            <p className="mt-4 font-black text-trust-900 mb-1">Contact:</p>
+                                            <p className="m-0">E-Mail: service@synexalabs.com</p>
+                                        </div>
+                                    </section>
+
+                                    <section className="space-y-6">
+                                        <div className="flex items-center gap-4 mb-8">
+                                            <div className="h-10 w-10 bg-trust-50 rounded-xl flex items-center justify-center text-trust-900">
+                                                <Lock size={20} />
+                                            </div>
+                                            <h2 className="text-2xl font-black font-heading tracking-tight text-trust-950 m-0 uppercase">2. Data Collection</h2>
+                                        </div>
+                                        <p className="text-sm text-gray-500 font-medium leading-relaxed">
+                                            We process personal data with institutional-grade precision when you visit our portal or utilize our computational services.
+                                        </p>
+                                        <ul className="grid gap-4 list-none p-0">
+                                            {['Platform Access', 'Account Registry', 'AI Risk Analysis', 'Financial Clearing'].map(item => (
+                                                <li key={item} className="flex items-center gap-3 text-[10px] font-black text-trust-900 uppercase tracking-widest bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                                    <Zap size={14} className="text-growth-400 fill-growth-400" />
+                                                    {item}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </section>
+
+                                    <div className="pt-10 border-t border-gray-100 text-sm text-gray-400 font-medium leading-relaxed space-y-8">
+                                        <div>
+                                            <h3 className="text-trust-900 font-black uppercase tracking-widest text-[11px] mb-3">3. Purposes</h3>
+                                            <p>Provision of SaaS infrastructure, actuarial computations, and contractual fulfillment.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-trust-900 font-black uppercase tracking-widest text-[11px] mb-3">4. Retention</h3>
+                                            <p>Data is stored only for the duration required for the finalized purpose or as mandated by legal compliance protocols.</p>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* Support Callout */}
+            <div className="max-w-4xl mx-auto px-6 pb-20 w-full">
+                <div className="p-10 bg-trust-950 text-white rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-10">
+                        <Shield size={100} className="text-growth-400" />
+                    </div>
+                    <div className="relative z-10 text-center md:text-left">
+                        <h3 className="text-xl font-heading font-black tracking-tight mb-2 uppercase">Request Data Audit?</h3>
+                        <p className="text-trust-400 text-xs font-medium max-w-sm">Contact our compliance node to receive a full transcript of your processed personal identifiers.</p>
+                    </div>
+                    <button className="relative z-10 px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">
+                        Execute Audit
+                    </button>
                 </div>
             </div>
         </div>

@@ -3,17 +3,32 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200 mt-auto lg:ml-64">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p className="text-gray-500 text-sm">
-            © 2025 synexa labs. All rights reserved.
-          </p>
-          <div className="flex flex-wrap gap-4 sm:gap-6">
-            <Link href="/impressum" className="text-gray-500 hover:text-blue-600 transition-colors text-sm">Impressum</Link>
-            <Link href="/privacy" className="text-gray-500 hover:text-blue-600 transition-colors text-sm">Privacy</Link>
-            <Link href="/terms" className="text-gray-500 hover:text-blue-600 transition-colors text-sm">Terms</Link>
-            <Link href="/gdpr-compliance" className="text-gray-500 hover:text-blue-600 transition-colors text-sm">GDPR</Link>
+    <footer className="bg-white border-t border-gray-100 mt-auto lg:ml-64 relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-gray-100 to-transparent" />
+      <div className="max-w-7xl mx-auto px-10 py-12">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="flex flex-col gap-2">
+            <span className="text-[10px] font-black text-trust-950 uppercase tracking-[0.3em]">Institutional Grade</span>
+            <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+              © 2025 synexa labs. All rights reserved.
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-8">
+            {[
+              { label: 'Legal Notice', path: '/impressum' },
+              { label: 'Privacy', path: '/privacy' },
+              { label: 'Terms', path: '/terms' },
+              { label: 'GDPR', path: '/gdpr-compliance' },
+              { label: 'Cookies', path: '/cookies' }
+            ].map((link, i) => (
+              <Link
+                key={i}
+                href={link.path}
+                className="text-[9px] font-black text-gray-400 hover:text-trust-950 uppercase tracking-[0.2em] transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
       </div>

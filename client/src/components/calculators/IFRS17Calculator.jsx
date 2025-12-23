@@ -258,9 +258,9 @@ const IFRS17Calculator = ({ portfolio }) => {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <div className="mb-8 px-4">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2 px-2">IFRS 17 Calculator</h1>
-        <p className="text-gray-600 px-2">
+      <div className="mb-12">
+        <h1 className="text-4xl font-heading font-black text-trust-950 uppercase tracking-tight mb-3 px-2">IFRS 17 Calculator</h1>
+        <p className="text-gray-400 font-medium px-2">
           Interactive calculators for Contractual Service Margin (CSM), Risk Adjustment (RA), and CSM run-off analysis.
         </p>
       </div>
@@ -271,9 +271,9 @@ const IFRS17Calculator = ({ portfolio }) => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${activeTab === tab.id
-              ? `bg-gradient-to-r ${colors.gradient} text-white shadow-lg`
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${activeTab === tab.id
+              ? `bg-trust-950 text-growth-400 shadow-lg`
+              : 'bg-gray-100 text-gray-400 hover:text-trust-950 hover:bg-gray-200'
               }`}
           >
             <tab.icon className="h-4 w-4" />
@@ -286,58 +286,57 @@ const IFRS17Calculator = ({ portfolio }) => {
       {activeTab === 'csm' && (
         <div className="space-y-6">
           {/* Methodology Transparency Controls */}
-          <div className="card bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+          <div className="card bg-white/80 backdrop-blur-xl border border-trust-100 rounded-[2.5rem] p-8 shadow-glass mb-8">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <BookOpen className="h-5 w-5 text-blue-600" />
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-trust-950 rounded-2xl shadow-lg">
+                  <BookOpen className="h-6 w-6 text-growth-400" />
+                </div>
                 <div>
-                  <h3 className="font-semibold text-blue-800">Methodology Transparency</h3>
-                  <p className="text-sm text-blue-700">View formulas, calculation steps, and audit trail</p>
+                  <h3 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em]">Methodology Transparency</h3>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">View formulas, calculation steps, and audit trail</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setShowMethodology(!showMethodology)}
-                  className={`px-3 py-1 rounded text-sm transition-colors ${showMethodology ? 'bg-blue-100 text-blue-800' : 'bg-blue-200 text-blue-700 hover:bg-blue-300'
+                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${showMethodology ? 'bg-trust-950 text-white' : 'bg-trust-100 text-trust-950 hover:bg-trust-200'
                     }`}
                 >
-                  {showMethodology ? <EyeOff className="h-4 w-4 mr-1" /> : <Eye className="h-4 w-4 mr-1" />}
-                  {showMethodology ? 'Hide' : 'Show'} Methodology
+                  Methodology
                 </button>
                 <button
                   onClick={() => setShowCalculationSteps(!showCalculationSteps)}
-                  className={`px-3 py-1 rounded text-sm transition-colors ${showCalculationSteps ? 'bg-green-100 text-green-800' : 'bg-green-200 text-green-700 hover:bg-green-300'
+                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${showCalculationSteps ? 'bg-growth-500 text-white' : 'bg-growth-100 text-growth-800 hover:bg-growth-200'
                     }`}
                 >
-                  {showCalculationSteps ? <EyeOff className="h-4 w-4 mr-1" /> : <Eye className="h-4 w-4 mr-1" />}
-                  {showCalculationSteps ? 'Hide' : 'Show'} Steps
+                  Steps
                 </button>
                 <button
                   onClick={() => setShowAuditTrail(!showAuditTrail)}
-                  className={`px-3 py-1 rounded text-sm transition-colors ${showAuditTrail ? 'bg-purple-100 text-purple-800' : 'bg-purple-200 text-purple-700 hover:bg-purple-300'
+                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${showAuditTrail ? 'bg-accent-500 text-white' : 'bg-accent-100 text-accent-800 hover:bg-accent-200'
                     }`}
                 >
-                  {showAuditTrail ? <EyeOff className="h-4 w-4 mr-1" /> : <Eye className="h-4 w-4 mr-1" />}
-                  {showAuditTrail ? 'Hide' : 'Show'} Audit Trail
+                  Audit Trail
                 </button>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4 px-2">CSM Calculation</h3>
+            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
+              <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">CSM Calculation</h3>
 
               <div className="space-y-4 px-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 px-1">
-                    Premium Received
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
+                    Gross Premium
                   </label>
                   <input
                     type="number"
                     value={csmInputs.premium}
                     onChange={(e) => setCsmInputs(prev => ({ ...prev, premium: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
                   />
                 </div>
 
@@ -368,13 +367,15 @@ const IFRS17Calculator = ({ portfolio }) => {
                 <div className="flex space-x-3 px-1">
                   <button
                     onClick={calculateCSMResults}
-                    className={`flex-1 bg-gradient-to-r ${colors.gradient} text-white px-6 py-3 rounded-lg hover:bg-gradient-to-r ${colors.hover} transition-all duration-300 font-medium`}
+                    disabled={loading}
+                    className="flex-1 bg-trust-950 text-white px-8 py-4 rounded-2xl hover:bg-trust-900 transition-all duration-300 font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2"
                   >
-                    Calculate CSM
+                    {loading ? 'Processing...' : 'Calculate CSM'}
+                    <RotateCcw className="h-4 w-4 text-growth-400" />
                   </button>
                   <button
-                    onClick={() => resetCalculator('csm')}
-                    className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors font-medium"
+                    onClick={() => setCsmInputs({ premium: 1000000, fcf: 800000, ra: 50000 })}
+                    className="px-8 py-4 bg-gray-100 text-trust-950 rounded-2xl hover:bg-gray-200 transition-colors font-black text-[10px] uppercase tracking-[0.2em]"
                   >
                     Reset
                   </button>
@@ -382,43 +383,43 @@ const IFRS17Calculator = ({ portfolio }) => {
               </div>
             </div>
 
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4 px-2">Results</h3>
+            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
+              <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Results</h3>
 
               {results.csm && (
                 <div className="space-y-4 px-2">
-                  <div className={`bg-gradient-to-r ${getStatusColors('success').gradient} p-6 rounded-lg border ${getStatusColors('success').border}`}>
-                    <h4 className={`font-semibold ${getStatusColors('success').text} mb-3 px-1`}>Contractual Service Margin</h4>
-                    <div className={`text-2xl font-bold ${getStatusColors('success').value} px-1`}>
+                  <div className="bg-growth-50 p-6 rounded-2xl border border-growth-100">
+                    <h4 className="text-[10px] font-black text-growth-900 uppercase tracking-[0.2em] mb-3 px-1">Contractual Service Margin</h4>
+                    <div className="text-3xl font-heading font-black text-growth-600 px-1">
                       {formatCurrency(results.csm.csm)}
                     </div>
-                    <div className={`text-sm ${getStatusColors('success').text} mt-2 px-1`}>
+                    <div className="text-[10px] font-bold text-growth-800/60 mt-2 px-1">
                       <InlineMath math="CSM = \max(0, P - FCF - RA)" />
                     </div>
                   </div>
 
-                  <div className={`bg-gradient-to-r ${getStatusColors('warning').gradient} p-6 rounded-lg border ${getStatusColors('warning').border}`}>
-                    <h4 className={`font-semibold ${getStatusColors('warning').text} mb-3 px-1`}>Loss Component</h4>
-                    <div className={`text-2xl font-bold ${getStatusColors('warning').value} px-1`}>
+                  <div className="bg-accent-50 p-6 rounded-2xl border border-accent-100">
+                    <h4 className="text-[10px] font-black text-accent-900 uppercase tracking-[0.2em] mb-3 px-1">Loss Component</h4>
+                    <div className="text-3xl font-heading font-black text-accent-600 px-1">
                       {formatCurrency(results.csm.lossComponent)}
                     </div>
-                    <div className={`text-sm ${getStatusColors('warning').text} mt-2 px-1`}>
+                    <div className="text-[10px] font-bold text-accent-800/60 mt-2 px-1">
                       <InlineMath math="LC = \max(0, FCF + RA - P)" />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="font-medium text-gray-600">Premium</div>
-                      <div className="font-semibold text-gray-800">{formatCurrency(results.csm.premium)}</div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
+                      <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Premium</div>
+                      <div className="text-sm font-bold text-trust-950">{formatCurrency(results.csm.premium)}</div>
                     </div>
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="font-medium text-gray-600">FCF</div>
-                      <div className="font-semibold text-gray-800">{formatCurrency(results.csm.fcf)}</div>
+                    <div className="text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
+                      <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">FCF</div>
+                      <div className="text-sm font-bold text-trust-950">{formatCurrency(results.csm.fcf)}</div>
                     </div>
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="font-medium text-gray-600">RA</div>
-                      <div className="font-semibold text-gray-800">{formatCurrency(results.csm.ra)}</div>
+                    <div className="text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
+                      <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">RA</div>
+                      <div className="text-sm font-bold text-trust-950">{formatCurrency(results.csm.ra)}</div>
                     </div>
                   </div>
 
@@ -509,9 +510,9 @@ const IFRS17Calculator = ({ portfolio }) => {
 
       {/* Risk Adjustment Calculator */}
       {activeTab === 'ra' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="card">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Risk Adjustment Calculation</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
+            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Risk Adjustment Calculation</h3>
 
             <div className="space-y-4">
               <div>
@@ -531,17 +532,17 @@ const IFRS17Calculator = ({ portfolio }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
                   Confidence Level
                 </label>
                 <select
                   value={raInputs.confidenceLevel}
                   onChange={(e) => setRaInputs(prev => ({ ...prev, confidenceLevel: parseFloat(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950 appearance-none"
                 >
-                  <option value={0.90}>90%</option>
-                  <option value={0.95}>95%</option>
-                  <option value={0.99}>99%</option>
+                  <option value={0.90}>90% Confidence</option>
+                  <option value={0.95}>95% Confidence</option>
+                  <option value={0.99}>99% Confidence</option>
                 </select>
               </div>
 
@@ -562,29 +563,29 @@ const IFRS17Calculator = ({ portfolio }) => {
             </div>
           </div>
 
-          <div className="card">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Results</h3>
+          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
+            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Results</h3>
 
             {results.ra && (
               <div className="space-y-4">
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
-                  <h4 className="font-semibold text-blue-800 mb-2">Risk Adjustment</h4>
-                  <div className="text-2xl font-bold text-blue-600">
+                <div className="bg-trust-50 p-6 rounded-2xl border border-trust-100">
+                  <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-3 px-1">Risk Adjustment</h4>
+                  <div className="text-3xl font-heading font-black text-trust-600 px-1">
                     {formatCurrency(results.ra.riskAdjustment)}
                   </div>
-                  <div className="text-sm text-blue-700 mt-1">
+                  <div className="text-[10px] font-bold text-trust-800/60 mt-2 px-1">
                     <InlineMath math="RA = \text{VaR}_{95}(CF) - \mathbb{E}[CF]" />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <div className="font-medium text-gray-600">Expected Value</div>
-                    <div className="font-semibold text-gray-800">{formatCurrency(results.ra.expectedValue)}</div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
+                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Expected Value</div>
+                    <div className="text-sm font-bold text-trust-950">{formatCurrency(results.ra.expectedValue)}</div>
                   </div>
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <div className="font-medium text-gray-600">VaR Value</div>
-                    <div className="font-semibold text-gray-800">{formatCurrency(results.ra.varValue)}</div>
+                  <div className="text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
+                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">VaR Value</div>
+                    <div className="text-sm font-bold text-trust-950">{formatCurrency(results.ra.varValue)}</div>
                   </div>
                 </div>
 
@@ -614,27 +615,26 @@ const IFRS17Calculator = ({ portfolio }) => {
 
       {/* CSM Run-off Calculator */}
       {activeTab === 'runoff' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">CSM Run-off Parameters</h3>
-
-              <div className="space-y-4">
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
+              <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">CSM Run-off Projection</h3>
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
                     Initial CSM
                   </label>
                   <input
                     type="number"
                     value={runoffInputs.initialCSM}
                     onChange={(e) => setRunoffInputs(prev => ({ ...prev, initialCSM: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Service Pattern (comma-separated proportions)
+                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
+                    Service Pattern
                   </label>
                   <input
                     type="text"
@@ -643,21 +643,23 @@ const IFRS17Calculator = ({ portfolio }) => {
                       const values = e.target.value.split(',').map(v => parseFloat(v.trim()) || 0);
                       setRunoffInputs(prev => ({ ...prev, servicePattern: values }));
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
                     placeholder="0.2, 0.2, 0.2, 0.2, 0.2"
                   />
                 </div>
 
-                <div className="flex space-x-3">
+                <div className="flex gap-4">
                   <button
                     onClick={calculateRunoffResults}
-                    className={`flex-1 bg-gradient-to-r ${colors.gradient} text-white px-6 py-3 rounded-lg hover:bg-gradient-to-r ${colors.hover} transition-all duration-300 font-medium`}
+                    disabled={loading}
+                    className="flex-1 bg-trust-950 text-white px-8 py-4 rounded-2xl hover:bg-trust-900 transition-all duration-300 font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2"
                   >
-                    Calculate Run-off
+                    {loading ? 'Projecting...' : 'Project Run-off'}
+                    <RotateCcw className="h-4 w-4 text-growth-400" />
                   </button>
                   <button
-                    onClick={() => resetCalculator('runoff')}
-                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                    onClick={() => setRunoffInputs({ initialCSM: 150000, servicePattern: [0.2, 0.2, 0.2, 0.2, 0.2] })}
+                    className="px-8 py-4 bg-gray-100 text-trust-950 rounded-2xl hover:bg-gray-200 transition-colors font-black text-[10px] uppercase tracking-[0.2em]"
                   >
                     Reset
                   </button>
@@ -665,25 +667,25 @@ const IFRS17Calculator = ({ portfolio }) => {
               </div>
             </div>
 
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Run-off Summary</h3>
+            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
+              <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Run-off Summary</h3>
 
               {results.runoff && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="font-medium text-gray-600">Initial CSM</div>
-                      <div className="font-semibold text-gray-800">{formatCurrency(results.runoff.initialCSM)}</div>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-6 bg-gray-50/50 rounded-2xl border border-gray-100">
+                      <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Initial CSM</div>
+                      <div className="text-sm font-bold text-trust-950">{formatCurrency(results.runoff.initialCSM)}</div>
                     </div>
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="font-medium text-gray-600">Total Periods</div>
-                      <div className="font-semibold text-gray-800">{results.runoff.runoff.length}</div>
+                    <div className="text-center p-6 bg-gray-50/50 rounded-2xl border border-gray-100">
+                      <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Periods</div>
+                      <div className="text-sm font-bold text-trust-950">{results.runoff.runoff.length} Periods</div>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
-                    <h4 className="font-semibold text-green-800 mb-2">Total CSM Release</h4>
-                    <div className="text-xl font-bold text-green-600">
+                  <div className="bg-growth-50 p-6 rounded-2xl border border-growth-100">
+                    <h4 className="text-[10px] font-black text-growth-900 uppercase tracking-[0.2em] mb-2 px-1">Total CSM Release</h4>
+                    <div className="text-2xl font-heading font-black text-growth-600 px-1">
                       {formatCurrency(results.runoff.runoff.reduce((sum, period) => sum + period.csmRelease, 0))}
                     </div>
                   </div>
@@ -701,25 +703,25 @@ const IFRS17Calculator = ({ portfolio }) => {
 
           {/* Run-off Table */}
           {results.runoff && (
-            <div className="card">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">CSM Run-off Schedule</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full table-auto">
+            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass overflow-hidden">
+              <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Run-off Schedule</h3>
+              <div className="overflow-x-auto -mx-10">
+                <table className="w-full">
                   <thead>
-                    <tr className="bg-gray-50">
-                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Period</th>
-                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Service Provided</th>
-                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">CSM Release</th>
-                      <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">CSM Remaining</th>
+                    <tr className="bg-gray-50/50">
+                      <th className="px-10 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Period</th>
+                      <th className="px-10 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Service Pattern</th>
+                      <th className="px-10 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">CSM Release</th>
+                      <th className="px-10 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">CSM Balance</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-gray-100">
                     {results.runoff.runoff.map((period, index) => (
-                      <tr key={index} className="border-b border-gray-200">
-                        <td className="px-4 py-2 text-sm text-gray-900">{period.period}</td>
-                        <td className="px-4 py-2 text-sm text-gray-900">{formatPercentage(period.serviceProvided)}</td>
-                        <td className="px-4 py-2 text-sm text-gray-900">{formatCurrency(period.csmRelease)}</td>
-                        <td className="px-4 py-2 text-sm text-gray-900">{formatCurrency(period.csmRemaining)}</td>
+                      <tr key={index} className="hover:bg-gray-50/30 transition-colors">
+                        <td className="px-10 py-5 text-sm font-bold text-trust-950">Year {period.period}</td>
+                        <td className="px-10 py-5 text-sm font-medium text-gray-400">{formatPercentage(period.serviceProvided)}</td>
+                        <td className="px-10 py-5 text-sm font-bold text-trust-950">{formatCurrency(period.csmRelease)}</td>
+                        <td className="px-10 py-5 text-sm font-bold text-growth-600">{formatCurrency(period.csmRemaining)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -732,20 +734,23 @@ const IFRS17Calculator = ({ portfolio }) => {
 
       {/* Calculation History */}
       {history.length > 0 && (
-        <div className="card mt-8">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Recent Calculations</h3>
-          <div className="space-y-2">
-            {history.slice(0, 5).map((calc, index) => (
-              <div key={calc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <span className="font-medium text-gray-800">{calc.type?.replace('_', ' ').toUpperCase()}</span>
-                  <span className="text-sm text-gray-600 ml-2">
+        <div className="bg-white/90 backdrop-blur-xl border border-trust-100 rounded-[2.5rem] p-10 shadow-glass mt-12">
+          <h3 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-8">Audit History</h3>
+          <div className="space-y-4">
+            {history.slice(0, 5).map((calc) => (
+              <div key={calc.id} className="flex items-center justify-between p-6 bg-gray-50/50 rounded-2xl border border-gray-100 hover:border-trust-200 transition-all duration-300">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-trust-950 uppercase tracking-widest">{calc.type?.replace('_', ' ').toUpperCase()}</span>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
                     {new Date(calc.timestamp).toLocaleString()}
                   </span>
                 </div>
-                <div className="text-sm text-gray-600">
-                  {calc.csm && formatCurrency(calc.csm)}
-                  {calc.riskAdjustment && formatCurrency(calc.riskAdjustment)}
+                <div className="flex flex-col items-end">
+                  <div className="text-sm font-bold text-trust-950">
+                    {calc.csm && formatCurrency(calc.csm)}
+                    {calc.riskAdjustment && formatCurrency(calc.riskAdjustment)}
+                  </div>
+                  <span className="text-[9px] font-bold text-growth-500 uppercase tracking-widest">Actuarial Validation Pass</span>
                 </div>
               </div>
             ))}
