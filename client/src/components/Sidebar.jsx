@@ -34,7 +34,7 @@ const Sidebar = () => {
   // const { user, logout } = useAuth()
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: Home },
+    { name: 'Dashboard', href: '/dashboard', icon: Home },
     { name: 'Data Management', href: '/data', icon: Database },
     { name: 'Valuations', href: '/valuations', icon: Calculator },
     { name: 'Quick Calculators', href: '/calculators', icon: Cpu },

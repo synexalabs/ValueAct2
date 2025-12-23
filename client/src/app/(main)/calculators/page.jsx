@@ -13,7 +13,7 @@ import {
     Download,
     Database
 } from 'lucide-react';
-import { getCalculatorColors } from '../../utils/designSystem';
+import { getCalculatorColors } from '../../../utils/designSystem';
 
 const CalculatorHub = () => {
     const calculators = [

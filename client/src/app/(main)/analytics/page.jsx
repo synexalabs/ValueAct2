@@ -6,8 +6,8 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { TrendingUp, Shield, Activity, DollarSign, AlertTriangle } from 'lucide-react';
-import { data } from '../../utils/api';
-import { formatCurrency, formatPercentage } from '../../utils/formatters';
+import { data } from '../../../utils/api';
+import { formatCurrency, formatPercentage } from '../../../utils/formatters';
 
 // MOCK DATA FOR DEMONSTRATION
 const MOCK_PROJECTION_DATA = [

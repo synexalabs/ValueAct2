@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../../contexts/AuthContext';
 import {
     ChevronRight,
     ChevronLeft,
@@ -14,9 +14,9 @@ import {
     ArrowRight
 } from 'lucide-react';
 
-import FileUploader from '../../components/DataManagement/FileUploader';
-import ValidationStatus from '../../components/DataManagement/ValidationStatus';
-import DataPreview from '../../components/DataManagement/DataPreview';
+import FileUploader from '../../../components/DataManagement/FileUploader';
+import ValidationStatus from '../../../components/DataManagement/ValidationStatus';
+import DataPreview from '../../../components/DataManagement/DataPreview';
 
 /**
  * DataManagement Page

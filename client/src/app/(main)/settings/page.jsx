@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Settings, User, Shield, Bell, Palette, HardDrive } from 'lucide-react';
-import StorageManager from '../../components/StorageManager';
+import StorageManager from '../../../components/StorageManager';
 
 const SettingsPage = () => {
     const [activeTab, setActiveTab] = useState('storage');

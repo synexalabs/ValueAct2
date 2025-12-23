@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
@@ -23,17 +24,33 @@ const Login = ({ onSwitchToRegister }) => {
     setError(''); // Clear error when user types
   };
 
+  const router = useRouter();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
+    // DEMO BYPASS: For Phase 2 Testing of Customer Portal
+    if (formData.email === 'demo@fairlife.de') {
+      router.push('/portal');
+      setLoading(false);
+      return;
+    }
+
     const result = await login(formData.email, formData.password);
-    
-    if (!result.success) {
+
+    if (result.success) {
+      // Role-based routing (MVP: Admin domain check)
+      if (formData.email.includes('@valuact.com')) {
+        router.push('/dashboard');
+      } else {
+        router.push('/portal');
+      }
+    } else {
       setError(result.error);
     }
-    
+
     setLoading(false);
   };
 
@@ -48,7 +65,7 @@ const Login = ({ onSwitchToRegister }) => {
             Access your actuarial workspace
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -72,7 +89,7 @@ const Login = ({ onSwitchToRegister }) => {
                 />
               </div>
             </div>
-            
+
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
