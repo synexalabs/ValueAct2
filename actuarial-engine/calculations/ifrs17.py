@@ -66,6 +66,65 @@ class CoverageUnit(Enum):
     PREMIUM = "premium"
     EXPOSURE = "exposure"
 
+
+def get_dynamic_lapse_rate(base_rate: float, duration: int, policy_type: str = "term_life") -> float:
+    """
+    Calculate duration-dependent lapse rate.
+    
+    Lapse behavior is typically:
+    - Higher in early years (shock lapses)
+    - Stabilizes after year 5
+    - May increase near policy end for term products
+    
+    Args:
+        base_rate: Base annual lapse rate from assumptions
+        duration: Policy duration in years (0-indexed)
+        policy_type: Type of policy for adjustment
+        
+    Returns:
+        Adjusted lapse rate for the specific duration
+    """
+    # Duration-based multipliers based on industry experience
+    LAPSE_MULTIPLIERS = {
+        0: 0.50,   # 50% of base in year 0 (just issued)
+        1: 1.50,   # 150% in year 1 (highest lapses)
+        2: 1.30,   # 130% in year 2
+        3: 1.10,   # 110% in year 3
+        4: 1.00,   # 100% in year 4
+        5: 0.90,   # 90% in year 5
+    }
+    
+    # Get multiplier with default for later durations
+    multiplier = LAPSE_MULTIPLIERS.get(duration, 0.80)  # 80% for duration > 5
+    
+    # Adjust for policy type
+    if policy_type in ["whole_life", "endowment"]:
+        multiplier *= 0.8  # Lower lapses for investment-linked products
+    
+    # Calculate adjusted rate with cap at 50%
+    adjusted_rate = min(base_rate * multiplier, 0.50)
+    
+    return adjusted_rate
+
+
+def get_cumulative_persistence(base_lapse_rate: float, duration: int, policy_type: str = "term_life") -> float:
+    """
+    Calculate cumulative persistence probability using dynamic lapse rates.
+    
+    Args:
+        base_lapse_rate: Base annual lapse rate
+        duration: Number of years
+        policy_type: Type of policy
+        
+    Returns:
+        Probability of policy persisting to given duration
+    """
+    persistence = 1.0
+    for t in range(duration):
+        lapse_rate = get_dynamic_lapse_rate(base_lapse_rate, t, policy_type)
+        persistence *= (1 - lapse_rate)
+    return persistence
+
 def calculate_portfolio_csm(policies: List[Dict[str, Any]], 
                           assumptions: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -405,17 +464,24 @@ def calculate_pv_premiums_proper(policy: pd.Series, assumptions: Dict[str, Any],
     gender = policy.get('gender', 'male')
     mortality_table_id = assumptions['mortality_table']
     lapse_rate = assumptions.get('lapse_rate', 0.05)
+    policy_type = policy.get('policy_type', 'term_life')
+    use_dynamic_lapse = assumptions.get('use_dynamic_lapse', True)
     
     pv_premiums = 0.0
     
     # Project premium cashflows over policy lifetime
     for t in range(policy_term):
-        # Calculate probability of survival and not lapsing to year t
+        # Calculate probability of survival to year t
         survival_probability = get_survival_probability(mortality_table_id, issue_age, t, gender)
-        lapse_probability = (1 - lapse_rate) ** t  # Simplified lapse assumption
+        
+        # Calculate persistence probability using dynamic lapse rates
+        if use_dynamic_lapse:
+            persistence_probability = get_cumulative_persistence(lapse_rate, t, policy_type)
+        else:
+            persistence_probability = (1 - lapse_rate) ** t  # Legacy constant lapse
         
         # Premium paid at beginning of year
-        premium_amount = premium * survival_probability * lapse_probability
+        premium_amount = premium * survival_probability * persistence_probability
         discount_factor = 1 / (1 + discount_rate) ** t
         
         pv_premiums += premium_amount * discount_factor

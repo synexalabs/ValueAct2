@@ -23,6 +23,17 @@ from utils.logging_config import setup_logging
 setup_logging()
 logger = logging.getLogger(__name__)
 
+
+def sanitize_error_message(error: Exception, context: str) -> str:
+    """
+    Sanitize error messages for production responses.
+    Logs full error details but returns safe message to client.
+    """
+    logger.error(f"{context}: {str(error)}", exc_info=True)
+    if os.getenv("ENVIRONMENT") == "development":
+        return f"{context}: {str(error)}"
+    return f"{context} - Please contact support if this persists."
+
 # Create FastAPI application
 app = FastAPI(
     title="Valuact Actuarial Engine",
@@ -32,13 +43,19 @@ app = FastAPI(
     redoc_url="/redoc" if os.getenv("ENVIRONMENT") != "production" else None
 )
 
-# Add CORS middleware
+# Get allowed origins from environment or use defaults
+allowed_origins = os.getenv(
+    "ALLOWED_ORIGINS", 
+    "http://localhost:5173,http://localhost:3000,http://localhost:3001"
+).split(",")
+
+# Add CORS middleware with origin whitelist for production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=allowed_origins if os.getenv("ENVIRONMENT") == "production" else ["*"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 # Add trusted host middleware for production
@@ -103,10 +120,10 @@ async def calculate_ifrs17(request: IFRS17Request):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"IFRS 17 calculation failed: {str(e)}")
+        error_msg = sanitize_error_message(e, "IFRS 17 calculation failed")
         raise HTTPException(
             status_code=500,
-            detail=f"Calculation failed: {str(e)}"
+            detail=error_msg
         )
 
 @app.post("/api/v1/calculate/solvency", response_model=SolvencyResponse)
@@ -145,10 +162,10 @@ async def calculate_solvency(request: SolvencyRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Solvency II calculation failed: {str(e)}")
+        error_msg = sanitize_error_message(e, "Solvency II calculation failed")
         raise HTTPException(
             status_code=500,
-            detail=f"Calculation failed: {str(e)}"
+            detail=error_msg
         )
 
 @app.get("/api/v1/mortality-tables")

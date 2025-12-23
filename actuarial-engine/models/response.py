@@ -95,7 +95,7 @@ class CalculationStatus(BaseModel):
     
 class BatchCalculationRequest(BaseModel):
     """Request model for batch calculations"""
-    calculations: List[Dict[str, Any]] = Field(..., min_items=1, max_items=10, description="List of calculations")
+    calculations: List[Dict[str, Any]] = Field(..., min_length=1, max_length=10, description="List of calculations")
     batch_id: str = Field(..., description="Unique batch identifier")
     priority: Optional[str] = Field("normal", description="Calculation priority")
     

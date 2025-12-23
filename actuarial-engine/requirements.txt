@@ -1,11 +1,25 @@
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-pydantic==2.5.3
-numpy==1.26.3
-pandas==2.1.4
-scipy==1.11.4
-python-dateutil==2.8.2
-python-multipart==0.0.6
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-python-dotenv==1.0.0
+# Valuact Actuarial Engine - Python Dependencies
+# Updated: December 2024
+
+# Web Framework
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+
+# Data Validation
+pydantic>=2.10.0
+
+# Scientific Computing
+numpy>=2.0.0
+pandas>=2.2.0
+scipy>=1.14.0
+
+# Utilities
+python-dateutil>=2.9.0
+python-multipart>=0.0.18
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-dotenv>=1.0.1
+
+# Testing (optional)
+pytest>=8.0.0
+requests>=2.32.0

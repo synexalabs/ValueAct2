@@ -17,6 +17,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'data'))
 
 from data.mortality_tables import get_mortality_rate, get_survival_probability, get_mortality_table
 
+# Import regulatory constants for Solvency II parameters
+from utils.regulatory_constants import (
+    EQUITY_SHOCKS, EQUITY_SYMMETRIC_ADJUSTMENT,
+    MORTALITY_SHOCK, LONGEVITY_SHOCK, LAPSE_SHOCKS, PROPERTY_SHOCK, CURRENCY_SHOCK,
+    get_equity_shock_with_symmetric_adjustment, get_interest_rate_shock
+)
+
 from models.request import PolicyData, SolvencyAssumptions
 from models.response import SolvencyResponse, PolicyResult, AggregateMetrics
 from utils.actuarial import (
@@ -177,26 +184,47 @@ def calculate_market_risk_scr(df: pd.DataFrame, assumptions: Dict[str, Any]) -> 
     return calculate_correlated_scr(market_risks, 'market_risk')
 
 def calculate_interest_rate_risk(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
-    """Calculate interest rate risk SCR"""
-    # Simplified calculation - in production would use duration/convexity
+    """Calculate interest rate risk SCR using term-dependent shocks per Article 166."""
     total_assets = df['face_amount'].sum()
-    interest_rate_shock = assumptions.get('interest_rate_shock', 0.01)  # 100bp shock
+    average_duration = assumptions.get('average_duration', 10)  # Default 10 year duration
     
-    return total_assets * interest_rate_shock * 0.5  # Simplified duration assumption
+    # Get term-dependent shock using regulatory constants
+    up_shock = get_interest_rate_shock(average_duration, direction="up")
+    down_shock = abs(get_interest_rate_shock(average_duration, direction="down"))
+    
+    # SCR is max of up and down scenarios
+    scr_up = total_assets * up_shock * assumptions.get('duration_factor', 0.5)
+    scr_down = total_assets * down_shock * assumptions.get('duration_factor', 0.5)
+    
+    return max(scr_up, scr_down)
 
 def calculate_equity_risk(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
-    """Calculate equity risk SCR"""
+    """Calculate equity risk SCR with symmetric adjustment per Article 172."""
     equity_exposure = assumptions.get('equity_exposure', 0.1)  # 10% equity allocation
     total_assets = df['face_amount'].sum()
-    equity_shock = assumptions.get('equity_shock', 0.39)  # 39% equity shock
+    
+    # Get base equity shock from regulatory constants
+    equity_type = assumptions.get('equity_type', 'type_1')
+    base_shock = EQUITY_SHOCKS.get(equity_type, 0.39)
+    
+    # Apply symmetric adjustment if market data provided
+    current_index = assumptions.get('current_equity_index')
+    reference_index = assumptions.get('reference_equity_index')
+    
+    if current_index and reference_index:
+        equity_shock = get_equity_shock_with_symmetric_adjustment(
+            base_shock, current_index, reference_index
+        )
+    else:
+        equity_shock = base_shock
     
     return total_assets * equity_exposure * equity_shock
 
 def calculate_property_risk(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
-    """Calculate property risk SCR"""
+    """Calculate property risk SCR per Article 174."""
     property_exposure = assumptions.get('property_exposure', 0.05)  # 5% property allocation
     total_assets = df['face_amount'].sum()
-    property_shock = assumptions.get('property_shock', 0.25)  # 25% property shock
+    property_shock = PROPERTY_SHOCK  # Use regulatory constant
     
     return total_assets * property_exposure * property_shock
 
@@ -209,10 +237,10 @@ def calculate_spread_risk(df: pd.DataFrame, assumptions: Dict[str, Any]) -> floa
     return total_assets * bond_exposure * spread_shock
 
 def calculate_currency_risk(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
-    """Calculate currency risk SCR"""
+    """Calculate currency risk SCR per Article 188."""
     currency_exposure = assumptions.get('currency_exposure', 0.1)  # 10% foreign currency
     total_assets = df['face_amount'].sum()
-    currency_shock = assumptions.get('currency_shock', 0.25)  # 25% currency shock
+    currency_shock = CURRENCY_SHOCK  # Use regulatory constant
     
     return total_assets * currency_exposure * currency_shock
 

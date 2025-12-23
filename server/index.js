@@ -53,11 +53,44 @@ const db = admin.firestore();
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
+// Validate GOOGLE_API_KEY at startup
+if (!process.env.GOOGLE_API_KEY) {
+  logger.warn('GOOGLE_API_KEY not set - AI chat features will be disabled');
+}
+
+// Input sanitization utility for security
+const sanitizeInput = (input, maxLength = 2000) => {
+  if (!input || typeof input !== 'string') return '';
+  return input
+    .slice(0, maxLength)
+    .replace(/<[^>]*>/g, '')  // Remove HTML tags
+    .replace(/[\x00-\x1F\x7F]/g, '')  // Remove control characters
+    .trim();
+};
+
+// CORS configuration with origin whitelist
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173,http://localhost:3000')
+  .split(',')
+  .map(origin => origin.trim());
+
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc.) in development
+    if (!origin && process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      logger.warn(`CORS blocked request from origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -95,16 +128,17 @@ app.use('/api/data-management', dataManagementRoutes);
 // Chat with Gemini AI
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message } = req.body;
+    // Sanitize input to prevent XSS and injection attacks
+    const message = sanitizeInput(req.body.message);
 
-    if (!message) {
-      return res.status(400).json({ error: 'Message is required' });
+    if (!message || message.length < 2) {
+      return res.status(400).json({ error: 'Message is required (minimum 2 characters)' });
     }
 
     // Require valid API key
     if (!process.env.GOOGLE_API_KEY) {
-      return res.status(500).json({
-        error: 'AI service not configured. Please set GOOGLE_API_KEY environment variable.'
+      return res.status(503).json({
+        error: 'AI service is currently unavailable.'
       });
     }
 
