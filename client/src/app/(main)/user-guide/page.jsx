@@ -12,7 +12,10 @@ import {
     ChevronRight,
     Search,
     Database,
-    Zap
+    Zap,
+    Table,
+    AlertCircle,
+    CheckCircle
 } from 'lucide-react';
 
 const GuideSection = ({ title, isActive, onClick, children }) => (
@@ -48,7 +51,7 @@ export default function UserGuidePage() {
                 </div>
                 <div className="relative z-10 max-w-2xl">
                     <div className="px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-6 inline-block">
-                        Product Manual v2.1
+                        Product Manual v2.2
                     </div>
                     <h1 className="text-4xl lg:text-5xl font-heading font-bold mb-6">Valuact Platform Guide</h1>
                     <p className="text-lg text-white/70 leading-relaxed mb-8">
@@ -66,6 +69,7 @@ export default function UserGuidePage() {
                         <nav className="space-y-1">
                             {[
                                 { id: 'getting-started', label: 'Getting Started', icon: Zap },
+                                { id: 'specs', label: 'Data Specs & Limits', icon: Table },
                                 { id: 'ifrs17', label: 'IFRS 17 Engine', icon: Calculator },
                                 { id: 'solvency', label: 'Solvency II', icon: Shield },
                                 { id: 'pricing', label: 'Pricing Products', icon: TrendingUp },
@@ -76,8 +80,8 @@ export default function UserGuidePage() {
                                     key={item.id}
                                     onClick={() => setActiveSection(item.id)}
                                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 ${activeSection === item.id
-                                            ? 'bg-trust-950 text-white shadow-md'
-                                            : 'text-gray-500 hover:bg-gray-50 hover:text-trust-900'
+                                        ? 'bg-trust-950 text-white shadow-md'
+                                        : 'text-gray-500 hover:bg-gray-50 hover:text-trust-900'
                                         }`}
                                 >
                                     <item.icon className={`w-4 h-4 ${activeSection === item.id ? 'text-growth-400' : 'text-gray-400'}`} />
@@ -125,6 +129,127 @@ export default function UserGuidePage() {
                                         The AI is trained on typical actuarial standards.
                                     </p>
                                 </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Data Specs & Limits */}
+                    {activeSection === 'specs' && (
+                        <div className="p-8 lg:p-12">
+                            <h2 className="text-3xl font-heading font-bold text-trust-900 mb-6 flex items-center gap-3">
+                                <Table className="w-8 h-8 text-blue-500" />
+                                Data Specifications
+                            </h2>
+                            <div className="prose prose-slate max-w-none text-gray-500">
+                                <p className="text-lg">
+                                    To ensure accurate calculations and system stability, please adhere to the following data formatting guidelines and limits.
+                                </p>
+
+                                <h3 className="text-trust-800 mt-8">Supported Formats</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 not-prose my-4">
+                                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                        <div className="h-8 w-8 bg-green-100 rounded-lg flex items-center justify-center font-bold text-green-700 text-xs">CSV</div>
+                                        <span className="font-bold text-gray-700">Comma Separated</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                        <div className="h-8 w-8 bg-green-100 rounded-lg flex items-center justify-center font-bold text-green-700 text-xs">XLSX</div>
+                                        <span className="font-bold text-gray-700">Excel Workbook</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                        <div className="h-8 w-8 bg-green-100 rounded-lg flex items-center justify-center font-bold text-green-700 text-xs">JSON</div>
+                                        <span className="font-bold text-gray-700">JavaScript Object</span>
+                                    </div>
+                                </div>
+
+                                <h3 className="text-trust-800 mt-8">System Limits</h3>
+                                <div className="space-y-4 not-prose">
+                                    <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                        <div className="flex items-center gap-3">
+                                            <AlertCircle className="text-orange-500 w-5 h-5" />
+                                            <span className="font-bold text-gray-700">Max File Size</span>
+                                        </div>
+                                        <span className="font-mono text-sm bg-white px-3 py-1 rounded border border-gray-200">10 MB</span>
+                                    </div>
+                                    <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                        <div className="flex items-center gap-3">
+                                            <Zap className="text-trust-500 w-5 h-5" />
+                                            <span className="font-bold text-gray-700">Max Concurrent Scenarios</span>
+                                        </div>
+                                        <span className="font-mono text-sm bg-white px-3 py-1 rounded border border-gray-200">5 Parallel</span>
+                                    </div>
+                                    <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                        <div className="flex items-center gap-3">
+                                            <Shield className="text-growth-500 w-5 h-5" />
+                                            <span className="font-bold text-gray-700">Validation Batch Size</span>
+                                        </div>
+                                        <span className="font-mono text-sm bg-white px-3 py-1 rounded border border-gray-200">&lt; 50 Policies</span>
+                                    </div>
+                                </div>
+
+                                <h3 className="text-trust-800 mt-8">Policy Data Schema</h3>
+                                <p className="text-sm mb-4">The following columns are required in your <strong>Policies</strong> upload file:</p>
+                                <div className="overflow-x-auto not-prose">
+                                    <table className="min-w-full text-sm text-left">
+                                        <thead className="bg-gray-50 text-gray-500 font-bold uppercase text-xs">
+                                            <tr>
+                                                <th className="px-4 py-3 rounded-tl-xl">Column Name</th>
+                                                <th className="px-4 py-3">Type</th>
+                                                <th className="px-4 py-3">Description</th>
+                                                <th className="px-4 py-3 rounded-tr-xl">Required</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100 border border-gray-100 rounded-b-xl">
+                                            <tr>
+                                                <td className="px-4 py-3 font-mono text-trust-700">policy_id</td>
+                                                <td className="px-4 py-3">String</td>
+                                                <td className="px-4 py-3">Unique identifier for the contract</td>
+                                                <td className="px-4 py-3 text-red-500 font-bold">Yes</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-3 font-mono text-trust-700">issue_date</td>
+                                                <td className="px-4 py-3">Date (ISO)</td>
+                                                <td className="px-4 py-3">Format: YYYY-MM-DD</td>
+                                                <td className="px-4 py-3 text-red-500 font-bold">Yes</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-3 font-mono text-trust-700">face_amount</td>
+                                                <td className="px-4 py-3">Number</td>
+                                                <td className="px-4 py-3">Death benefit amount (min 0)</td>
+                                                <td className="px-4 py-3 text-red-500 font-bold">Yes</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-3 font-mono text-trust-700">premium</td>
+                                                <td className="px-4 py-3">Number</td>
+                                                <td className="px-4 py-3">Annual premium amount (min 0)</td>
+                                                <td className="px-4 py-3 text-red-500 font-bold">Yes</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-3 font-mono text-trust-700">issue_age</td>
+                                                <td className="px-4 py-3">Integer</td>
+                                                <td className="px-4 py-3">Age at issue (0-120), Default: 45</td>
+                                                <td className="px-4 py-3 text-gray-400">No</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-3 font-mono text-trust-700">gender</td>
+                                                <td className="px-4 py-3">String</td>
+                                                <td className="px-4 py-3">'M' or 'F', Default: 'M'</td>
+                                                <td className="px-4 py-3 text-gray-400">No</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="px-4 py-3 font-mono text-trust-700">policy_type</td>
+                                                <td className="px-4 py-3">String</td>
+                                                <td className="px-4 py-3">Product code. Default: 'TERM'</td>
+                                                <td className="px-4 py-3 text-gray-400">No</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <h3 className="text-trust-800 mt-8">Supported Products</h3>
+                                <p>
+                                    Currently, the Valuact engine is optimized for <strong>Term Life Insurance</strong> products with level premiums and level death benefits.
+                                    Additional product types (Whole Life, Endowment, Annuities) are in development beta.
+                                </p>
                             </div>
                         </div>
                     )}
