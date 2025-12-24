@@ -1,10 +1,44 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
-import { ArrowLeft, Calculator, Database, FileText, Settings, BookOpen, TrendingUp, Shield, DollarSign, Activity, AlertTriangle } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+    BookOpen,
+    Calculator,
+    Shield,
+    TrendingUp,
+    Activity,
+    FileText,
+    HelpCircle,
+    ChevronRight,
+    Search,
+    Database,
+    Zap
+} from 'lucide-react';
+
+const GuideSection = ({ title, isActive, onClick, children }) => (
+    <div className={`border-b border-gray-100 last:border-0`}>
+        <button
+            onClick={onClick}
+            className={`w-full flex items-center justify-between p-6 text-left transition-all duration-300 ${isActive ? 'bg-trust-50/50' : 'hover:bg-gray-50'}`}
+        >
+            <span className={`font-heading font-bold text-lg ${isActive ? 'text-trust-900' : 'text-gray-600'}`}>
+                {title}
+            </span>
+            <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isActive ? 'rotate-90' : ''}`} />
+        </button>
+        {isActive && (
+            <div className="p-6 pt-0 animate-in slide-in-from-top-2 duration-300">
+                <div className="prose prose-slate max-w-none text-gray-500 leading-relaxed">
+                    {children}
+                </div>
+            </div>
+        )}
+    </div>
+);
 
 export default function UserGuidePage() {
+    const [activeSection, setActiveSection] = useState('getting-started');
+
     return (
         <div className="space-y-12 pb-20">
             {/* Hero Section */}
@@ -14,154 +48,238 @@ export default function UserGuidePage() {
                 </div>
                 <div className="relative z-10 max-w-2xl">
                     <div className="px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] mb-6 inline-block">
-                        Knowledge Base
+                        Product Manual v2.1
                     </div>
-                    <h1 className="text-4xl lg:text-5xl font-heading font-bold mb-6">Master the Platform</h1>
+                    <h1 className="text-4xl lg:text-5xl font-heading font-bold mb-6">Valuact Platform Guide</h1>
                     <p className="text-lg text-white/70 leading-relaxed mb-8">
-                        Valuact is a premium actuarial gateway for life insurance engineering. This guide details every algorithm,
-                        data architecture, and regulatory cross-walk within the system.
+                        The definitive reference manual for the Valuact actuarial pricing and reporting engine.
+                        Learn how to leverage our IFRS 17, Solvency II, and Pricing modules.
                     </p>
-                    <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-2">
-                            <div className="h-2 w-2 rounded-full bg-growth-400" />
-                            <span className="text-xs font-bold uppercase tracking-wider text-white/50">V2.0 Documentation</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="h-2 w-2 rounded-full bg-accent-400" />
-                            <span className="text-xs font-bold uppercase tracking-wider text-white/50">BaFin Compliant</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
-            <div className="max-w-4xl mx-auto space-y-20">
-                {/* What is Valuact */}
-                <section>
-                    <div className="flex items-center gap-4 mb-8">
-                        <div className="h-10 w-10 bg-trust-50 rounded-xl flex items-center justify-center">
-                            <Activity className="h-5 w-5 text-trust-600" />
-                        </div>
-                        <h2 className="text-3xl font-heading font-bold text-trust-900 uppercase tracking-tight">Core Architecture</h2>
-                    </div>
-                    <div className="prose prose-slate max-w-none">
-                        <p className="text-lg text-gray-500 leading-relaxed mb-10">
-                            Our platform serves as a unified digital layer for actuaries and risk handlers,
-                            built on four primary structural pillars:
-                        </p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+                {/* Navigation Sidebar */}
+                <div className="lg:col-span-1 space-y-4">
+                    <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm sticky top-8">
+                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4 px-2">Table of Contents</h3>
+                        <nav className="space-y-1">
                             {[
-                                { title: 'IFRS 17 Gateway', desc: 'Full-spectrum reporting engine for unearned profit and risk adjustment.' },
-                                { title: 'Solvency II Audit', desc: 'Real-time capital requirement validation and Pillar 3 reporting.' },
-                                { title: 'Dynamic Pricing', desc: 'Algorithmic premium modeling with integrated profit margin testing.' },
-                                { title: 'Actuarial Logic', desc: 'Proprietary mortality curve processing using global benchmarks.' }
-                            ].map((item, i) => (
-                                <div key={i} className="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
-                                    <h4 className="font-bold text-trust-900 mb-2">{item.title}</h4>
-                                    <p className="text-sm text-gray-400 leading-relaxed">{item.desc}</p>
+                                { id: 'getting-started', label: 'Getting Started', icon: Zap },
+                                { id: 'ifrs17', label: 'IFRS 17 Engine', icon: Calculator },
+                                { id: 'solvency', label: 'Solvency II', icon: Shield },
+                                { id: 'pricing', label: 'Pricing Products', icon: TrendingUp },
+                                { id: 'mortality', label: 'Mortality Tables', icon: Activity },
+                                { id: 'api-reference', label: 'API & Data', icon: Database },
+                            ].map((item) => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => setActiveSection(item.id)}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-200 ${activeSection === item.id
+                                            ? 'bg-trust-950 text-white shadow-md'
+                                            : 'text-gray-500 hover:bg-gray-50 hover:text-trust-900'
+                                        }`}
+                                >
+                                    <item.icon className={`w-4 h-4 ${activeSection === item.id ? 'text-growth-400' : 'text-gray-400'}`} />
+                                    {item.label}
+                                </button>
+                            ))}
+                        </nav>
+                    </div>
+                </div>
+
+                {/* Main Content Area */}
+                <div className="lg:col-span-3 bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden min-h-[600px]">
+
+                    {/* Getting Started */}
+                    {activeSection === 'getting-started' && (
+                        <div className="p-8 lg:p-12">
+                            <h2 className="text-3xl font-heading font-bold text-trust-900 mb-6 flex items-center gap-3">
+                                <Zap className="w-8 h-8 text-growth-500" />
+                                Getting Started
+                            </h2>
+                            <div className="prose prose-slate max-w-none text-gray-500">
+                                <p className="text-lg">
+                                    Welcome to Valuact. This platform provides real-time actuarial modeling capabilities.
+                                    Follow these steps to generate your first valuation report.
+                                </p>
+
+                                <h3 className="text-trust-800 mt-8">1. Dashboard Overview</h3>
+                                <p>
+                                    Your dashboard is the command center. From here you can access quick metrics on recent calculations,
+                                    system health status, and shortcuts to the primary calculators. The "Quick Actions" panel allows for rapid navigation.
+                                </p>
+
+                                <h3 className="text-trust-800 mt-8">2. Navigation Structure</h3>
+                                <ul className="list-disc pl-5 space-y-2">
+                                    <li><strong>Calculators:</strong> The core engines (IFRS 17, Solvency, Pricing, Mortality)</li>
+                                    <li><strong>Valuations:</strong> View and manage stored solution outputs</li>
+                                    <li><strong>Analytics:</strong> High-level visual reporting of your modeling history</li>
+                                    <li><strong>Settings:</strong> Configure user preferences and API keys</li>
+                                </ul>
+
+                                <div className="bg-trust-50 p-6 rounded-2xl border border-trust-100 mt-8 not-prose">
+                                    <h4 className="text-sm font-black text-trust-900 uppercase tracking-widest mb-2">Pro Tip</h4>
+                                    <p className="text-sm text-trust-700">
+                                        Use the "AI Assistant" (chat icon) at any time to ask methodological questions or get help interpreting results.
+                                        The AI is trained on typical actuarial standards.
+                                    </p>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
-                {/* IFRS 17 Section */}
-                <section className="bg-white rounded-[2.5rem] border border-gray-100 p-10 shadow-sm">
-                    <div className="flex items-center space-x-4 mb-8">
-                        <div className="p-3 bg-trust-900 rounded-2xl text-white">
-                            <Calculator className="w-6 h-6" />
-                        </div>
-                        <h2 className="text-2xl font-heading font-bold text-trust-900">IFRS 17 Master Specs</h2>
-                    </div>
-
-                    <div className="bg-trust-50/50 rounded-2xl p-6 border border-trust-100 mb-10">
-                        <p className="text-trust-900/70 text-sm leading-relaxed">
-                            <strong className="text-trust-900">Technical Context:</strong> The system computes the Contractual Service Margin (CSM)
-                            following the General Model (BBA) as defined in IFRS 17 Appendix C. All cash flows are discounted using the bottom-up approach.
-                        </p>
-                    </div>
-
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Required Data Architecture</h3>
-                    <div className="overflow-hidden border border-gray-50 rounded-2xl">
-                        <table className="min-w-full text-sm">
-                            <thead className="bg-gray-50/50">
-                                <tr>
-                                    <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Field ID</th>
-                                    <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Type</th>
-                                    <th className="px-6 py-4 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Logic</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-50 bg-white">
-                                {[
-                                    { id: 'policy_id', type: 'UUID/String', desc: 'Primary key for actuarial ledger' },
-                                    { id: 'face_amount', type: 'Numeric', desc: 'Total death benefit liability' },
-                                    { id: 'premium', type: 'Numeric', desc: 'Gross annual premium intake' },
-                                    { id: 'issue_age', type: 'Int', desc: 'Policyholder risk age at entry' }
-                                ].map((row, i) => (
-                                    <tr key={i} className="hover:bg-trust-50/20 transition-colors">
-                                        <td className="px-6 py-4 font-mono text-trust-600 font-bold">{row.id}</td>
-                                        <td className="px-6 py-4 text-gray-400">{row.type}</td>
-                                        <td className="px-6 py-4 text-gray-900 font-medium">{row.desc}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-                {/* Solvency II Section */}
-                <section className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                    <div>
-                        <div className="flex items-center space-x-3 mb-6">
-                            <div className="p-3 bg-growth-600 rounded-2xl text-white">
-                                <Shield className="w-6 h-6" />
                             </div>
-                            <h2 className="text-2xl font-heading font-bold text-trust-900">Solvency II Logic</h2>
                         </div>
-                        <p className="text-gray-400 leading-relaxed mb-6">
-                            Our SCR engine executes a 99.5% VaR (Value-at-Risk) over a 1-year horizon,
-                            aligning with the Standard Formula approach.
-                        </p>
-                        <ul className="space-y-4">
-                            {[
-                                { label: 'SCR Calibration', icon: TrendingUp },
-                                { label: 'MCR Absolute Floors', icon: AlertTriangle },
-                                { label: 'Pillar 3 Disclosure', icon: FileText }
-                            ].map((item, i) => (
-                                <li key={i} className="flex items-center gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                                    <item.icon className="h-4 w-4 text-growth-600" />
-                                    <span className="text-sm font-bold text-trust-900 uppercase tracking-wider">{item.label}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                    <div className="bg-growth-50/50 p-8 rounded-[2.5rem] border border-growth-100">
-                        <div className="space-y-4">
-                            <h4 className="font-bold text-growth-900">Regulatory Target</h4>
-                            <div className="flex items-end gap-2">
-                                <span className="text-5xl font-heading font-bold text-growth-600">100%</span>
-                                <span className="text-xs font-bold text-growth-900/40 uppercase mb-2">SCR Threshold</span>
-                            </div>
-                            <p className="text-sm text-growth-900/60 leading-relaxed">
-                                Maintaining a ratio above 100% is mandatory. Our system flags any scenario reaching 115% as a "Compliance Alert" zone.
-                            </p>
-                        </div>
-                    </div>
-                </section>
+                    )}
 
-                {/* Transparency Commitment */}
-                <section className="p-12 bg-white border border-gray-100 rounded-[3rem] shadow-sm text-center">
-                    <h2 className="text-3xl font-heading font-bold text-trust-900 mb-6">Security & Decryption</h2>
-                    <p className="text-gray-400 max-w-xl mx-auto mb-10">
-                        We operate under a "Box Zero" transparency policy. Every actuarial factor is traced back to its regulatory or population source.
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-4">
-                        {['AES-256 Encrypted', 'BaFin Aligned', 'ISO 27001 Certified', 'GDPR Compliant'].map((tag, i) => (
-                            <span key={i} className="px-4 py-2 bg-trust-50 text-trust-600 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-trust-100 italic">
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
-                </section>
+                    {/* IFRS 17 Engine */}
+                    {activeSection === 'ifrs17' && (
+                        <div className="p-8 lg:p-12">
+                            <h2 className="text-3xl font-heading font-bold text-trust-900 mb-6 flex items-center gap-3">
+                                <Calculator className="w-8 h-8 text-trust-600" />
+                                IFRS 17 Engine
+                            </h2>
+                            <div className="prose prose-slate max-w-none text-gray-500">
+                                <p>
+                                    The IFRS 17 Calculator allows for the estimation of Contractual Service Margin (CSM),
+                                    Risk Adjustment (RA), and Loss Components for insurance contracts.
+                                </p>
+
+                                <h3 className="text-trust-800 font-bold mt-8">Key Features</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-6">
+                                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                        <div className="font-bold text-trust-900 mb-1">CSM Calculation</div>
+                                        <div className="text-sm">Computes unearned profit based on Premium, FCF, and RA inputs.</div>
+                                    </div>
+                                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                        <div className="font-bold text-trust-900 mb-1">Risk Adjustment</div>
+                                        <div className="text-sm">Uses VaR (Value at Risk) confidence intervals (90%, 95%, 99%).</div>
+                                    </div>
+                                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                        <div className="font-bold text-trust-900 mb-1">Run-off Projection</div>
+                                        <div className="text-sm">Projects CSM release over time based on service units.</div>
+                                    </div>
+                                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                        <div className="font-bold text-trust-900 mb-1">Methodology Transparency</div>
+                                        <div className="text-sm">View exact formulas and intermediate calculation steps.</div>
+                                    </div>
+                                </div>
+
+                                <h3 className="text-trust-800 font-bold mt-8">How to Use</h3>
+                                <ol className="list-decimal pl-5 space-y-2">
+                                    <li>Navigate to <strong>Calculators &gt; IFRS 17</strong>.</li>
+                                    <li>Select the sub-module (CSM, RA, or Run-off) from the top tabs.</li>
+                                    <li>Enter the required parameters (Premium, FCF, Risk Adjustment).</li>
+                                    <li>Click "Calculate". Results will appear on the right panel.</li>
+                                    <li>Use the "Audit Trail" button to see a detailed breakdown of the logic used.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Solvency II */}
+                    {activeSection === 'solvency' && (
+                        <div className="p-8 lg:p-12">
+                            <h2 className="text-3xl font-heading font-bold text-trust-900 mb-6 flex items-center gap-3">
+                                <Shield className="w-8 h-8 text-growth-600" />
+                                Solvency II Engine
+                            </h2>
+                            <div className="prose prose-slate max-w-none text-gray-500">
+                                <p>
+                                    Calculate Solvency Capital Requirement (SCR) and Minimum Capital Requirement (MCR)
+                                    compliant with the Standard Formula approach.
+                                </p>
+
+                                <h3 className="text-trust-800 font-bold mt-8">Included Modules</h3>
+                                <ul className="list-disc pl-5 space-y-2">
+                                    <li><strong>Market Risk:</strong> Interest rate, equity, property, and spread risks.</li>
+                                    <li><strong>Life Underwriting Risk:</strong> Mortality, longevity, lapse, and expense risks.</li>
+                                    <li><strong>BSCR Aggregation:</strong> Combines risk modules using correlation matrices.</li>
+                                </ul>
+
+                                <div className="bg-yellow-50 p-6 rounded-2xl border border-yellow-100 mt-8 not-prose">
+                                    <h4 className="text-sm font-black text-yellow-800 uppercase tracking-widest mb-2">Important Note</h4>
+                                    <p className="text-sm text-yellow-700">
+                                        The standard formula correlations are hardcoded based on the EIOPA delegated acts.
+                                        Ensure your input vectors match the required granularity (e.g., net vs gross scenarios).
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Pricing */}
+                    {activeSection === 'pricing' && (
+                        <div className="p-8 lg:p-12">
+                            <h2 className="text-3xl font-heading font-bold text-trust-900 mb-6 flex items-center gap-3">
+                                <TrendingUp className="w-8 h-8 text-accent-500" />
+                                Pricing & Profit Testing
+                            </h2>
+                            <div className="prose prose-slate max-w-none text-gray-500">
+                                <p>
+                                    Design products and test their profitability metrics (NPV, IRR) under various assumptions.
+                                </p>
+
+                                <h3 className="text-trust-800 font-bold mt-8">Capabilities</h3>
+                                <ul className="list-disc pl-5 space-y-2">
+                                    <li><strong>Premium Calculation:</strong> Determine Net and Gross premiums based on mortality hooks.</li>
+                                    <li><strong>Profit Testing:</strong> Calculate Net Present Value (NPV) and Internal Rate of Return (IRR).</li>
+                                    <li><strong>Sensitivity Analysis:</strong> Automatically shock assumptions (Mortality, Interest, Expense) to see impact on break-even price.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Mortality */}
+                    {activeSection === 'mortality' && (
+                        <div className="p-8 lg:p-12">
+                            <h2 className="text-3xl font-heading font-bold text-trust-900 mb-6 flex items-center gap-3">
+                                <Activity className="w-8 h-8 text-red-500" />
+                                Mortality Tables
+                            </h2>
+                            <div className="prose prose-slate max-w-none text-gray-500">
+                                <p>
+                                    Interactive viewer and calculator for standard life tables. Supports generation of $l_x$, $d_x$, $q_x$ columns.
+                                </p>
+
+                                <h3 className="text-trust-800 font-bold mt-8">Supported Tables</h3>
+                                <ul className="list-disc pl-5 space-y-2">
+                                    <li>Swiss Standard (BVG 2020)</li>
+                                    <li>US CSO 2017</li>
+                                    <li>Custom uploads (via API)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* API Reference */}
+                    {activeSection === 'api-reference' && (
+                        <div className="p-8 lg:p-12">
+                            <h2 className="text-3xl font-heading font-bold text-trust-900 mb-6 flex items-center gap-3">
+                                <Database className="w-8 h-8 text-purple-500" />
+                                Data & API
+                            </h2>
+                            <div className="prose prose-slate max-w-none text-gray-500">
+                                <p>
+                                    For batch processing or integration with other systems, you can interact with the Python Actuarial Engine directly.
+                                </p>
+
+                                <h3 className="text-trust-800 font-bold mt-8">Key Endpoints</h3>
+                                <div className="space-y-4 not-prose">
+                                    <div className="p-4 bg-gray-900 text-gray-100 rounded-xl overflow-x-auto">
+                                        <code>POST /api/v1/calculate/ifrs17</code>
+                                    </div>
+                                    <div className="p-4 bg-gray-900 text-gray-100 rounded-xl overflow-x-auto">
+                                        <code>POST /api/v1/calculate/solvency</code>
+                                    </div>
+                                </div>
+
+                                <p className="mt-6">
+                                    All endpoints require standard JSON payloads containing `portfolio` arrays and `assumptions` objects.
+                                    See the Swagger documentation (running locally at :8000/docs) for schema details.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                </div>
             </div>
         </div>
     );
