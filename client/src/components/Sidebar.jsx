@@ -57,8 +57,8 @@ const Sidebar = () => {
       <aside className="hidden lg:block fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-100 shadow-glass z-40 overflow-y-auto">
         {/* App Title */}
         <div className="p-6 border-b border-gray-100 bg-gradient-to-br from-trust-50 via-white to-trust-50">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-gradient-to-br from-trust-600 to-trust-800 rounded-lg shadow-warm">
+          <Link href="/" className="flex items-center space-x-3 group">
+            <div className="p-2 bg-gradient-to-br from-trust-600 to-trust-800 rounded-lg shadow-warm group-hover:scale-105 transition-transform duration-200">
               <Calculator className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1 min-w-0">
@@ -67,7 +67,7 @@ const Sidebar = () => {
               </p>
               <p className="text-[10px] font-bold text-trust-400 uppercase tracking-widest -mt-1">Actuarial Analytics</p>
             </div>
-          </div>
+          </Link>
         </div>
 
         <nav className="p-4 space-y-1">
