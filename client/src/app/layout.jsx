@@ -3,8 +3,8 @@ import { AuthProvider } from '../contexts/AuthContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 export const metadata = {
-    title: 'FairLife - Insurance for the Future',
-    description: 'Premiums that adapt to your life. Instant coverage, 100% digital.',
+    title: 'Valuact - Institutional Actuarial Analytics',
+    description: 'Enterprise-grade IFRS 17 and Solvency II actuarial platform. Precision calculations, regulatory compliance, and advanced risk analytics.',
 };
 
 export default function RootLayout({ children }) {

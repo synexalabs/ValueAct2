@@ -6,6 +6,18 @@ import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext();
 
+// Test mode demo user - allows access without authentication
+const DEMO_USER = {
+  id: 'demo-user',
+  email: 'demo@valuact.io',
+  name: 'Demo User',
+  role: 'tester',
+  isDemo: true
+};
+
+// Enable test mode - set to false when authentication is required
+const TEST_MODE = true;
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -18,6 +30,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isTestMode] = useState(TEST_MODE);
 
   // Load token from localStorage on client side
   useEffect(() => {
@@ -71,6 +84,12 @@ export const AuthProvider = ({ children }) => {
           setUser(null);
         }
       }
+
+      // In test mode, provide demo user if no authenticated user
+      if (TEST_MODE && !user) {
+        setUser(DEMO_USER);
+      }
+
       setLoading(false);
     };
 
@@ -129,7 +148,12 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
-    setUser(null);
+    // In test mode, revert to demo user instead of null
+    if (TEST_MODE) {
+      setUser(DEMO_USER);
+    } else {
+      setUser(null);
+    }
     delete axios.defaults.headers.common['Authorization'];
   };
 
@@ -177,6 +201,8 @@ export const AuthProvider = ({ children }) => {
     user,
     token,
     loading,
+    isTestMode,
+    isAuthenticated: !!user && !user.isDemo,
     login,
     register,
     logout,
@@ -190,3 +216,4 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+

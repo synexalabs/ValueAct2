@@ -10,10 +10,19 @@ import React, { useState } from 'react';
 import { Calculator, Save, RotateCcw, Info, AlertCircle, BookOpen, Eye, EyeOff, Download } from 'lucide-react';
 import { InlineMath, BlockMath } from 'react-katex';
 import ExportButton from '../ExportButton';
-import FormulaExplainer from '../FormulaExplainer';
-import CalculationStepViewer from '../CalculationStepViewer';
-import AuditTrailViewer from '../AuditTrailViewer';
+import dynamic from 'next/dynamic';
 import { useCalculationHistory } from '../../hooks/useLocalStorage';
+
+// Dynamic imports for heavy components
+const FormulaExplainer = dynamic(() => import('../FormulaExplainer'), {
+  loading: () => <div className="p-4 text-center text-gray-400">Loading formula explainer...</div>
+});
+const CalculationStepViewer = dynamic(() => import('../CalculationStepViewer'), {
+  loading: () => <div className="p-4 text-center text-gray-400">Loading calculation steps...</div>
+});
+const AuditTrailViewer = dynamic(() => import('../AuditTrailViewer'), {
+  loading: () => <div className="p-4 text-center text-gray-400">Loading audit trail...</div>
+});
 import {
   calculateCSM,
   calculateRiskAdjustment,

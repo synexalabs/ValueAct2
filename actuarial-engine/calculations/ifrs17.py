@@ -12,8 +12,6 @@ import sys
 import os
 from enum import Enum
 from functools import lru_cache
-import concurrent.futures
-from multiprocessing import Pool
 
 # Add the utils directory to the path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'utils'))
@@ -424,7 +422,7 @@ def calculate_pv_benefits_proper(policy: pd.Series, assumptions: Dict[str, Any],
     face_amount = policy['face_amount']
     issue_age = policy.get('issue_age', 35)
     policy_term = policy.get('policy_term', 20)
-    gender = policy.get('gender', 'male')
+    gender = policy.get('gender', 'M')  # Standardized to M/F format
     mortality_table_id = assumptions['mortality_table']
     
     pv_benefits = 0.0
@@ -461,7 +459,7 @@ def calculate_pv_premiums_proper(policy: pd.Series, assumptions: Dict[str, Any],
     premium = policy['premium']
     issue_age = policy.get('issue_age', 35)
     policy_term = policy.get('policy_term', 20)
-    gender = policy.get('gender', 'male')
+    gender = policy.get('gender', 'M')  # Standardized to M/F format
     mortality_table_id = assumptions['mortality_table']
     lapse_rate = assumptions.get('lapse_rate', 0.05)
     policy_type = policy.get('policy_type', 'term_life')
@@ -505,7 +503,7 @@ def calculate_pv_expenses(policy: pd.Series, assumptions: Dict[str, Any],
     premium = policy['premium']
     issue_age = policy.get('issue_age', 35)
     policy_term = policy.get('policy_term', 20)
-    gender = policy.get('gender', 'male')
+    gender = policy.get('gender', 'M')  # Standardized to M/F format
     mortality_table_id = assumptions['mortality_table']
     expense_loading = assumptions.get('expense_loading', 0.05)
     expense_inflation = assumptions.get('expense_inflation', 0.02)
@@ -581,7 +579,7 @@ def calculate_csm_release_pattern_proper(df: pd.DataFrame, assumptions: Dict[str
         coverage_units = 0
         for _, row in df.iterrows():
             issue_age = row.get('issue_age', 35)
-            gender = row.get('gender', 'male')
+            gender = row.get('gender', 'M')  # Standardized
             mortality_table_id = assumptions['mortality_table']
             
             survival_prob = get_survival_probability(mortality_table_id, issue_age, year, gender)
@@ -816,7 +814,7 @@ def calculate_pv_expenses_vectorized(df: pd.DataFrame, assumptions: Dict[str, An
         Series of PV of expenses for each policy
     """
     discount_rate = assumptions['discount_rate']
-    expense_ratio = assumptions.get('expense_ratio', 0.05)
+    expense_loading = assumptions.get('expense_loading', 0.05)  # Standardized naming
     max_term = int(df.get('policy_term', pd.Series([20])).max())
     
     # Create time vector
@@ -841,7 +839,7 @@ def calculate_pv_expenses_vectorized(df: pd.DataFrame, assumptions: Dict[str, An
         ])
         
         # PV of expenses (proportional to premium)
-        expense_cashflows = premium * expense_ratio * survival_probs * discount_factors[:term]
+        expense_cashflows = premium * expense_loading * survival_probs * discount_factors[:term]
         pv_expenses[i] = np.sum(expense_cashflows)
     
     return pd.Series(pv_expenses, index=df.index)

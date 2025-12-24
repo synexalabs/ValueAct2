@@ -1,5 +1,26 @@
 const axios = require('axios');
 const logger = require('../utils/logger');
+const Joi = require('joi');
+const pLimit = require('p-limit');
+
+// Validation schemas (Type Safety)
+const policySchema = Joi.object({
+    policyId: Joi.string().required(),
+    issueDate: Joi.string().isoDate().required(),
+    faceAmount: Joi.number().min(0).required(),
+    premium: Joi.number().min(0).required(),
+    policyType: Joi.string().default('TERM'),
+    gender: Joi.string().valid('M', 'F').default('M'),
+    issueAge: Joi.number().integer().min(0).max(120).default(45),
+    sumAssured: Joi.number().min(0),
+    premiumTerm: Joi.number().integer().min(1).default(20)
+}).unknown(true);
+
+const assumptionSchema = Joi.object({
+    discountRate: Joi.number().min(-0.1).max(0.5).default(0.035),
+    lapseRate: Joi.number().min(0).max(1).default(0.05),
+    mortalityTable: Joi.string().default('CSO_2017')
+}).unknown(true);
 
 const PYTHON_ENGINE_URL = process.env.PYTHON_ENGINE_URL || 'http://localhost:8000';
 
@@ -167,8 +188,11 @@ class PythonEngineService {
         logger.info(`Starting sensitivity analysis with ${scenarios.length} scenarios`);
 
         try {
+            // Concurrency Control: Limit to 5 parallel scenarios to protect Python engine
+            const limit = pLimit(5);
+
             const results = await Promise.all(
-                scenarios.map(async (scenario) => {
+                scenarios.map((scenario) => limit(async () => {
                     const shockedAssumptions = { ...baseAssumptions };
 
                     // Apply shocks
@@ -184,6 +208,15 @@ class PythonEngineService {
                         }
                     });
 
+                    // Input Validation before calling engine
+                    if (scenarios.length < 50) { // Only validate for smaller batches to safe perf
+                        try {
+                            Joi.attempt(shockedAssumptions, assumptionSchema);
+                        } catch (validationErr) {
+                            logger.warn(`Assumption validation warning for scenario ${scenario.name}: ${validationErr.message}`);
+                        }
+                    }
+
                     const result = calculationType === 'ifrs17'
                         ? await this.calculateIFRS17(portfolio, shockedAssumptions)
                         : await this.calculateSolvency(portfolio, shockedAssumptions);
@@ -193,7 +226,7 @@ class PythonEngineService {
                         shocks: scenario.shocks,
                         results: result.aggregate_results || result,
                     };
-                })
+                }))
             );
 
             const duration = Date.now() - startTime;

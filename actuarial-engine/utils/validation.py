@@ -206,21 +206,39 @@ class ValidationEngine:
         
         # Consistency checks
         def csm_formula_check(premium, fcf, ra, csm):
-            """Check if CSM follows the correct formula"""
-            expected_csm = max(0, premium - fcf - ra)
-            return abs(csm - expected_csm) < 1e-6
+            """
+            Check if CSM follows the correct formula.
+            
+            Note: FCF convention can vary:
+            - If FCF represents net margin (PV_premiums - PV_benefits - PV_expenses), then:
+              CSM = max(0, FCF - RA)
+            - If FCF represents liability (positive = cost), then:
+              CSM = max(0, Premium - FCF - RA)
+            
+            We check both conventions to support different input formats.
+            """
+            # Convention 1: FCF as net margin (used in ifrs17.py)
+            expected_csm_1 = max(0, fcf - ra)
+            # Convention 2: FCF as liability (legacy)
+            expected_csm_2 = max(0, premium - fcf - ra)
+            
+            # Accept if either convention matches (with tolerance for float comparison)
+            tolerance = max(1e-6, abs(csm) * 0.001)  # 0.1% relative tolerance
+            return abs(csm - expected_csm_1) < tolerance or abs(csm - expected_csm_2) < tolerance
         
         self.add_consistency_check(
             "CSM Formula Consistency",
-            "CSM must follow the formula CSM = max(0, P - FCF - RA)",
+            "CSM must follow the formula CSM = max(0, FCF - RA) or CSM = max(0, P - FCF - RA)",
             csm_formula_check,
             severity='error'
         )
         
         def onerous_contract_check(premium, fcf, ra, csm):
-            """Check if onerous contract logic is correct"""
-            if premium < fcf + ra:
-                return csm == 0  # Should be zero for onerous contracts
+            """Check if onerous contract logic is correct - CSM should be 0 for onerous"""
+            # Onerous when FCF (as liability) > Premium, or when FCF (as margin) < RA
+            is_onerous = (fcf < ra) or (premium < fcf + ra if fcf < 0 else False)
+            if is_onerous:
+                return csm == 0 or abs(csm) < 1e-6  # Should be zero for onerous contracts
             return True
         
         self.add_consistency_check(

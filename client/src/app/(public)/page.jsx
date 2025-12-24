@@ -1,17 +1,10 @@
 'use client';
 
 import Navbar from '../../components/Navbar';
-import { Shield, Zap, Heart, Check, ArrowRight } from 'lucide-react';
+import { Calculator, Shield, BarChart3, Check, ArrowRight, Database, FileText } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
 
 export default function LandingPage() {
-    const [age, setAge] = useState(30);
-    const [amount, setAmount] = useState(250000);
-
-    // Simple estimation logic
-    const price = ((amount / 100000) * 2.5 * (1 + (age - 20) * 0.03)).toFixed(2);
-
     return (
         <div className="min-h-screen bg-white">
             <Navbar />
@@ -29,106 +22,86 @@ export default function LandingPage() {
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-growth-400 opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-growth-500"></span>
                                 </span>
-                                #1 Rated Digital Claims 2024
+                                Test Phase - Open Access
                             </div>
                             <h1 className="text-6xl lg:text-8xl font-heading font-black text-trust-950 leading-[0.95] mb-8 tracking-tighter">
-                                Life <span className="text-trust-600">Insurance</span> <br />
-                                <span className="italic font-light">Reimagined.</span>
+                                IFRS 17 &<br />
+                                <span className="text-trust-600">Solvency II</span><br />
+                                <span className="italic font-light">Analytics.</span>
                             </h1>
                             <p className="text-xl text-gray-400 mb-10 max-w-lg leading-relaxed font-medium">
-                                German engineering meets modern simplicity. Secure your legacy with a fully digital architecture in under 5 minutes.
+                                Institutional-grade actuarial platform for regulatory compliance. Precision CSM, BEL, SCR calculations with German regulatory standards.
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-5 mb-14">
-                                <Link href="/get-quote" className="group flex items-center justify-center px-10 py-5 bg-trust-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-trust-900 transition-all hover:-translate-y-1 shadow-2xl shadow-trust-900/20 active:scale-95">
-                                    Calculate Coverage
+                                <Link href="/dashboard" className="group flex items-center justify-center px-10 py-5 bg-trust-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-trust-900 transition-all hover:-translate-y-1 shadow-2xl shadow-trust-900/20 active:scale-95">
+                                    Launch Platform
                                     <ArrowRight size={18} className="ml-3 text-growth-400 group-hover:translate-x-1 transition-transform" />
                                 </Link>
-                                <button className="flex items-center justify-center px-10 py-5 bg-white text-trust-900 border border-gray-100 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-gray-50 transition-all shadow-sm active:scale-95">
-                                    Core Architecture
-                                </button>
+                                <Link href="/methodology" className="flex items-center justify-center px-10 py-5 bg-white text-trust-900 border border-gray-100 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-gray-50 transition-all shadow-sm active:scale-95">
+                                    View Methodology
+                                </Link>
                             </div>
 
                             <div className="flex flex-wrap gap-10 text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">
                                 <div className="flex items-center gap-3">
                                     <div className="h-2 w-2 rounded-full bg-growth-500" />
-                                    BaFin Regulated
+                                    IFRS 17 Compliant
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <div className="h-2 w-2 rounded-full bg-growth-500" />
-                                    TÜV Certified
+                                    Solvency II Ready
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <div className="h-2 w-2 rounded-full bg-growth-500" />
-                                    Instant Liquidity
+                                    BaFin Standards
                                 </div>
                             </div>
                         </div>
 
-                        {/* Calculator Widget */}
+                        {/* Platform Preview Widget */}
                         <div className="relative animate-scale-in" style={{ animationDelay: '0.2s' }}>
                             <div className="absolute -inset-10 bg-gradient-to-tr from-trust-200/30 to-growth-200/30 rounded-[4rem] blur-[80px] opacity-40"></div>
                             <div className="relative bg-white/80 backdrop-blur-2xl rounded-[3rem] p-10 shadow-glass border border-white/50">
                                 <div className="flex items-center justify-between mb-10">
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-trust-600 uppercase tracking-[0.3em] mb-1">Precision Quote</span>
-                                        <h3 className="text-3xl font-heading font-black text-trust-950 tracking-tight">Quick Estimate.</h3>
+                                        <span className="text-[10px] font-black text-trust-600 uppercase tracking-[0.3em] mb-1">Actuarial Sandbox</span>
+                                        <h3 className="text-3xl font-heading font-black text-trust-950 tracking-tight">Quick Access.</h3>
                                     </div>
                                     <div className="h-12 w-12 bg-trust-950 rounded-2xl flex items-center justify-center text-growth-400 shadow-lg">
-                                        <Zap size={24} className="fill-growth-400" />
+                                        <Calculator size={24} className="fill-growth-400" />
                                     </div>
                                 </div>
 
-                                <div className="space-y-10">
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-end">
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Target Age</label>
-                                            <span className="text-lg font-black text-trust-900">{age} <span className="text-[10px] text-gray-400 ml-0.5">YRS</span></span>
-                                        </div>
-                                        <input
-                                            type="range"
-                                            min="18"
-                                            max="65"
-                                            value={age}
-                                            onChange={(e) => setAge(parseInt(e.target.value))}
-                                            className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-trust-950"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-end">
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Coverage Target</label>
-                                            <span className="text-lg font-black text-trust-900">€{amount.toLocaleString()}</span>
-                                        </div>
-                                        <input
-                                            type="range"
-                                            min="50000"
-                                            max="1000000"
-                                            step="10000"
-                                            value={amount}
-                                            onChange={(e) => setAmount(parseInt(e.target.value))}
-                                            className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-trust-950"
-                                        />
-                                    </div>
-
-                                    <div className="pt-8 border-t border-gray-100">
-                                        <div className="flex justify-between items-center mb-10">
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Monthly Settlement</span>
-                                                <div className="flex items-baseline gap-1">
-                                                    <span className="text-5xl font-heading font-black text-trust-950 tracking-tighter">€{price}</span>
-                                                    <span className="text-[10px] font-bold text-gray-400 uppercase">/ Month</span>
-                                                </div>
+                                <div className="space-y-4">
+                                    {[
+                                        { title: 'IFRS 17 Engine', desc: 'CSM, BEL & Risk Adjustment', href: '/calculators/ifrs17' },
+                                        { title: 'Solvency II Audit', desc: 'SCR & MCR Calculations', href: '/calculators/solvency' },
+                                        { title: 'Premium Modeler', desc: 'Pricing & Sensitivity Analysis', href: '/calculators/pricing' },
+                                        { title: 'Actuarial Tables', desc: 'DAV Mortality Tables', href: '/calculators/mortality' }
+                                    ].map((calc, i) => (
+                                        <Link
+                                            key={i}
+                                            href={calc.href}
+                                            className="flex items-center justify-between p-5 bg-gray-50/50 border border-gray-100 rounded-2xl hover:bg-trust-50 hover:border-trust-200 transition-all group"
+                                        >
+                                            <div>
+                                                <h4 className="text-sm font-bold text-trust-900">{calc.title}</h4>
+                                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{calc.desc}</p>
                                             </div>
-                                        </div>
+                                            <ArrowRight size={16} className="text-gray-300 group-hover:text-trust-600 group-hover:translate-x-1 transition-all" />
+                                        </Link>
+                                    ))}
+                                </div>
 
-                                        <button className="w-full py-5 bg-trust-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-trust-900 transition-all shadow-2xl shadow-trust-900/20 active:scale-95">
-                                            Finalize Verification
-                                        </button>
-                                        <p className="text-[8px] font-bold text-gray-400 text-center uppercase tracking-widest mt-6">
-                                            *Calculated for non-smoker based on dynamic health parameters.
-                                        </p>
-                                    </div>
+                                <div className="mt-8 pt-6 border-t border-gray-100">
+                                    <Link
+                                        href="/calculators"
+                                        className="w-full py-5 bg-trust-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-trust-900 transition-all shadow-2xl shadow-trust-900/20 active:scale-95 flex items-center justify-center gap-2"
+                                    >
+                                        View All Calculators
+                                        <ArrowRight size={14} className="text-growth-400" />
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -140,26 +113,26 @@ export default function LandingPage() {
             <section className="py-32 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center max-w-3xl mx-auto mb-20">
-                        <span className="text-[10px] font-black text-growth-600 uppercase tracking-[0.4em]">Core Foundations</span>
-                        <h2 className="mt-4 text-5xl font-heading font-black text-trust-950 tracking-tight leading-[1.1]">The New Standard in <br />Financial Protection.</h2>
+                        <span className="text-[10px] font-black text-growth-600 uppercase tracking-[0.4em]">Enterprise Platform</span>
+                        <h2 className="mt-4 text-5xl font-heading font-black text-trust-950 tracking-tight leading-[1.1]">Institutional-Grade<br />Actuarial Analytics.</h2>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-12">
                         {[
                             {
+                                icon: Calculator,
+                                title: "IFRS 17 Engine",
+                                desc: "Complete CSM determination, Risk Adjustment calculations, and BEL projections aligned with latest IASB standards."
+                            },
+                            {
                                 icon: Shield,
-                                title: "Neural Architecture",
-                                desc: "Proprietary risk assessment engine for instantaneous, precise coverage allocation."
+                                title: "Solvency II Compliance",
+                                desc: "SCR stress testing, MCR calibration, and Pillar 1 capital validation with BaFin regulatory alignment."
                             },
                             {
-                                icon: Heart,
-                                title: "Bespoke Guidance",
-                                desc: "Elite advisors synchronized with your digital portfolio 24/7 for total visibility."
-                            },
-                            {
-                                icon: Check,
-                                title: "Infinite Flexibility",
-                                desc: "Policies that breathe with your life. Daily liquidity options with zero lock-in."
+                                icon: BarChart3,
+                                title: "Advanced Analytics",
+                                desc: "Session persistence, multi-format exports, and comparative analysis against historical runs."
                             }
                         ].map((feature, i) => (
                             <div key={i} className="p-10 rounded-[3rem] bg-gray-50/50 border border-gray-100 hover:bg-white hover:shadow-glass hover:-translate-y-2 transition-all duration-500 group">
@@ -171,6 +144,29 @@ export default function LandingPage() {
                             </div>
                         ))}
                     </div>
+                </div>
+            </section>
+
+            {/* CTA Section */}
+            <section className="py-20 bg-trust-950">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-[10px] font-black text-white/70 uppercase tracking-[0.2em] mb-6">
+                        <Check size={12} className="text-growth-400" />
+                        No Sign-in Required for Testing
+                    </div>
+                    <h2 className="text-4xl md:text-5xl font-heading font-black text-white mb-6 tracking-tight">
+                        Ready to Explore?
+                    </h2>
+                    <p className="text-lg text-white/60 mb-10 max-w-2xl mx-auto">
+                        Access all IFRS 17 and Solvency II calculators instantly. No registration required during the test phase.
+                    </p>
+                    <Link
+                        href="/dashboard"
+                        className="inline-flex items-center gap-3 px-12 py-6 bg-white text-trust-950 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-growth-400 transition-all shadow-2xl active:scale-95"
+                    >
+                        Launch Platform
+                        <ArrowRight size={18} />
+                    </Link>
                 </div>
             </section>
         </div>

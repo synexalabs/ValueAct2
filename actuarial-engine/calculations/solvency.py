@@ -316,17 +316,23 @@ def calculate_life_underwriting_risk_scr(df: pd.DataFrame, assumptions: Dict[str
     return calculate_correlated_scr(life_risks, 'life_underwriting_risk')
 
 def calculate_mortality_risk(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
-    """Calculate mortality risk SCR"""
+    """Calculate mortality risk SCR per Article 137 - 15% permanent increase in mortality rates."""
     total_benefits = df['face_amount'].sum()
-    mortality_shock = assumptions.get('mortality_shock', 0.15)  # 15% mortality shock
+    # Use regulatory constant for mortality shock (15%)
+    mortality_shock = assumptions.get('mortality_shock', MORTALITY_SHOCK)
     
-    return total_benefits * mortality_shock * 0.5  # Simplified calculation
+    # Simplified: apply shock to sum at risk weighted by duration
+    average_duration = assumptions.get('average_duration', 10)
+    duration_factor = min(average_duration / 20.0, 1.0)  # Max impact at 20 years
+    
+    return total_benefits * mortality_shock * duration_factor * 0.5
 
 def calculate_longevity_risk(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
-    """Calculate longevity risk SCR"""
+    """Calculate longevity risk SCR per Article 138 - 20% permanent decrease in mortality rates."""
     annuity_exposure = assumptions.get('annuity_exposure', 0.2)  # 20% annuity exposure
     total_assets = df['face_amount'].sum()
-    longevity_shock = assumptions.get('longevity_shock', 0.20)  # 20% longevity shock
+    # Use regulatory constant for longevity shock (20%)
+    longevity_shock = assumptions.get('longevity_shock', LONGEVITY_SHOCK)
     
     return total_assets * annuity_exposure * longevity_shock
 
@@ -339,11 +345,27 @@ def calculate_disability_risk(df: pd.DataFrame, assumptions: Dict[str, Any]) -> 
     return total_assets * disability_exposure * disability_shock
 
 def calculate_lapse_risk(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
-    """Calculate lapse risk SCR"""
+    """Calculate lapse risk SCR per Article 142 - takes maximum of up, down, and mass lapse scenarios."""
     total_premiums = df['premium'].sum()
-    lapse_shock = assumptions.get('lapse_shock', 0.5)  # 50% lapse shock
+    total_face = df['face_amount'].sum()
     
-    return total_premiums * lapse_shock * 0.1  # Simplified calculation
+    # Use regulatory constants for lapse shocks
+    mass_lapse_shock = assumptions.get('mass_lapse_shock', LAPSE_SHOCKS['mass_lapse'])  # 40%
+    lapse_up_shock = assumptions.get('lapse_up_shock', LAPSE_SHOCKS['up_shock'])  # 50%
+    lapse_down_shock = assumptions.get('lapse_down_shock', LAPSE_SHOCKS['down_shock'])  # 50%
+    
+    # Calculate SCR for each scenario
+    # Mass lapse: 40% of policies surrender immediately
+    scr_mass_lapse = total_face * mass_lapse_shock * 0.05  # Assume 5% surrender strain
+    
+    # Lapse up: 50% increase in lapse rates - impacts premium income
+    scr_lapse_up = total_premiums * lapse_up_shock * 0.10  # Simplified impact
+    
+    # Lapse down: 50% decrease in lapse rates - impacts reserves
+    scr_lapse_down = total_face * lapse_down_shock * 0.02  # Simplified impact
+    
+    # SCR is maximum of three scenarios
+    return max(scr_mass_lapse, scr_lapse_up, scr_lapse_down)
 
 def calculate_expense_risk(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
     """Calculate expense risk SCR"""
@@ -413,46 +435,47 @@ def calculate_correlated_scr(risk_components: Dict[str, float], risk_type: str) 
     Returns:
         Correlated SCR amount
     """
-    # Correlation matrices per Solvency II Delegated Regulation
+    # Correlation matrices per Solvency II Delegated Regulation (EU) 2015/35 Annex IV
     correlation_matrices = {
         'market_risk': {
             ('interest_rate', 'equity'): 0.0,
             ('interest_rate', 'property'): 0.0,
             ('interest_rate', 'spread'): 0.5,
-            ('interest_rate', 'currency'): 0.0,
+            ('interest_rate', 'currency'): 0.25,
             ('interest_rate', 'concentration'): 0.0,
             ('equity', 'property'): 0.75,
-            ('equity', 'spread'): 0.0,
-            ('equity', 'currency'): 0.0,
+            ('equity', 'spread'): 0.75,
+            ('equity', 'currency'): 0.25,
             ('equity', 'concentration'): 0.0,
-            ('property', 'spread'): 0.0,
-            ('property', 'currency'): 0.0,
+            ('property', 'spread'): 0.50,
+            ('property', 'currency'): 0.25,
             ('property', 'concentration'): 0.0,
-            ('spread', 'currency'): 0.0,
+            ('spread', 'currency'): 0.25,
             ('spread', 'concentration'): 0.0,
             ('currency', 'concentration'): 0.0
         },
         'life_underwriting_risk': {
-            ('mortality', 'longevity'): 0.0,
+            # Note: mortality-longevity is NEGATIVE per regulation
+            ('mortality', 'longevity'): -0.25,
             ('mortality', 'disability'): 0.25,
             ('mortality', 'lapse'): 0.0,
             ('mortality', 'expense'): 0.25,
             ('mortality', 'revision'): 0.0,
-            ('mortality', 'catastrophe'): 0.0,
+            ('mortality', 'catastrophe'): 0.25,
             ('longevity', 'disability'): 0.0,
-            ('longevity', 'lapse'): 0.0,
-            ('longevity', 'expense'): 0.0,
-            ('longevity', 'revision'): 0.0,
+            ('longevity', 'lapse'): 0.25,
+            ('longevity', 'expense'): 0.25,
+            ('longevity', 'revision'): 0.25,
             ('longevity', 'catastrophe'): 0.0,
             ('disability', 'lapse'): 0.0,
-            ('disability', 'expense'): 0.25,
+            ('disability', 'expense'): 0.50,
             ('disability', 'revision'): 0.0,
-            ('disability', 'catastrophe'): 0.0,
-            ('lapse', 'expense'): 0.0,
+            ('disability', 'catastrophe'): 0.25,
+            ('lapse', 'expense'): 0.50,
             ('lapse', 'revision'): 0.0,
-            ('lapse', 'catastrophe'): 0.0,
-            ('expense', 'revision'): 0.0,
-            ('expense', 'catastrophe'): 0.0,
+            ('lapse', 'catastrophe'): 0.25,
+            ('expense', 'revision'): 0.50,
+            ('expense', 'catastrophe'): 0.25,
             ('revision', 'catastrophe'): 0.0
         }
     }
@@ -486,23 +509,24 @@ def calculate_total_scr(scr_components: Dict[str, float]) -> float:
     Returns:
         Total SCR amount
     """
-    # Main correlation matrix per Solvency II
+    # Main correlation matrix per Solvency II Delegated Regulation (EU) 2015/35 Annex IV
+    # Note: Operational risk is calculated separately and added linearly
     correlations = {
         ('market_risk', 'counterparty_risk'): 0.25,
         ('market_risk', 'life_underwriting_risk'): 0.25,
         ('market_risk', 'health_underwriting_risk'): 0.25,
         ('market_risk', 'non_life_underwriting_risk'): 0.25,
-        ('market_risk', 'operational_risk'): 0.25,
+        ('market_risk', 'operational_risk'): 0.0,  # Op risk added separately
         ('counterparty_risk', 'life_underwriting_risk'): 0.25,
         ('counterparty_risk', 'health_underwriting_risk'): 0.25,
-        ('counterparty_risk', 'non_life_underwriting_risk'): 0.5,
-        ('counterparty_risk', 'operational_risk'): 0.25,
+        ('counterparty_risk', 'non_life_underwriting_risk'): 0.50,  # Correct: 0.50 not 0.25
+        ('counterparty_risk', 'operational_risk'): 0.0,
         ('life_underwriting_risk', 'health_underwriting_risk'): 0.25,
-        ('life_underwriting_risk', 'non_life_underwriting_risk'): 0.0,
-        ('life_underwriting_risk', 'operational_risk'): 0.25,
+        ('life_underwriting_risk', 'non_life_underwriting_risk'): 0.0,  # Correct: 0.0
+        ('life_underwriting_risk', 'operational_risk'): 0.0,
         ('health_underwriting_risk', 'non_life_underwriting_risk'): 0.0,
-        ('health_underwriting_risk', 'operational_risk'): 0.25,
-        ('non_life_underwriting_risk', 'operational_risk'): 0.25
+        ('health_underwriting_risk', 'operational_risk'): 0.0,
+        ('non_life_underwriting_risk', 'operational_risk'): 0.0
     }
     
     # Calculate sum of squares

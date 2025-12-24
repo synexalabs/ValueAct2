@@ -271,7 +271,7 @@ class TestDataValidation:
     def test_policy_data_validation(self):
         """Test policy data validation"""
         from models.request import PolicyData
-        from utils.actuarial import validate_assumptions
+        from utils.actuarial import validate_assumptions, validate_policy_data
         
         # Valid policy
         valid_policy = {

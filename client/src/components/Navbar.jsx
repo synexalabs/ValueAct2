@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Shield, Menu, X, ArrowRight } from 'lucide-react';
+import { Calculator, Menu, X, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 
 const Navbar = () => {
@@ -9,7 +9,7 @@ const Navbar = () => {
 
     const navLinks = [
         { label: 'Methodology', path: '/methodology' },
-        { label: 'Portal', path: '/login' }
+        { label: 'Calculators', path: '/calculators' }
     ];
 
     return (
@@ -19,10 +19,10 @@ const Navbar = () => {
                     <div className="flex-shrink-0 flex items-center gap-3 group">
                         <Link href="/" className="flex items-center gap-3">
                             <div className="p-2.5 bg-trust-950 rounded-xl shadow-lg group-hover:scale-105 transition-transform">
-                                <Shield className="h-5 w-5 text-white" />
+                                <Calculator className="h-5 w-5 text-white" />
                             </div>
                             <span className="font-heading font-black text-2xl text-trust-950 tracking-tighter">
-                                FairLife<span className="text-trust-600">.</span>
+                                Valuact<span className="text-trust-600">.</span>
                             </span>
                         </Link>
                     </div>
@@ -38,10 +38,10 @@ const Navbar = () => {
                             </Link>
                         ))}
                         <Link
-                            href="/get-quote"
+                            href="/dashboard"
                             className="group flex items-center gap-2 bg-trust-950 text-white px-8 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-trust-900 transition-all shadow-xl shadow-trust-900/10 hover:-translate-y-0.5"
                         >
-                            Connect Legacy
+                            Launch Platform
                             <ArrowRight size={14} className="text-growth-400 group-hover:translate-x-1 transition-transform" />
                         </Link>
                     </div>
@@ -69,11 +69,11 @@ const Navbar = () => {
                             </Link>
                         ))}
                         <Link
-                            href="/get-quote"
+                            href="/dashboard"
                             onClick={() => setIsOpen(false)}
                             className="flex items-center justify-between w-full bg-trust-950 text-white px-6 py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em]"
                         >
-                            Establish Coverage
+                            Launch Platform
                             <ArrowRight size={18} className="text-growth-400" />
                         </Link>
                     </div>

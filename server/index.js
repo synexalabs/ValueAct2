@@ -4,7 +4,6 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 const admin = require('firebase-admin');
 const logger = require('./utils/logger');
 
@@ -15,6 +14,8 @@ const calculationRoutes = require('./routes/calculations');
 const methodologyRoutes = require('./routes/methodology');
 const dataManagementRoutes = require('./routes/dataManagement');
 const healthRoutes = require('./routes/healthRoutes');
+const chatRoutes = require('./routes/chat');
+const solutionRoutes = require('./routes/solutions');
 
 
 const app = express();
@@ -48,10 +49,7 @@ if (!admin.apps.length) {
   }
 }
 
-const db = admin.firestore();
-
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+// Initialize Gemini AI removed (moved to consumers)
 
 // Validate GOOGLE_API_KEY at startup
 if (!process.env.GOOGLE_API_KEY) {
@@ -125,173 +123,11 @@ app.use('/api/methodology', methodologyRoutes);
 // Data management routes (comprehensive multi-file processing)
 app.use('/api/data-management', dataManagementRoutes);
 
-// Chat with Gemini AI
-app.post('/api/chat', async (req, res) => {
-  try {
-    // Sanitize input to prevent XSS and injection attacks
-    const message = sanitizeInput(req.body.message);
+// Chat and Solutions routes
+app.use('/api/chat', chatRoutes);
+app.use('/api/solutions', solutionRoutes);
 
-    if (!message || message.length < 2) {
-      return res.status(400).json({ error: 'Message is required (minimum 2 characters)' });
-    }
-
-    // Require valid API key
-    if (!process.env.GOOGLE_API_KEY) {
-      return res.status(503).json({
-        error: 'AI service is currently unavailable.'
-      });
-    }
-
-    // Use Gemini AI
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-    const prompt = `You are AxiomAI, an expert actuarial co-pilot specializing in life insurance actuarial practice. 
-    You have deep knowledge across all areas of life insurance actuarial work including:
-    
-    CORE KNOWLEDGE AREAS:
-    - Life Insurance Fundamentals: Product types, mortality tables, valuation principles, policyholder behavior
-    - IFRS 17: GMM, PAA, VFA models, CSM mechanics, risk adjustments, implementation challenges
-    - Solvency II: SCR/MCR calculations, internal models, capital management, risk frameworks
-    - Pricing & Product Development: GLM modeling, profit testing, product design, market analysis
-    - Risk Management & ALM: Asset-liability management, interest rate risk, longevity risk, hedging strategies
-    - Regulatory & Compliance: Global frameworks, reporting standards, compliance management
-    
-    User question: ${message}
-    
-    Provide a comprehensive, professional response that:
-    1. Answers the technical question with actuarial accuracy
-    2. Provides practical business context and implications
-    3. Offers strategic insights where relevant
-    4. Suggests additional resources or considerations
-    5. Maintains a professional, educational tone
-    
-    Focus on practical application and real-world relevance. Keep responses detailed but accessible.`;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-
-    res.json({ response: text });
-  } catch (error) {
-    console.error('Chat error:', error);
-    res.status(500).json({
-      error: 'Failed to process chat request',
-      response: "I'm experiencing technical difficulties. Please try again in a moment."
-    });
-  }
-});
-
-// Submit solution
-app.post('/api/solutions', async (req, res) => {
-  try {
-    const solutionData = {
-      ...req.body,
-      id: Date.now().toString(),
-      submittedAt: new Date().toISOString(),
-      userId: req.body.userId || `user_${Date.now()}`
-    };
-
-    // Store in Firestore
-    await db.collection('solutions').add(solutionData);
-
-    res.json({
-      success: true,
-      solutionId: solutionData.id,
-      message: 'Solution submitted successfully'
-    });
-  } catch (error) {
-    console.error('Solution submission error:', error);
-    res.status(500).json({ error: 'Failed to submit solution' });
-  }
-});
-
-// Get user solutions
-app.get('/api/solutions/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-
-    // Get solutions from Firestore
-    const solutionsSnapshot = await db.collection('solutions')
-      .where('userId', '==', userId)
-      .orderBy('submittedAt', 'desc')
-      .get();
-
-    const userSolutions = solutionsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-
-    res.json({ solutions: userSolutions });
-  } catch (error) {
-    console.error('Get solutions error:', error);
-    res.status(500).json({ error: 'Failed to retrieve solutions' });
-  }
-});
-
-// Analyze solution with AI
-app.post('/api/analyze-solution', async (req, res) => {
-  try {
-    const { solutionData } = req.body;
-
-    if (!solutionData) {
-      return res.status(400).json({ error: 'Solution data is required' });
-    }
-
-    // Require valid API key
-    if (!process.env.GOOGLE_API_KEY) {
-      return res.status(500).json({
-        error: 'AI service not configured. Please set GOOGLE_API_KEY environment variable.'
-      });
-    }
-
-    // Use Gemini AI for analysis
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-    const prompt = `As an expert actuarial mentor, analyze this student solution:
-
-    Module: ${solutionData.moduleName}
-    Analysis: ${solutionData.analysis}
-    Code: ${solutionData.code}
-    Conclusion: ${solutionData.conclusion}
-    Recommendations: ${solutionData.recommendations}
-
-    Provide a comprehensive analysis including:
-    1. Technical accuracy (score 0-100)
-    2. Strategic thinking (score 0-100)
-    3. Constructive feedback
-    4. Key strengths
-    5. Areas for improvement
-
-    Format as JSON with scores, feedback, strengths, and improvements arrays.`;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-
-    // Try to parse JSON response, fallback to mock if parsing fails
-    try {
-      const analysis = JSON.parse(text);
-      res.json({ analysis });
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', parseError);
-      res.status(500).json({
-        error: 'Failed to parse AI analysis response',
-        analysis: {
-          technicalScore: 0,
-          strategicScore: 0,
-          feedback: "Analysis failed due to parsing error.",
-          strengths: [],
-          improvements: ["Please try again"]
-        }
-      });
-    }
-  } catch (error) {
-    console.error('Analysis error:', error);
-    res.status(500).json({
-      error: 'Failed to analyze solution'
-    });
-  }
-});
+// Routes moved to controllers
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -314,11 +150,11 @@ const io = initializeWebSocket(server);
 
 // Start server
 server.listen(PORT, () => {
-  console.log(`🚀 Valuact server running on port ${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🤖 AI Chat: http://localhost:${PORT}/api/chat`);
-  console.log(`💾 Solutions: http://localhost:${PORT}/api/solutions`);
-  console.log(`🔌 WebSocket: ws://localhost:${PORT}`);
+  logger.info(`🚀 Valuact server running on port ${PORT}`);
+  logger.info(`📊 Health check: http://localhost:${PORT}/api/health`);
+  logger.info(`🤖 AI Chat: http://localhost:${PORT}/api/chat`);
+  logger.info(`💾 Solutions: http://localhost:${PORT}/api/solutions`);
+  logger.info(`🔌 WebSocket: ws://localhost:${PORT}`);
 });
 
 module.exports = app;
