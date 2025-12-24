@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Reveal from '../../../components/common/Reveal';
 import { ShieldCheck, Globe, Lock, Zap, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -60,7 +61,10 @@ export default function PrivacyPage() {
                                     <p className="font-black text-trust-900 mb-1">Zaur Guliyev</p>
                                     <p className="m-0">Deutschland</p>
                                     <p className="mt-4 font-black text-trust-900 mb-1">Kontakt:</p>
-                                    <p className="m-0">E-Mail: service@synexalabs.com</p>
+                                    <div className="flex items-center gap-2">
+                                        <span>E-Mail:</span>
+                                        <Reveal text="service@synexalabs.org" label="E-Mail anzeigen" />
+                                    </div>
                                 </div>
                             </section>
 
@@ -108,7 +112,10 @@ export default function PrivacyPage() {
                                     <p className="font-black text-trust-900 mb-1">Zaur Guliyev</p>
                                     <p className="m-0">Germany</p>
                                     <p className="mt-4 font-black text-trust-900 mb-1">Contact:</p>
-                                    <p className="m-0">E-Mail: service@synexalabs.com</p>
+                                    <div className="flex items-center gap-2">
+                                        <span>E-Mail:</span>
+                                        <Reveal text="service@synexalabs.org" label="Show Email" />
+                                    </div>
                                 </div>
                             </section>
 

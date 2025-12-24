@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Reveal from '../../../components/common/Reveal';
 import { Landmark, Mail, Fingerprint, ShieldAlert } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -68,7 +69,10 @@ export default function ImpressumPage() {
                             <h2 className="text-[10px] font-black text-trust-900 uppercase tracking-[0.2em] m-0">{language === 'de' ? 'KONTAKT' : 'COMMUNICATION'}</h2>
                         </div>
                         <div className="text-sm text-gray-500 font-medium leading-relaxed">
-                            <p className="m-0">service@synexalabs.com</p>
+                            <div className="flex items-center gap-2">
+                                <Mail size={16} className="text-trust-900" />
+                                <Reveal text="service@synexalabs.org" label="Show Email" />
+                            </div>
                             <div className="mt-4 pt-4 border-t border-gray-50">
                                 <p className="text-[10px] font-black text-trust-900 uppercase tracking-widest mb-1">VAT ID / USt-ID:</p>
                                 <p className="m-0 text-trust-600 font-black">DE360921142</p>

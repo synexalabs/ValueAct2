@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Reveal from '../../../components/common/Reveal';
 import { Shield, CheckCircle, FileText, Users, Database, Zap, ArrowRight, ShieldCheck, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -144,9 +145,9 @@ export default function GDPRCompliancePage() {
                         <div className="relative z-10">
                             <h3 className="text-xl font-heading font-black tracking-tight mb-4 uppercase">Direct Inquiry?</h3>
                             <p className="text-trust-400 text-xs font-medium leading-relaxed mb-8">For official GDPR data egress requests or jurisdictional audits, please contact our verified security portal.</p>
-                            <a href="mailto:service@synexalabs.com" className="inline-flex py-4 px-8 bg-growth-500 hover:bg-growth-400 text-trust-950 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg shadow-growth-500/20">
-                                Contact Security Hub
-                            </a>
+                            <div className="inline-block">
+                                <Reveal text="service@synexalabs.org" label="Unlock Security Hub" className="bg-growth-500 hover:bg-growth-400 text-trust-950 px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-growth-500/20" />
+                            </div>
                         </div>
                     </section>
                 </div>
