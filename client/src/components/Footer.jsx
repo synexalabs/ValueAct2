@@ -10,7 +10,7 @@ export default function Footer() {
           <div className="flex flex-col gap-2">
             <span className="text-[10px] font-black text-trust-950 uppercase tracking-[0.3em]">Institutional Grade</span>
             <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">
-              © 2025 synexa labs. All rights reserved.
+              © 2025 <a href="https://www.synexalabs.org/" target="_blank" rel="noopener noreferrer" className="hover:text-trust-950 transition-colors">synexa labs</a>. All rights reserved.
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-8">
