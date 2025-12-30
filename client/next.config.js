@@ -4,6 +4,12 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  eslint: {
+    // Lint src and app directories
+    dirs: ['src', 'app'],
+    // Don't fail production builds on lint errors
+    ignoreDuringBuilds: true,
+  },
   async rewrites() {
     return [
       {

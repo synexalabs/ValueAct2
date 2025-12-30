@@ -21,10 +21,8 @@ export const useLocalStorage = (key, initialValue, options = {}) => {
 
   // Get value from localStorage or use initial value
   const [storedValue, setStoredValue] = useState(initialValue);
-  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
     try {
       const item = window.localStorage.getItem(key);
       if (item) {
@@ -132,11 +130,13 @@ export const useLocalStorage = (key, initialValue, options = {}) => {
 export const useCalculationHistory = (calculatorType, options = {}) => {
   const { maxItems = 25, compress = true, maxSize = 2 * 1024 * 1024 } = options; // 2MB for history
   const historyKey = `calculations_${calculatorType}`;
-  const [history, setHistory, removeHistory, clearAllHistory, getStorageInfo] = useLocalStorage(
+  const storageResult = useLocalStorage(
     historyKey,
     [],
     { compress, maxSize, maxItems }
   );
+  const [history, setHistory] = storageResult;
+  const getStorageInfo = storageResult[4];
 
   const saveCalculation = (calculation) => {
     // Optimize calculation data before saving

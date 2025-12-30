@@ -154,17 +154,35 @@ GAM_1994_FEMALE = {
     }
 }
 
+# Import DAV German mortality tables
+from data.dav_mortality_tables import (
+    DAV_2008_T_MALE, DAV_2008_T_FEMALE,
+    DAV_2004_R_MALE, DAV_2004_R_FEMALE,
+    DAV_MORTALITY_TABLES
+)
+
 # Registry of all mortality tables
 MORTALITY_TABLES = {
+    # US Tables
     "CSO_2017_MALE": CSO_2017_MALE,
     "CSO_2017_FEMALE": CSO_2017_FEMALE,
     "CSO_2017": CSO_2017_MALE,  # Default to male for unisex
     "CSO_2001_MALE": CSO_2001_MALE,
     "CSO_2001_FEMALE": CSO_2001_FEMALE,
     "CSO_2001": CSO_2001_MALE,  # Default to male for unisex
+    
+    # Legacy German Tables
     "GAM_1994_MALE": GAM_1994_MALE,
     "GAM_1994_FEMALE": GAM_1994_FEMALE,
     "GAM_1994": GAM_1994_MALE,  # Default to male for unisex
+    
+    # DAV German Tables (Current Standard)
+    "DAV_2008_T_MALE": DAV_2008_T_MALE,
+    "DAV_2008_T_FEMALE": DAV_2008_T_FEMALE,
+    "DAV_2008_T": DAV_2008_T_MALE,  # Default to male for unisex - Term Life
+    "DAV_2004_R_MALE": DAV_2004_R_MALE,
+    "DAV_2004_R_FEMALE": DAV_2004_R_FEMALE,
+    "DAV_2004_R": DAV_2004_R_MALE,  # Default to male for unisex - Annuities
 }
 
 
