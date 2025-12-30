@@ -1,14 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   reactStrictMode: true,
   images: {
     unoptimized: true,
-  },
-  eslint: {
-    // Lint src and app directories
-    dirs: ['src', 'app'],
-    // Don't fail production builds on lint errors
-    ignoreDuringBuilds: true,
   },
   async rewrites() {
     return [
@@ -21,3 +16,4 @@ const nextConfig = {
 }
 
 export default nextConfig
+
