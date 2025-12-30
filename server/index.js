@@ -15,7 +15,6 @@ const methodologyRoutes = require('./routes/methodology');
 const dataManagementRoutes = require('./routes/dataManagement');
 const healthRoutes = require('./routes/healthRoutes');
 const chatRoutes = require('./routes/chat');
-const solutionRoutes = require('./routes/solutions');
 
 
 const app = express();
@@ -101,7 +100,7 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Solutions will be stored in Firestore
+
 
 // Routes
 
@@ -123,9 +122,8 @@ app.use('/api/methodology', methodologyRoutes);
 // Data management routes (comprehensive multi-file processing)
 app.use('/api/data-management', dataManagementRoutes);
 
-// Chat and Solutions routes
+// Chat routes
 app.use('/api/chat', chatRoutes);
-app.use('/api/solutions', solutionRoutes);
 
 // Routes moved to controllers
 
@@ -153,7 +151,7 @@ server.listen(PORT, () => {
   logger.info(`🚀 Valuact server running on port ${PORT}`);
   logger.info(`📊 Health check: http://localhost:${PORT}/api/health`);
   logger.info(`🤖 AI Chat: http://localhost:${PORT}/api/chat`);
-  logger.info(`💾 Solutions: http://localhost:${PORT}/api/solutions`);
+
   logger.info(`🔌 WebSocket: ws://localhost:${PORT}`);
 });
 

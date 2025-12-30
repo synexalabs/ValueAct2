@@ -34,7 +34,7 @@ class ChatController {
             // Use Gemini AI
             const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-            const prompt = `You are AxiomAI, an expert actuarial co-pilot specializing in life insurance actuarial practice. 
+            const prompt = `You are an expert actuarial co-pilot specializing in life insurance actuarial practice. 
       You have deep knowledge across all areas of life insurance actuarial work including:
       
       CORE KNOWLEDGE AREAS:
