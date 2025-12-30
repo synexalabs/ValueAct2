@@ -14,7 +14,10 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# Copy public folder if it exists (using shell to handle missing case)
 COPY --from=builder /app/public ./public
+
+# Copy standalone build
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 

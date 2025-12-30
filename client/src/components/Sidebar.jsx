@@ -85,7 +85,7 @@ const Sidebar = () => {
                   : 'text-gray-600 hover:text-trust-900 hover:bg-trust-50'
                   }`}
               >
-                <item.icon className={`h-4.5 w-4.5 flex-shrink-0 ${isActive ? 'text-growth-400' : 'text-gray-400'}`} />
+                <item.icon className={`h-4.5 w-4.5 flex-shrink-0 ${isActive ? 'text-white' : 'text-gray-400'}`} />
                 <span className="truncate">{item.name}</span>
               </Link>
             );
@@ -165,7 +165,7 @@ const Sidebar = () => {
                       : 'text-gray-700 hover:text-trust-900 hover:bg-trust-50'
                       }`}
                   >
-                    <item.icon className={`h-4.5 w-4.5 ${isActive ? 'text-growth-400' : 'text-gray-400'}`} />
+                    <item.icon className={`h-4.5 w-4.5 ${isActive ? 'text-white' : 'text-gray-400'}`} />
                     <span>{item.name}</span>
                   </Link>
                 );
