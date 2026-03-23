@@ -254,6 +254,15 @@ def calculate_portfolio_csm(policies: List[Dict[str, Any]],
         )
 
         df['csm'] = np.maximum(0, -(df['fcf'] + df['risk_adjustment']))
+        
+        # Apply VFA adjustment if applicable (IFRS 17 para. 45)
+        # CSM is adjusted for the insurer's share of the change in fair value of underlying items
+        if 'participation_factor' in df.columns:
+            fv_change = assumptions.get('underlying_fv_change', 0.0)
+            vfa_mask = df['measurement_model'] == MeasurementModel.VFA
+            df.loc[vfa_mask, 'csm'] += df.loc[vfa_mask, 'participation_factor'].fillna(0) * fv_change
+            # Ensure CSM remains non-negative
+            df['csm'] = np.maximum(0, df['csm'])
 
         # Calculate Loss Component for onerous contracts
         # LC = max(0, FCF + RA) — immediate loss for onerous contracts
@@ -280,14 +289,32 @@ def calculate_portfolio_csm(policies: List[Dict[str, Any]],
         csm_release_pattern = calculate_csm_release_pattern_proper(df, assumptions)
         audit.add_intermediate_result("CSM Release Pattern", csm_release_pattern, "pattern", "CSM release pattern by year")
         
-        # Calculate CSM accretion (time value of money on CSM)
+        # Calculate CSM accretion (time value of money on CSM) using locked-in rates if available
+        # IFRS 17 para. 44(b)
         audit.add_calculation_step(
             description="CSM Accretion",
-            explanation="Calculate time value of money on CSM",
-            formula="CSM_{t+1} = CSM_t \\times (1 + r)"
+            explanation="Calculate time value of money on CSM using locked-in rates per cohort (IFRS 17 para. 44b)",
+            formula="CSM_{t+1} = CSM_t \\times (1 + r_{locked-in})"
         )
         
-        df['csm_accretion'] = df['csm'] * assumptions.get('discount_rate', 0.035)
+        locked_in_rates = assumptions.get('locked_in_rates', {})
+        
+        def get_locked_in_rate(row):
+            # Extract year from issue_date or use cohort_year if available
+            try:
+                dt_str = row.get('issue_date')
+                if not dt_str:
+                    return assumptions.get('discount_rate', 0.035)
+                dt = datetime.fromisoformat(dt_str.replace('Z', '+00:00'))
+                year = str(dt.year)
+                return locked_in_rates.get(year, assumptions.get('discount_rate', 0.035))
+            except (ValueError, TypeError):
+                return assumptions.get('discount_rate', 0.035)
+
+        df['csm_accretion'] = df.apply(
+            lambda row: row['csm'] * get_locked_in_rate(row),
+            axis=1
+        )
         
         # Group by cohorts
         audit.add_calculation_step("Cohort Analysis", 
@@ -595,32 +622,6 @@ def calculate_csm_release_pattern_proper(df: pd.DataFrame, assumptions: Dict[str
     
     return release_pattern
 
-# Legacy functions for backward compatibility
-def calculate_pv_benefits(policy: pd.Series, assumptions: Dict[str, Any], 
-                         mortality_table: Dict[str, Any]) -> float:
-    """Legacy function - use calculate_pv_benefits_proper instead"""
-    return calculate_pv_benefits_proper(policy, assumptions, mortality_table)
-
-def calculate_pv_premiums(policy: pd.Series, assumptions: Dict[str, Any], 
-                         mortality_table: Dict[str, Any]) -> float:
-    """Legacy function - use calculate_pv_premiums_proper instead"""
-    return calculate_pv_premiums_proper(policy, assumptions, mortality_table)
-
-def calculate_risk_adjustment_by_policy(policy: pd.Series, assumptions: Dict[str, Any]) -> float:
-    """Legacy function - use calculate_risk_adjustment_proper instead"""
-    return calculate_risk_adjustment_proper(policy, assumptions, {})
-
-def calculate_expense_loading(policy: pd.Series, assumptions: Dict[str, Any]) -> float:
-    """Legacy function - now integrated into calculate_pv_expenses"""
-    expense_factor = assumptions.get('expense_loading', 0.05)
-    premium = policy['premium']
-    return premium * expense_factor
-
-def calculate_tax_liability(policy: pd.Series, assumptions: Dict[str, Any]) -> float:
-    """Legacy function - tax calculations would be integrated into FCF"""
-    tax_rate = assumptions.get('tax_rate', 0.25)
-    premium = policy['premium']
-    return premium * tax_rate
 
 def calculate_csm_by_policy_type(policies: List[Dict[str, Any]], 
                                 assumptions: Dict[str, Any]) -> Dict[str, float]:

@@ -21,6 +21,7 @@ class PolicyData(BaseModel):
     issue_age: Optional[int] = Field(None, ge=0, le=120, description="Issue age")
     sum_assured: Optional[float] = Field(None, ge=0, description="Sum assured")
     premium_term: Optional[int] = Field(None, ge=0, description="Premium payment term")
+    participation_factor: Optional[float] = Field(None, ge=0, le=1, description="Insurer's share of underlying items (VFA)")
     
     @field_validator('policy_id')
     @classmethod
@@ -68,13 +69,18 @@ class IFRS17Assumptions(BaseModel):
     expense_loading: Optional[float] = Field(0.05, ge=0, le=0.2, description="Expense loading factor")
     tax_rate: Optional[float] = Field(0.25, ge=0, le=0.5, description="Tax rate")
     use_dynamic_lapse: Optional[bool] = Field(True, description="Use dynamic duration-based lapse rates")
+    locked_in_rates: Optional[Dict[str, float]] = Field(None, description="Historical locked-in rates by cohort year")
     
     @field_validator('mortality_table')
     @classmethod
     def validate_mortality_table(cls, v: str) -> str:
-        valid_tables = ['CSO_2017', 'CSO_2001', 'GAM_1994']
-        if v not in valid_tables:
-            raise ValueError(f'Mortality table must be one of: {valid_tables}')
+        # Support German DAV tables (including gender-specific/unisex aliases) and legacy tables
+        v_upper = v.upper()
+        is_dav = v_upper.startswith('DAV_')
+        is_legacy = v_upper in ['CSO_2017', 'CSO_2001', 'GAM_1994']
+        
+        if not (is_dav or is_legacy):
+            raise ValueError(f'Mortality table "{v}" is not supported. Use a DAV table (e.g., DAV_2008_T) or CSO_2017.')
         return v
 
 

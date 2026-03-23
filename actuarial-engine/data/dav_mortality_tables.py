@@ -1,3 +1,6 @@
+import math
+from typing import Dict, List, Any, Optional
+
 """
 Deutsche Aktuarvereinigung (DAV) Sterbetafeln
 German Actuarial Mortality Tables for Life Insurance
@@ -232,14 +235,16 @@ def get_dav_table(table_id: str, gender: str = None):
     return None
 
 
-def get_dav_mortality_rate(table_id: str, age: int, gender: str = None) -> float:
+def get_dav_mortality_rate(table_id: str, age: int, gender: str = None, year: int = 2024) -> float:
     """
-    Get mortality rate (qx) from DAV table for specific age and gender
+    Get mortality rate (qx) from DAV table for specific age and gender, 
+    applying dynamic trends for annuity tables.
     
     Args:
         table_id: DAV table identifier
-        age: Age at which to get mortality rate (will be capped at 121)
+        age: Age at which to get mortality rate
         gender: Gender ('male', 'female', 'M', 'F')
+        year: Year for which to calculate the rate (applies trends)
         
     Returns:
         Mortality rate (qx) as decimal (not per mille)
@@ -247,14 +252,47 @@ def get_dav_mortality_rate(table_id: str, age: int, gender: str = None) -> float
     table = get_dav_table(table_id, gender)
     
     if table is None:
-        raise ValueError(f"Unknown DAV mortality table: {table_id}")
+        # Fallback for generic logic
+        return 0.0
     
     # Cap age at maximum table age
     max_age = max(table["rates"].keys())
     capped_age = min(max(0, age), max_age)
     
-    # Return rate as decimal (divide by 1000)
-    return table["rates"].get(capped_age, 1000.0) / 1000.0
+    # Base rate as decimal
+    qx = table["rates"].get(capped_age, 0.0) / 1000.0
+    
+    # Apply mortality improvement trend for annuity tables (DAV 2004 R)
+    # IFRS 17 and Solvency II require best estimate assumptions including trends
+    if "2004_R" in table_id and "trend" in table:
+        t0 = table.get("base_year", 2004)
+        trend_data = table["trend"]
+        
+        # Interpolate trend factor if age not exactly in table
+        trend_ages = sorted(trend_data.keys())
+        if capped_age in trend_data:
+            trend_factor = trend_data[capped_age]
+        else:
+            # Find surrounding ages for interpolation
+            lower_ages = [a for a in trend_ages if a < capped_age]
+            upper_ages = [a for a in trend_ages if a > capped_age]
+            
+            if not lower_ages:
+                trend_factor = trend_data[upper_ages[0]]
+            elif not upper_ages:
+                trend_factor = trend_data[lower_ages[-1]]
+            else:
+                l_age = lower_ages[-1]
+                u_age = upper_ages[0]
+                l_val = trend_data[l_age]
+                u_val = trend_data[u_age]
+                # Linear interpolation
+                trend_factor = l_val + (u_val - l_val) * (capped_age - l_age) / (u_age - l_age)
+        
+        # q(x, t) = q(x, t0) * exp(-trend * (t - t0))
+        qx = qx * math.exp(-trend_factor * (year - t0))
+        
+    return qx
 
 
 def get_dav_survival_probability(table_id: str, age: int, term: int, gender: str = None) -> float:

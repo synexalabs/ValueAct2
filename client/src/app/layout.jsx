@@ -1,5 +1,6 @@
 import './globals.css';
 import { AuthProvider } from '../contexts/AuthContext';
+import { LanguageProvider } from '../contexts/LanguageContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 
 export const metadata = {
@@ -33,9 +34,11 @@ export default function RootLayout({ children }) {
             </head>
             <body className="min-h-screen bg-white flex flex-col font-sans">
                 <ErrorBoundary>
-                    <AuthProvider>
-                        {children}
-                    </AuthProvider>
+                    <LanguageProvider>
+                        <AuthProvider>
+                            {children}
+                        </AuthProvider>
+                    </LanguageProvider>
                 </ErrorBoundary>
             </body>
         </html>

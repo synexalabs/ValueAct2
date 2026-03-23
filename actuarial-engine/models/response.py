@@ -10,8 +10,10 @@ class PolicyResult(BaseModel):
     """Individual policy calculation result"""
     policy_id: str = Field(..., description="Policy identifier")
     csm: Optional[float] = Field(None, description="Contractual Service Margin")
+    fcf: Optional[float] = Field(None, description="Fulfilment cash flows")
     pv_benefits: Optional[float] = Field(None, description="Present value of benefits")
     pv_premiums: Optional[float] = Field(None, description="Present value of premiums")
+    pv_expenses: Optional[float] = Field(None, description="Present value of expenses")
     risk_adjustment: Optional[float] = Field(None, description="Risk adjustment")
     loss_component: Optional[float] = Field(None, description="Loss component")
     scr: Optional[float] = Field(None, description="Solvency Capital Requirement")
@@ -29,15 +31,19 @@ class AggregateMetrics(BaseModel):
     """Aggregate portfolio metrics"""
     total_premium: float = Field(..., description="Total portfolio premium")
     total_benefits_pv: float = Field(..., description="Total present value of benefits")
+    total_expenses_pv: Optional[float] = Field(None, description="Total present value of expenses")
+    total_fcf: Optional[float] = Field(None, description="Total fulfilment cash flows")
     risk_adjustment: float = Field(..., description="Total risk adjustment")
     loss_component: float = Field(..., description="Total loss component")
     policy_count: int = Field(..., description="Total number of policies")
     onerous_count: int = Field(..., description="Number of onerous contracts")
     diversification_benefit: Optional[float] = Field(None, description="Diversification benefit")
+    own_funds: Optional[float] = Field(None, description="Available own funds")
     
 class IFRS17Response(BaseModel):
     """Response model for IFRS 17 calculations"""
     portfolio_csm: float = Field(..., description="Total portfolio CSM")
+    portfolio_fcf: Optional[float] = Field(None, description="Total portfolio fulfilment cash flows")
     csm_by_cohort: Dict[str, float] = Field(..., description="CSM by cohort year")
     csm_release_pattern: List[float] = Field(..., description="CSM release pattern over time")
     policy_results: List[PolicyResult] = Field(..., description="Individual policy results")

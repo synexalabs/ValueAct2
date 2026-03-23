@@ -20,8 +20,6 @@ export default function ImpressumPage() {
               <p>
                 Zaur Guliyev<br />
                 Synexa Labs<br />
-                [Straße und Hausnummer]<br />
-                [PLZ] [Ort]<br />
                 Deutschland
               </p>
             </section>
@@ -37,11 +35,8 @@ export default function ImpressumPage() {
             <section>
               <h2 className="text-base font-semibold text-trust-900 mb-2">Umsatzsteuer-ID</h2>
               <p>
-                Umsatzsteuer-Identifikationsnummer gem. § 27a UStG: [USt-IdNr.]
-                <br />
                 <em>
-                  Hinweis: Sofern keine USt-IdNr. vorliegt, gilt die Kleinunternehmerregelung
-                  gem. § 19 UStG.
+                  Kleinunternehmer gem. § 19 UStG. Es wird keine Umsatzsteuer berechnet.
                 </em>
               </p>
             </section>
@@ -50,8 +45,25 @@ export default function ImpressumPage() {
               <h2 className="text-base font-semibold text-trust-900 mb-2">Verantwortlich für den Inhalt</h2>
               <p>
                 Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:<br />
-                Zaur Guliyev<br />
-                [Adresse wie oben]
+                Zaur Guliyev, Synexa Labs, Deutschland
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-base font-semibold text-trust-900 mb-2">Online-Streitbeilegung (OS)</h2>
+              <p>
+                Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:{' '}
+                <a
+                  href="https://ec.europa.eu/consumers/odr/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-trust-600 hover:underline"
+                >
+                  https://ec.europa.eu/consumers/odr/
+                </a>
+                <br />
+                Wir sind nicht verpflichtet und nicht bereit, an einem Streitbeilegungsverfahren
+                vor einer Verbraucherschlichtungsstelle teilzunehmen.
               </p>
             </section>
 

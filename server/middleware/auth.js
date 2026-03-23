@@ -1,4 +1,5 @@
 const { verifyToken, extractTokenFromHeader } = require('../utils/jwt');
+const firestoreService = require('../services/firestoreService');
 const logger = require('../utils/logger');
 
 /**
@@ -23,17 +24,27 @@ async function authMiddleware(req, res, next) {
     // Verify token
     const decoded = verifyToken(token);
     
+    // Fetch user plan from Firestore for rate-limit bypass
+    let plan = 'free';
+    try {
+      const userDoc = await firestoreService.getDocument('users', decoded.userId);
+      if (userDoc?.plan) plan = userDoc.plan;
+    } catch (err) {
+      logger.warn('Could not fetch user plan from Firestore:', err.message);
+    }
+
     // Add user info to request
     req.user = {
       id: decoded.userId,
-      email: decoded.email
+      email: decoded.email,
+      plan
     };
-    
+
     next();
   } catch (error) {
     logger.error('Authentication error:', error);
-    return res.status(401).json({ 
-      error: 'Invalid or expired token' 
+    return res.status(401).json({
+      error: 'Invalid or expired token'
     });
   }
 }

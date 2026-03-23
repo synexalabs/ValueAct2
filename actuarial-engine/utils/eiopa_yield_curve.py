@@ -212,67 +212,66 @@ def smith_wilson_extrapolation(
     country: str = "DE"
 ) -> Dict[int, float]:
     """
-    Apply Smith-Wilson extrapolation to extend yield curve beyond LLP
+    Apply Smith-Wilson extrapolation using matrix inversion for exact matching
+    of liquid points and smooth convergence to UFR.
     
-    Args:
-        liquid_rates: Dictionary of {maturity: spot_rate} for liquid maturities
-        max_maturity: Maximum maturity to extrapolate to
-        currency: Currency code
-        include_va: Whether to include Volatility Adjustment
-        country: Country code for VA lookup
-        
-    Returns:
-        Dictionary of {maturity: spot_rate} for all maturities
+    Formula: P(t) = exp(-UFR_cont * t) * (1 + sum_{j=1}^N zeta_j * W(t, t_j))
     """
-    # Get parameters
+    # 1. Setup parameters
     ufr = UFR_RATES.get(currency, 0.0345)
+    ufr_cont = math.log(1 + ufr)
     params = EXTRAPOLATION_PARAMETERS.get(currency, {"llp": 20, "fsp": 20, "convergence_period": 40})
-    llp = params["llp"]
     convergence_period = params["convergence_period"]
     
-    # Calculate alpha
+    # Calculate alpha based on convergence criteria
     alpha = calculate_smith_wilson_alpha(ufr, convergence_period=convergence_period)
     
     # Get VA if requested
     va = 0.0
     if include_va:
         va = VOLATILITY_ADJUSTMENT.get(country, VOLATILITY_ADJUSTMENT.get(currency, 0.0))
+        # Add VA to liquid spot rates before calculating prices
+        liquid_rates_adjusted = {m: r + va for m, r in liquid_rates.items()}
+    else:
+        liquid_rates_adjusted = liquid_rates.copy()
     
-    # Build result with liquid rates
+    # 2. Construct vectors and matrix for solving zeta
+    maturities_liquid = np.array(sorted(liquid_rates_adjusted.keys()))
+    prices_liquid = np.array([1 / (1 + liquid_rates_adjusted[m])**m for m in maturities_liquid])
+    
+    # mu vector: exp(-UFR_cont * maturities)
+    mu = np.exp(-ufr_cont * maturities_liquid)
+    
+    # W matrix: Smith-Wilson kernel values
+    N = len(maturities_liquid)
+    W = np.zeros((N, N))
+    for i in range(N):
+        for j in range(N):
+            W[i, j] = smith_wilson_kernel(maturities_liquid[i], maturities_liquid[j], alpha, ufr)
+            
+    # 3. Solve for zeta: zeta = W^-1 * (P - mu)
+    try:
+        zeta = np.linalg.solve(W, prices_liquid - mu)
+    except np.linalg.LinAlgError:
+        # Fallback to pseudo-inverse if W is singular
+        zeta = np.linalg.pinv(W) @ (prices_liquid - mu)
+        
+    # 4. Generate result for all maturities
     result = {}
-    liquid_maturities = sorted(liquid_rates.keys())
+    time_points = np.arange(1, max_maturity + 1)
     
-    for t in range(1, max_maturity + 1):
-        if t <= llp and t in liquid_rates:
-            # Use observed rate + VA
-            result[t] = liquid_rates[t] + va
-        else:
-            # Extrapolate using Smith-Wilson
-            # Simplified extrapolation formula
-            if t <= llp:
-                # Interpolate between observed points
-                lower_m = max([m for m in liquid_maturities if m <= t], default=1)
-                upper_m = min([m for m in liquid_maturities if m >= t], default=llp)
-                
-                if lower_m == upper_m:
-                    result[t] = liquid_rates[lower_m] + va
-                else:
-                    ratio = (t - lower_m) / (upper_m - lower_m)
-                    rate = liquid_rates[lower_m] + ratio * (liquid_rates[upper_m] - liquid_rates[lower_m])
-                    result[t] = rate + va
-            else:
-                # Extrapolation beyond LLP
-                # Gradual convergence to UFR
-                years_beyond_llp = t - llp
-                convergence_weight = 1 - math.exp(-alpha * years_beyond_llp)
-                
-                # Last liquid rate
-                last_liquid_rate = liquid_rates.get(llp, liquid_rates[max(liquid_rates.keys())])
-                
-                # Blend between last liquid rate and UFR
-                extrapolated_rate = last_liquid_rate + convergence_weight * (ufr - last_liquid_rate)
-                result[t] = extrapolated_rate + va
-    
+    for t in time_points:
+        # Calculate kernel vector w(t)
+        w_t = np.array([smith_wilson_kernel(t, u, alpha, ufr) for u in maturities_liquid])
+        
+        # Extrapolated price: P(t) = mu(t) + w(t) * zeta
+        mu_t = math.exp(-ufr_cont * t)
+        p_t = mu_t + np.dot(w_t, zeta)
+        
+        # Convert price back to spot rate: r = P^(-1/t) - 1
+        spot_rate = p_t**(-1/t) - 1
+        result[t] = float(spot_rate)
+        
     return result
 
 

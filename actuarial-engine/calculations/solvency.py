@@ -83,13 +83,15 @@ def calculate_portfolio_scr(policies: List[Dict[str, Any]],
     own_funds = assumptions.get('own_funds', total_scr_adjusted * 1.5)  # Assume 150% solvency ratio
     solvency_ratio = own_funds / total_scr_adjusted if total_scr_adjusted > 0 else 0
     
-    # Create policy results
+    # Create policy results — allocate portfolio SCR proportionally by face_amount
+    total_face = float(df['face_amount'].sum()) or 1.0
     policy_results = []
     for _, row in df.iterrows():
+        weight = float(row['face_amount']) / total_face
         policy_result = {
             'policy_id': row['policy_id'],
-            'scr': float(row['face_amount'] * 0.25),  # Simplified per-policy SCR
-            'mcr': float(row['face_amount'] * 0.125),  # Simplified per-policy MCR
+            'scr': float(total_scr_adjusted * weight),
+            'mcr': float(mcr * weight),
             'pv_benefits': float(row['face_amount'] * 0.95),
             'pv_premiums': float(row['premium'])
         }

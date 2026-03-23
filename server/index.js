@@ -67,6 +67,8 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+// Stripe webhook needs raw body — must be registered BEFORE express.json()
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -94,6 +96,18 @@ app.use('/api/calculations', calculationLimiter, calculationRoutes);
 app.use('/api/methodology', methodologyRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/stripe', stripeRoutes);
+
+// Mortality tables proxy — public, no rate limit
+app.get('/api/mortality-tables', async (req, res) => {
+  try {
+    const pythonEngine = require('./services/pythonEngineService');
+    const data = await pythonEngine.getMortalityTables();
+    res.json(data);
+  } catch (err) {
+    logger.error('Mortality tables proxy error:', err.message);
+    res.status(500).json({ error: 'Sterbetafeln konnten nicht abgerufen werden.' });
+  }
+});
 
 // Error handling
 app.use((err, req, res, next) => {
