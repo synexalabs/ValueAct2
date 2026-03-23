@@ -61,9 +61,13 @@ app.add_middleware(
 
 # Add trusted host middleware for production
 if os.getenv("ENVIRONMENT") == "production":
+    allowed_hosts = os.getenv(
+        "ALLOWED_HOSTS", 
+        "valuact-rechner.de,localhost,127.0.0.1"
+    ).split(",")
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["*"]  # Configure appropriately for production
+        allowed_hosts=allowed_hosts
     )
 
 @app.get("/")

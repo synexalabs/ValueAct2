@@ -18,7 +18,7 @@ const policySchema = Joi.object({
 const assumptionSchema = Joi.object({
     discountRate: Joi.number().min(-0.1).max(0.5).default(0.035),
     lapseRate: Joi.number().min(0).max(1).default(0.05),
-    mortalityTable: Joi.string().default('CSO_2017')
+    mortalityTable: Joi.string().default('DAV_2008_T')
 }).unknown(true);
 
 const PYTHON_ENGINE_URL = process.env.PYTHON_ENGINE_URL || 'http://localhost:8000';
@@ -261,7 +261,7 @@ class PythonEngineService {
             logger.error('Get mortality tables error:', error.message);
             // Return default tables if endpoint not available
             return {
-                tables: ['CSO_2017', 'CSO_2001', 'GAM_1994'],
+                tables: ['DAV_2008_T', 'DAV_2004_R', 'DAV_2008_T_MALE', 'DAV_2008_T_FEMALE'],
                 error: 'Could not fetch from engine, returning defaults',
             };
         }

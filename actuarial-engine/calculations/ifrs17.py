@@ -13,6 +13,7 @@ from functools import lru_cache
 
 from utils.audit_logger import AuditContext, validate_non_negative
 from data.mortality_tables import get_mortality_table, get_survival_probability, get_mortality_rate
+from utils.eiopa_yield_curve import smith_wilson_extrapolation
 
 # Global cache for mortality tables and discount factors
 _mortality_cache = {}
@@ -31,8 +32,14 @@ def get_cached_survival_probability(table_id: str, age: int, term: int, gender: 
     return get_survival_probability(table_id, age, term, gender)
 
 @lru_cache(maxsize=1000)
-def get_cached_discount_factor(rate: float, period: int) -> float:
-    """Cached discount factor calculation"""
+def get_cached_discount_factor(rate: float, period: int, curve: Tuple[float, ...] = None) -> float:
+    """Cached discount factor calculation. If curve is provided, rate is ignored."""
+    if curve:
+        # Use period-specific rate from curve (spot rate)
+        # Ensure period is within curve range, if not use last available rate
+        idx = min(period, len(curve) - 1)
+        period_rate = curve[idx]
+        return 1 / (1 + period_rate) ** period
     return 1 / (1 + rate) ** period
 
 from models.request import PolicyData, IFRS17Assumptions
@@ -181,13 +188,25 @@ def calculate_portfolio_csm(policies: List[Dict[str, Any]],
         mortality_table = get_mortality_table(assumptions['mortality_table'])
         audit.add_intermediate_result("Mortality Table", mortality_table, "table", "Selected mortality table")
         
-        # Pre-calculate discount factors for common terms to improve performance
-        max_term = int(df.get('policy_term', pd.Series([20])).max()) if len(df) > 0 else 20
-        discount_rate = assumptions['discount_rate']
+        # Pre-calculate Smith-Wilson Yield Curve
+        liquid_rates = assumptions.get('liquid_rates', {
+            1: 0.01, 2: 0.012, 5: 0.015, 10: 0.02, 20: 0.025, 30: 0.03
+        })
+        max_term = int(df.get('policy_term', pd.Series([50])).max()) if len(df) > 0 else 50
         
-        # Pre-calculate discount factors for all possible terms
+        # Extrapolate to cover maximum possible duration
+        curve_rates = smith_wilson_extrapolation(liquid_rates, max_maturity=max_term + 1)
+        yield_curve = tuple(curve_rates[t] for t in range(max_term + 1))
+        
+        # Pre-calculate discount factors for common terms to improve performance
+        discount_rate = assumptions.get('discount_rate', 0.035)
+        
+        # Pre-calculate using the term structure
         for t in range(1, max_term + 1):
-            get_cached_discount_factor(discount_rate, t)
+            get_cached_discount_factor(discount_rate, t, yield_curve)
+        
+        # Add yield curve to assumptions so sub-calculations can use it
+        assumptions['_yield_curve'] = yield_curve
         
         # Determine measurement model for each policy
         audit.add_calculation_step("Measurement Model Selection", 
@@ -457,7 +476,8 @@ def calculate_pv_benefits_proper(policy: pd.Series, assumptions: Dict[str, Any],
         
         # Death benefit paid at end of year
         benefit_amount = face_amount * death_probability
-        discount_factor = 1 / (1 + discount_rate) ** t
+        # Use term-structure aware discounting
+        discount_factor = get_cached_discount_factor(discount_rate, t, assumptions.get('_yield_curve'))
         
         pv_benefits += benefit_amount * discount_factor
     
@@ -501,7 +521,8 @@ def calculate_pv_premiums_proper(policy: pd.Series, assumptions: Dict[str, Any],
         
         # Premium paid at beginning of year
         premium_amount = premium * survival_probability * persistence_probability
-        discount_factor = 1 / (1 + discount_rate) ** t
+        # Use term-structure aware discounting
+        discount_factor = get_cached_discount_factor(discount_rate, t, assumptions.get('_yield_curve'))
         
         pv_premiums += premium_amount * discount_factor
     
@@ -539,7 +560,8 @@ def calculate_pv_expenses(policy: pd.Series, assumptions: Dict[str, Any],
     for t in range(1, policy_term):
         survival_probability = get_survival_probability(mortality_table_id, issue_age, t, gender)
         renewal_expense = premium * expense_loading * (1 + expense_inflation) ** t
-        discount_factor = 1 / (1 + discount_rate) ** t
+        # Use term-structure aware discounting
+        discount_factor = get_cached_discount_factor(discount_rate, t, assumptions.get('_yield_curve'))
         
         pv_expenses += renewal_expense * survival_probability * discount_factor
     
@@ -721,7 +743,7 @@ def calculate_pv_benefits_vectorized(df: pd.DataFrame, assumptions: Dict[str, An
     time_vector = np.arange(1, max_term + 1)
     
     # Calculate discount factors for all periods
-    discount_factors = np.array([get_cached_discount_factor(discount_rate, t) for t in time_vector])
+    discount_factors = np.array([get_cached_discount_factor(discount_rate, t, assumptions.get('_yield_curve')) for t in time_vector])
     
     # Vectorized calculation for each policy
     pv_benefits = np.zeros(len(df))
@@ -773,7 +795,7 @@ def calculate_pv_premiums_vectorized(df: pd.DataFrame, assumptions: Dict[str, An
     time_vector = np.arange(1, max_term + 1)
     
     # Calculate discount factors for all periods
-    discount_factors = np.array([get_cached_discount_factor(discount_rate, t) for t in time_vector])
+    discount_factors = np.array([get_cached_discount_factor(discount_rate, t, assumptions.get('_yield_curve')) for t in time_vector])
     
     # Vectorized calculation for each policy
     pv_premiums = np.zeros(len(df))

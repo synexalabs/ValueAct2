@@ -20,6 +20,8 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // SECURITY NOTE: Using localStorage for JWT is acceptable for MVP but carries XSS risks.
+    // RECOMMENDATION: Move to httpOnly cookies for professional production environments.
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       setToken(storedToken);

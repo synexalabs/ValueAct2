@@ -112,7 +112,7 @@ app.get('/api/mortality-tables', async (req, res) => {
 // Error handling
 app.use((err, req, res, next) => {
   logger.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
+  res.status(500).json({ error: 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.' });
 });
 
 app.use('*', (req, res) => {

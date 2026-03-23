@@ -78,15 +78,16 @@ def get_mortality_table(table_id: str) -> Dict[str, Any]:
     from data.mortality_tables import get_mortality_table as get_table
     return get_table(table_id)
 
-def calculate_present_value(cash_flows: List[float], discount_rate: float, 
-                          periods: List[int] = None) -> float:
+def calculate_present_value(cash_flows: List[float], discount_rate: float = 0.035, 
+                          periods: List[int] = None, curve: Tuple[float, ...] = None) -> float:
     """
-    Calculate present value of cash flows
+    Calculate present value of cash flows using flat rate or yield curve
     
     Args:
         cash_flows: List of cash flows
-        discount_rate: Discount rate per period
+        discount_rate: Flat discount rate (used if curve is None)
         periods: List of period numbers (optional)
+        curve: Yield curve tuple of spot rates (optional)
         
     Returns:
         Present value
@@ -94,7 +95,15 @@ def calculate_present_value(cash_flows: List[float], discount_rate: float,
     if periods is None:
         periods = list(range(len(cash_flows)))
     
-    pv = sum(cf / (1 + discount_rate) ** period for cf, period in zip(cash_flows, periods))
+    pv = 0.0
+    for cf, t in zip(cash_flows, periods):
+        if curve:
+            idx = min(t, len(curve) - 1)
+            rate = curve[idx]
+            df = 1 / (1 + rate) ** t
+        else:
+            df = 1 / (1 + discount_rate) ** t
+        pv += cf * df
     return pv
 
 def calculate_annuity_factor(age: int, mortality_table: Dict[str, Any], 
