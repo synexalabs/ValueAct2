@@ -7,31 +7,20 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-6 py-10">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start gap-1">
-            <span className="text-sm font-semibold text-trust-950">Valuact</span>
-            <p className="text-gray-500 text-sm">
-              © 2025{' '}
-              <a
-                href="https://www.synexalabs.org/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-trust-950 transition-colors"
-              >
-                Synexa Labs
-              </a>
+            <span className="text-sm font-semibold text-trust-950">ValueAct Rechner</span>
+            <p className="text-gray-400 text-xs">
+              © 2026 Zaur Guliyev / Synexa Labs. Alle Rechte vorbehalten.
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-6">
             {[
-              { label: 'Legal Notice', path: '/impressum' },
-              { label: 'Privacy', path: '/privacy' },
-              { label: 'Terms', path: '/terms' },
-              { label: 'GDPR', path: '/gdpr-compliance' }
-            ].map((link, i) => (
-              <Link
-                key={i}
-                href={link.path}
-                className="text-sm text-gray-500 hover:text-trust-950 transition-colors"
-              >
+              { label: 'Impressum', path: '/impressum' },
+              { label: 'Datenschutz', path: '/datenschutz' },
+              { label: 'AGB', path: '/agb' },
+              { label: 'Methodik', path: '/methodik' },
+            ].map((link) => (
+              <Link key={link.path} href={link.path}
+                className="text-sm text-gray-500 hover:text-trust-950 transition-colors">
                 {link.label}
               </Link>
             ))}

@@ -1,7 +1,6 @@
 const axios = require('axios');
 const logger = require('../utils/logger');
 const Joi = require('joi');
-const pLimit = require('p-limit');
 
 // Validation schemas (Type Safety)
 const policySchema = Joi.object({
@@ -101,7 +100,7 @@ class PythonEngineService {
                 assumptions: {
                     discount_rate: parseFloat(assumptions.discountRate || assumptions.discount_rate || 0.035),
                     lapse_rate: parseFloat(assumptions.lapseRate || assumptions.lapse_rate || 0.05),
-                    mortality_table: assumptions.mortalityTable || assumptions.mortality_table || 'CSO_2017',
+                    mortality_table: assumptions.mortalityTable || assumptions.mortality_table || 'DAV_2008_T',
                     expense_inflation: parseFloat(assumptions.expenseInflation || assumptions.expense_inflation || 0.02),
                     risk_adjustment_factor: parseFloat(assumptions.riskAdjustmentFactor || assumptions.risk_adjustment_factor || 0.06),
                     expense_loading: parseFloat(assumptions.expenseLoading || assumptions.expense_loading || 0.05),
@@ -188,11 +187,8 @@ class PythonEngineService {
         logger.info(`Starting sensitivity analysis with ${scenarios.length} scenarios`);
 
         try {
-            // Concurrency Control: Limit to 5 parallel scenarios to protect Python engine
-            const limit = pLimit(5);
-
             const results = await Promise.all(
-                scenarios.map((scenario) => limit(async () => {
+                scenarios.map(async (scenario) => {
                     const shockedAssumptions = { ...baseAssumptions };
 
                     // Apply shocks
@@ -226,7 +222,7 @@ class PythonEngineService {
                         shocks: scenario.shocks,
                         results: result.aggregate_results || result,
                     };
-                }))
+                })
             );
 
             const duration = Date.now() - startTime;

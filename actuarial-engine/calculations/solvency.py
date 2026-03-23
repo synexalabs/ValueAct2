@@ -8,16 +8,9 @@ import pandas as pd
 from typing import List, Dict, Any, Tuple
 from datetime import datetime
 import time
-import sys
-import os
-
-# Add the utils directory to the path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'utils'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'data'))
 
 from data.mortality_tables import get_mortality_rate, get_survival_probability, get_mortality_table
 
-# Import regulatory constants for Solvency II parameters
 from utils.regulatory_constants import (
     EQUITY_SHOCKS, EQUITY_SYMMETRIC_ADJUSTMENT,
     MORTALITY_SHOCK, LONGEVITY_SHOCK, LAPSE_SHOCKS, PROPERTY_SHOCK, CURRENCY_SHOCK,
@@ -407,22 +400,21 @@ def calculate_non_life_underwriting_risk_scr(df: pd.DataFrame, assumptions: Dict
 
 def calculate_operational_risk_scr(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
     """
-    Calculate operational risk SCR component
-    
-    Args:
-        df: Portfolio data as DataFrame
-        assumptions: Calculation assumptions
-        
-    Returns:
-        Operational risk SCR amount
+    Calculate operational risk SCR per Article 204 of Delegated Regulation.
+    Op_SCR = min(0.30 × BSCR, max(Op_premiums, Op_provisions))
     """
-    # Basic SCR (excluding operational risk)
-    basic_scr = assumptions.get('basic_scr', df['face_amount'].sum() * 0.2)
-    
-    # Operational risk = 25% of basic SCR
-    operational_risk_factor = assumptions.get('operational_risk_factor', 0.25)
-    
-    return basic_scr * operational_risk_factor
+    earned_premiums = df['premium'].sum()
+    technical_provisions = assumptions.get('technical_provisions', df['face_amount'].sum() * 0.95)
+    basic_scr = assumptions.get('basic_scr', df['face_amount'].sum() * 0.20)
+
+    # Premium-based component: 4% of earned life gross premiums
+    op_premiums = 0.04 * earned_premiums
+
+    # Provisions-based component: 0.45% of life technical provisions
+    op_provisions = 0.0045 * technical_provisions
+
+    # Capped at 30% of Basic SCR
+    return min(0.30 * basic_scr, max(op_premiums, op_provisions))
 
 def calculate_correlated_scr(risk_components: Dict[str, float], risk_type: str) -> float:
     """
@@ -548,46 +540,27 @@ def calculate_total_scr(scr_components: Dict[str, float]) -> float:
 
 def calculate_mcr(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
     """
-    Calculate Minimum Capital Requirement (MCR)
-    
-    Args:
-        df: Portfolio data as DataFrame
-        assumptions: Calculation assumptions
-        
-    Returns:
-        MCR amount
+    Calculate Minimum Capital Requirement per Solvency II Articles 248-250.
+    MCR = max(MCR_floor, min(0.45 × SCR, max(0.25 × SCR, MCR_linear)))
     """
-    # MCR calculation based on technical provisions and premium/claims
-    technical_provisions = df['face_amount'].sum() * 0.95  # Simplified TP calculation
-    premium_written = df['premium'].sum()
-    
-    # MCR = max(25% of TP, 15% of premium written, absolute floor)
-    mcr_tp = technical_provisions * 0.25
-    mcr_premium = premium_written * 0.15
-    mcr_floor = assumptions.get('mcr_floor', 1000000)  # 1M floor
-    
-    return max(mcr_tp, mcr_premium, mcr_floor)
+    from utils.regulatory_constants import MCR_ABSOLUTE_FLOORS, MCR_LINEAR_FACTORS
 
-# Legacy functions for backward compatibility
-def calculate_market_risk_scr_legacy(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
-    """Legacy function - use calculate_market_risk_scr instead"""
-    return calculate_market_risk_scr(df, assumptions)
+    technical_provisions_guaranteed = assumptions.get('tp_guaranteed', df['face_amount'].sum() * 0.80)
+    technical_provisions_other = assumptions.get('tp_other', df['face_amount'].sum() * 0.15)
+    capital_at_risk = assumptions.get('capital_at_risk', df['face_amount'].sum() * 0.50)
 
-def calculate_credit_risk_scr(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
-    """Legacy function - now called counterparty risk"""
-    return calculate_counterparty_risk_scr(df, assumptions)
+    mcr_linear = (
+        MCR_LINEAR_FACTORS['life']['technical_provisions_guaranteed'] * technical_provisions_guaranteed +
+        MCR_LINEAR_FACTORS['life']['technical_provisions_other'] * technical_provisions_other +
+        MCR_LINEAR_FACTORS['capital_at_risk'] * capital_at_risk
+    )
 
-def calculate_underwriting_risk_scr(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
-    """Legacy function - now split into life/health/non-life"""
-    return calculate_life_underwriting_risk_scr(df, assumptions)
+    scr = assumptions.get('scr_for_mcr', df['face_amount'].sum() * 0.20)
+    mcr_floor = MCR_ABSOLUTE_FLOORS.get('life_reinsurance', 3_700_000)
 
-def calculate_operational_risk_scr_legacy(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
-    """Legacy function - use calculate_operational_risk_scr instead"""
-    return calculate_operational_risk_scr(df, assumptions)
+    # Corridor: between 25% and 45% of SCR
+    return max(mcr_floor, min(0.45 * scr, max(0.25 * scr, mcr_linear)))
 
-def calculate_mcr_legacy(df: pd.DataFrame, assumptions: Dict[str, Any]) -> float:
-    """Legacy function - use calculate_mcr instead"""
-    return calculate_mcr(df, assumptions)
 
 def calculate_scr_by_policy_type(policies: List[Dict[str, Any]], 
                                assumptions: Dict[str, Any]) -> Dict[str, float]:

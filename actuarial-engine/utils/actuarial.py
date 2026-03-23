@@ -33,10 +33,15 @@ def validate_assumptions(assumptions: Dict[str, Any], calculation_type: str) -> 
         elif not (0 <= assumptions['lapse_rate'] <= 1):
             errors.append("lapse_rate must be between 0 and 1")
             
+        VALID_TABLES = [
+            'DAV_2008_T', 'DAV_2008_T_MALE', 'DAV_2008_T_FEMALE', 'DAV_2008_T_UNISEX',
+            'DAV_2004_R', 'DAV_2004_R_MALE', 'DAV_2004_R_FEMALE', 'DAV_2004_R_UNISEX',
+            'CSO_2017', 'CSO_2001'
+        ]
         if 'mortality_table' not in assumptions:
             errors.append("mortality_table is required")
-        elif assumptions['mortality_table'] not in ['CSO_2017', 'CSO_2001', 'GAM_1994']:
-            errors.append("Invalid mortality_table")
+        elif assumptions['mortality_table'] not in VALID_TABLES:
+            errors.append(f"Ungültige Sterbetafel: {assumptions['mortality_table']}. Verfügbar: {', '.join(VALID_TABLES)}")
             
         if 'expense_inflation' not in assumptions:
             errors.append("expense_inflation is required")

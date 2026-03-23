@@ -157,16 +157,42 @@ DAV_2004_R_FEMALE = {
 # Registry of German DAV mortality tables
 # ==============================================================================
 
+def _create_unisex_table(male_table: dict, female_table: dict, male_weight: float = 0.5) -> dict:
+    """Create unisex blended table using weighted average of male and female rates."""
+    female_weight = 1.0 - male_weight
+    unisex_rates = {}
+    for age in male_table["rates"]:
+        male_rate = male_table["rates"].get(age, 1000.0)
+        female_rate = female_table["rates"].get(age, 1000.0)
+        unisex_rates[age] = round(male_rate * male_weight + female_rate * female_weight, 3)
+    return {
+        "name": male_table["name"].replace("Male", "Unisex").replace("Female", "Unisex"),
+        "description": male_table["description"].replace("Männer", "Unisex").replace("Frauen", "Unisex") + " (50/50 Mischung gem. EU-Richtlinie 2004/113/EG)",
+        "year": male_table["year"],
+        "gender": "unisex",
+        "type": male_table["type"],
+        "select_period": male_table.get("select_period", 0),
+        "base_year": male_table.get("base_year", male_table["year"]),
+        "publisher": "Deutsche Aktuarvereinigung e.V.",
+        "rates": unisex_rates
+    }
+
+
+DAV_2008_T_UNISEX = _create_unisex_table(DAV_2008_T_MALE, DAV_2008_T_FEMALE)
+DAV_2004_R_UNISEX = _create_unisex_table(DAV_2004_R_MALE, DAV_2004_R_FEMALE)
+
 DAV_MORTALITY_TABLES = {
     # DAV 2008 T - Term Life Insurance
     "DAV_2008_T_MALE": DAV_2008_T_MALE,
     "DAV_2008_T_FEMALE": DAV_2008_T_FEMALE,
-    "DAV_2008_T": DAV_2008_T_MALE,  # Default to male for unisex requests
-    
+    "DAV_2008_T_UNISEX": DAV_2008_T_UNISEX,
+    "DAV_2008_T": DAV_2008_T_UNISEX,  # Default to unisex (EU Gender Directive)
+
     # DAV 2004 R - Annuities
     "DAV_2004_R_MALE": DAV_2004_R_MALE,
     "DAV_2004_R_FEMALE": DAV_2004_R_FEMALE,
-    "DAV_2004_R": DAV_2004_R_MALE,  # Default to male for unisex requests
+    "DAV_2004_R_UNISEX": DAV_2004_R_UNISEX,
+    "DAV_2004_R": DAV_2004_R_UNISEX,  # Default to unisex (EU Gender Directive)
 }
 
 

@@ -1,773 +1,333 @@
 'use client';
 
-/**
- * IFRS 17 Calculator Component
- * Provides interactive calculators for CSM, Risk Adjustment, and other IFRS 17 calculations
- * Enhanced with methodology transparency features
- */
-
-import React, { useState } from 'react';
-import { Calculator, Save, RotateCcw, Info, AlertCircle, BookOpen, Eye, EyeOff, Download } from 'lucide-react';
-import { InlineMath, BlockMath } from 'react-katex';
-import ExportButton from '../ExportButton';
-import dynamic from 'next/dynamic';
-import { useCalculationHistory } from '../../hooks/useLocalStorage';
-
-// Dynamic imports for heavy components
-const FormulaExplainer = dynamic(() => import('../FormulaExplainer'), {
-  loading: () => <div className="p-4 text-center text-gray-400">Loading formula explainer...</div>
-});
-const CalculationStepViewer = dynamic(() => import('../CalculationStepViewer'), {
-  loading: () => <div className="p-4 text-center text-gray-400">Loading calculation steps...</div>
-});
-const AuditTrailViewer = dynamic(() => import('../AuditTrailViewer'), {
-  loading: () => <div className="p-4 text-center text-gray-400">Loading audit trail...</div>
-});
-import {
-  calculateCSM,
-  calculateRiskAdjustment,
-  calculateCSMRelease,
-  calculateLossComponent,
-  calculatePresentValue,
-  calculateDiscountRate,
-  generateCSMRunoff
-} from '../../utils/ifrs17Calculations';
+import React, { useState, useCallback } from 'react';
+import { ChevronDown, ChevronUp, Lock, Loader2 } from 'lucide-react';
+import { calculateCSM, calculateLossComponent, calculatePresentValue, generateCSMRunoff } from '../../utils/ifrs17Calculations';
 import { formatCurrency, formatPercentage, formatNumber } from '../../utils/formatters';
-import { validateFields, actuarialValidationRules } from '../../utils/validation';
-import ValidatedInput from '../ValidatedInput';
-import { calculations } from '../../utils/api';
-import { getCalculatorColors, getStatusColors } from '../../utils/designSystem';
+import { useAuth } from '../../contexts/AuthContext';
+import axios from 'axios';
 
-const IFRS17Calculator = ({ portfolio }) => {
-  const [activeTab, setActiveTab] = useState('csm');
+const DEFAULT_INPUTS = {
+  faceAmount: 100000,
+  premium: 3000,
+  issueAge: 35,
+  policyTerm: 20,
+  gender: 'unisex',
+  policyType: 'term_life',
+};
+
+const DEFAULT_ASSUMPTIONS = {
+  discountRate: 0.035,
+  lapseRate: 0.05,
+  mortalityTable: 'DAV_2008_T',
+  expenseLoading: 0.05,
+  expenseInflation: 0.02,
+  riskAdjustmentFactor: 0.02,
+  confidenceLevel: '0.90',
+};
+
+const MORTALITY_TABLES = [
+  { value: 'DAV_2008_T', label: 'DAV 2008 T Unisex (Standard)' },
+  { value: 'DAV_2008_T_MALE', label: 'DAV 2008 T Männlich' },
+  { value: 'DAV_2008_T_FEMALE', label: 'DAV 2008 T Weiblich' },
+  { value: 'DAV_2004_R', label: 'DAV 2004 R Unisex' },
+  { value: 'DAV_2004_R_MALE', label: 'DAV 2004 R Männlich' },
+  { value: 'DAV_2004_R_FEMALE', label: 'DAV 2004 R Weiblich' },
+];
+
+const POLICY_TYPES = [
+  { value: 'term_life', label: 'Risikolebensversicherung' },
+  { value: 'whole_life', label: 'Kapitallebensversicherung' },
+  { value: 'annuity', label: 'Rentenversicherung' },
+];
+
+function clientSideEstimate(inputs, assumptions) {
+  const { faceAmount, premium, policyTerm, issueAge } = inputs;
+  const r = assumptions.discountRate;
+  const q = 0.003 + (issueAge - 18) * 0.001; // rough mortality estimate
+  const expenseRate = assumptions.expenseLoading;
+
+  const periods = Array.from({ length: policyTerm }, (_, i) => i + 1);
+  const survival = periods.map((t) => Math.pow(1 - q, t));
+
+  const pvPremiums = calculatePresentValue(
+    periods.map((_, i) => premium * survival[i]),
+    r,
+    periods
+  );
+  const pvBenefits = calculatePresentValue(
+    periods.map((_, i) => faceAmount * q * survival[i]),
+    r,
+    periods
+  );
+  const pvExpenses = calculatePresentValue(
+    periods.map((_, i) => premium * expenseRate * survival[i] * Math.pow(1 + assumptions.expenseInflation, i)),
+    r,
+    periods
+  );
+
+  const ra = pvBenefits * assumptions.riskAdjustmentFactor;
+  const csm = calculateCSM(pvPremiums, pvBenefits, pvExpenses, ra);
+  const lossComponent = calculateLossComponent(pvPremiums, pvBenefits, pvExpenses, ra);
+  const fcf = pvBenefits + pvExpenses - pvPremiums;
+
+  const csmRunoff = generateCSMRunoff(csm, Array(policyTerm).fill(1 / policyTerm));
+
+  return { pvPremiums, pvBenefits, pvExpenses, fcf, ra, csm, lossComponent, csmRunoff };
+}
+
+export default function IFRS17Calculator() {
+  const { isAuthenticated, plan } = useAuth();
+  const isPro = isAuthenticated && plan === 'pro';
+
+  const [inputs, setInputs] = useState(DEFAULT_INPUTS);
+  const [assumptions, setAssumptions] = useState(DEFAULT_ASSUMPTIONS);
+  const [showAssumptions, setShowAssumptions] = useState(false);
+  const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { history, saveCalculation } = useCalculationHistory('ifrs17');
-  const colors = getCalculatorColors('ifrs17');
 
-  // Methodology transparency state
-  const [showMethodology, setShowMethodology] = useState(false);
-  const [showAuditTrail, setShowAuditTrail] = useState(false);
-  const [showCalculationSteps, setShowCalculationSteps] = useState(false);
-  const [auditTrail, setAuditTrail] = useState(null);
+  const handleInput = (e) => {
+    const { name, value } = e.target;
+    setInputs((prev) => ({ ...prev, [name]: ['faceAmount', 'premium', 'issueAge', 'policyTerm'].includes(name) ? Number(value) : value }));
+  };
 
-  // CSM Calculator State
-  const [csmInputs, setCsmInputs] = useState({
-    premium: 1000000,
-    fcf: 800000,
-    ra: 50000
-  });
+  const handleAssumption = (e) => {
+    const { name, value } = e.target;
+    setAssumptions((prev) => ({ ...prev, [name]: ['discountRate', 'lapseRate', 'expenseLoading', 'expenseInflation', 'riskAdjustmentFactor'].includes(name) ? Number(value) : value }));
+  };
 
-  // Risk Adjustment Calculator State
-  const [raInputs, setRaInputs] = useState({
-    cashFlows: [750000, 800000, 850000, 900000, 950000],
-    confidenceLevel: 0.95
-  });
-
-  // CSM Run-off Calculator State
-  const [runoffInputs, setRunoffInputs] = useState({
-    initialCSM: 150000,
-    servicePattern: [0.2, 0.2, 0.2, 0.2, 0.2]
-  });
-
-  // Results state
-  const [results, setResults] = useState({});
-
-  const calculateCSMResults = async () => {
-    setLoading(true);
+  const handleCalculate = useCallback(async () => {
     setError(null);
-    const { premium, fcf, ra } = csmInputs;
-
+    setLoading(true);
     try {
-      // For portfolio calculations, use backend
-      if (portfolio && portfolio.length > 0) {
-        const response = await calculations.runIFRS17(portfolio, {
-          // Pass current inputs as assumptions or overrides if needed
-          // For now, assuming portfolio contains policy data and these inputs might acts as global assumptions
-          discount_rate: 0.035, // Example default
-          ...csmInputs
+      if (isPro) {
+        const response = await axios.post('/api/calculations/ifrs17', {
+          policies: [{ ...inputs, policy_id: 'P001' }],
+          assumptions,
         });
-
-        // Ensure result format matches what we expect or transform it
-        const backendResult = response.data.results || response.data;
-
-        // This assumes backend returns a compatible structure or we need to map it
-        // For Phase 1, we might just store it.
-        // If backendResult has 'csm', 'lossComponent' etc.
-
-        const newResults = {
-          ...backendResult,
-          timestamp: new Date().toISOString()
-        };
-
-        setResults(prev => ({ ...prev, csm: newResults }));
-        // Setup audit trail from backend response if available
-        if (backendResult.audit_trail) {
-          setAuditTrail(backendResult.audit_trail);
-        }
-
+        setResults({ ...response.data, source: 'server' });
       } else {
-        // Local calculation for single policy demo
-        const csm = calculateCSM(premium, fcf, ra);
-        const lossComponent = calculateLossComponent(fcf, ra, premium);
-
-        // Create calculation steps for transparency
-        const calculationSteps = [
-          {
-            name: 'Input Validation',
-            description: 'Validate input parameters',
-            status: 'completed',
-            inputs: { premium, fcf, ra },
-            output: 'Validated',
-            explanation: 'All inputs validated successfully'
-          },
-          {
-            name: 'CSM Calculation',
-            description: 'Calculate Contractual Service Margin',
-            status: 'completed',
-            formula: 'CSM = \\max(0, P - FCF - RA)',
-            inputs: { P: premium, FCF: fcf, RA: ra },
-            calculation: [
-              'Step 1: Calculate total obligations',
-              `Total Obligations = FCF + RA = ${fcf.toLocaleString()} + ${ra.toLocaleString()} = ${(fcf + ra).toLocaleString()}`,
-              'Step 2: Calculate CSM',
-              `CSM = \max(0, P - Total Obligations)`,
-              `CSM = \max(0, ${premium.toLocaleString()} - ${(fcf + ra).toLocaleString()}) = ${csm.toLocaleString()}`
-            ],
-            output: csm,
-            unit: 'USD',
-            explanation: 'CSM represents unearned profit to be recognized over coverage period'
-          },
-          {
-            name: 'Loss Component Calculation',
-            description: 'Calculate loss component for onerous contracts',
-            status: 'completed',
-            formula: 'LC = \\max(0, FCF + RA - P)',
-            inputs: { P: premium, FCF: fcf, RA: ra },
-            calculation: [
-              'Step 1: Calculate total obligations',
-              `Total Obligations = FCF + RA = ${fcf.toLocaleString()} + ${ra.toLocaleString()} = ${(fcf + ra).toLocaleString()}`,
-              'Step 2: Calculate loss component',
-              `LC = \max(0, Total Obligations - P)`,
-              `LC = \max(0, ${(fcf + ra).toLocaleString()} - ${premium.toLocaleString()}) = ${lossComponent.toLocaleString()}`
-            ],
-            output: lossComponent,
-            unit: 'USD',
-            explanation: 'Loss component represents immediate loss recognition for onerous contracts'
-          }
-        ];
-
-        // Create audit trail
-        const auditTrailData = {
-          calculationInputs: { premium, fcf, ra },
-          calculationSteps: calculationSteps,
-          intermediateResults: [
-            { name: 'Total Obligations', value: fcf + ra, unit: 'USD', description: 'Sum of FCF and Risk Adjustment' },
-            { name: 'CSM', value: csm, unit: 'USD', description: 'Contractual Service Margin' },
-            { name: 'Loss Component', value: lossComponent, unit: 'USD', description: 'Loss component for onerous contracts' }
-          ],
-          methodologyVersion: 'IFRS17_CSM_v1.0.0',
-          formulasUsed: [
-            { formulaId: 'CSM_Initial', version: '1.0.0', name: 'Initial CSM Recognition', latex: 'CSM = \\max(0, P - FCF - RA)', usedAt: new Date() },
-            { formulaId: 'Loss_Component', version: '1.0.0', name: 'Loss Component', latex: 'LC = \\max(0, FCF + RA - P)', usedAt: new Date() }
-          ],
-          assumptionsUsed: [
-            { name: 'Discount Rate', value: '3.5%', source: 'regulatory', justification: 'IFRS 17 requirement', usedAt: new Date() },
-            { name: 'Risk Adjustment', value: ra, source: 'company', justification: 'Company-specific risk adjustment', usedAt: new Date() }
-          ],
-          validationResults: [
-            { checkName: 'CSM Non-Negative', type: 'range', passed: csm >= 0, message: `CSM: ${csm.toLocaleString()}`, severity: 'info', timestamp: new Date() },
-            { checkName: 'Loss Component Non-Negative', type: 'range', passed: lossComponent >= 0, message: `Loss Component: ${lossComponent.toLocaleString()}`, severity: 'info', timestamp: new Date() }
-          ],
-          warnings: [],
-          executionLog: [
-            { level: 'info', message: 'CSM calculation started', timestamp: new Date() },
-            { level: 'info', message: 'CSM calculation completed successfully', timestamp: new Date() }
-          ]
-        };
-
-        const newResults = {
-          csm,
-          lossComponent,
-          premium,
-          fcf,
-          ra,
-          timestamp: new Date().toISOString(),
-          calculationSteps,
-          auditTrail: auditTrailData
-        };
-
-        setResults(prev => ({ ...prev, csm: newResults }));
-        setAuditTrail(auditTrailData);
-        saveCalculation({ type: 'csm', ...newResults });
+        const est = clientSideEstimate(inputs, assumptions);
+        setResults({ ...est, source: 'client' });
       }
     } catch (err) {
-      console.error('Calculation failed:', err);
-      setError(err.message || 'Calculation failed');
+      if (err.response?.status === 429) {
+        setError('Tageslimit erreicht. Upgraden Sie auf Professional für unbegrenzte Berechnungen.');
+      } else {
+        setError('Berechnung fehlgeschlagen. Bitte überprüfen Sie die Eingaben.');
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [inputs, assumptions, isPro]);
 
-  const calculateRiskAdjustmentResults = () => {
-    const { cashFlows, confidenceLevel } = raInputs;
-    const ra = calculateRiskAdjustment(cashFlows, confidenceLevel);
-    const expectedValue = cashFlows.reduce((sum, cf) => sum + cf, 0) / cashFlows.length;
-    const sortedFlows = [...cashFlows].sort((a, b) => a - b);
-    const varIndex = Math.floor((1 - confidenceLevel) * sortedFlows.length);
-    const varValue = sortedFlows[varIndex] || sortedFlows[0];
-
-    const newResults = {
-      riskAdjustment: ra,
-      expectedValue,
-      varValue,
-      confidenceLevel,
-      cashFlows,
-      timestamp: new Date().toISOString()
-    };
-
-    setResults(prev => ({ ...prev, ra: newResults }));
-    saveCalculation({ type: 'risk_adjustment', ...newResults });
-  };
-
-  const calculateRunoffResults = () => {
-    const { initialCSM, servicePattern } = runoffInputs;
-    const runoff = generateCSMRunoff(initialCSM, servicePattern);
-
-    const newResults = {
-      runoff,
-      initialCSM,
-      servicePattern,
-      timestamp: new Date().toISOString()
-    };
-
-    setResults(prev => ({ ...prev, runoff: newResults }));
-    saveCalculation({ type: 'csm_runoff', ...newResults });
-  };
-
-  const resetCalculator = (type) => {
-    switch (type) {
-      case 'csm':
-        setCsmInputs({ premium: 1000000, fcf: 800000, ra: 50000 });
-        break;
-      case 'ra':
-        setRaInputs({ cashFlows: [750000, 800000, 850000, 900000, 950000], confidenceLevel: 0.95 });
-        break;
-      case 'runoff':
-        setRunoffInputs({ initialCSM: 150000, servicePattern: [0.2, 0.2, 0.2, 0.2, 0.2] });
-        break;
-    }
-  };
-
-  const tabs = [
-    { id: 'csm', label: 'CSM Calculator', icon: Calculator },
-    { id: 'ra', label: 'Risk Adjustment', icon: AlertCircle },
-    { id: 'runoff', label: 'CSM Run-off', icon: RotateCcw }
-  ];
+  const isOnerous = results && results.lossComponent > 0;
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="mb-12">
-        <h1 className="text-4xl font-heading font-black text-trust-950 uppercase tracking-tight mb-3 px-2">IFRS 17 Calculator</h1>
-        <p className="text-gray-400 font-medium px-2">
-          Interactive calculators for Contractual Service Margin (CSM), Risk Adjustment (RA), and CSM run-off analysis.
-        </p>
-      </div>
+    <div className="grid lg:grid-cols-5 gap-6">
+      {/* Input panel */}
+      <div className="lg:col-span-2 space-y-4">
+        {/* Main inputs */}
+        <div className="bg-white border border-gray-100 rounded-xl p-5 space-y-4">
+          <h2 className="text-sm font-semibold text-trust-950 uppercase tracking-wide">Eingabeparameter</h2>
 
-      {/* Tab Navigation */}
-      <div className="flex flex-wrap gap-2 mb-6 px-4">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${activeTab === tab.id
-              ? `bg-trust-950 text-growth-400 shadow-lg`
-              : 'bg-gray-100 text-gray-400 hover:text-trust-950 hover:bg-gray-200'
-              }`}
-          >
-            <tab.icon className="h-4 w-4" />
-            <span className="px-1">{tab.label}</span>
-          </button>
-        ))}
-      </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Versicherungssumme (€)</label>
+            <input type="number" name="faceAmount" value={inputs.faceAmount} onChange={handleInput}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-trust-400"
+              min={0} step={1000} />
+          </div>
 
-      {/* CSM Calculator */}
-      {activeTab === 'csm' && (
-        <div className="space-y-6">
-          {/* Methodology Transparency Controls */}
-          <div className="card bg-white/80 backdrop-blur-xl border border-trust-100 rounded-[2.5rem] p-8 shadow-glass mb-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-trust-950 rounded-2xl shadow-lg">
-                  <BookOpen className="h-6 w-6 text-growth-400" />
-                </div>
-                <div>
-                  <h3 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em]">Methodology Transparency</h3>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">View formulas, calculation steps, and audit trail</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setShowMethodology(!showMethodology)}
-                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${showMethodology ? 'bg-trust-950 text-white' : 'bg-trust-100 text-trust-950 hover:bg-trust-200'
-                    }`}
-                >
-                  Methodology
-                </button>
-                <button
-                  onClick={() => setShowCalculationSteps(!showCalculationSteps)}
-                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${showCalculationSteps ? 'bg-growth-500 text-white' : 'bg-growth-100 text-growth-800 hover:bg-growth-200'
-                    }`}
-                >
-                  Steps
-                </button>
-                <button
-                  onClick={() => setShowAuditTrail(!showAuditTrail)}
-                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${showAuditTrail ? 'bg-accent-500 text-white' : 'bg-accent-100 text-accent-800 hover:bg-accent-200'
-                    }`}
-                >
-                  Audit Trail
-                </button>
-              </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Jahresprämie (€)</label>
+            <input type="number" name="premium" value={inputs.premium} onChange={handleInput}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-trust-400"
+              min={0} step={100} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Eintrittsalter</label>
+              <input type="number" name="issueAge" value={inputs.issueAge} onChange={handleInput}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-trust-400"
+                min={18} max={85} />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Laufzeit (Jahre)</label>
+              <input type="number" name="policyTerm" value={inputs.policyTerm} onChange={handleInput}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-trust-400"
+                min={1} max={50} />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
-              <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">CSM Calculation</h3>
-
-              <div className="space-y-4 px-2">
-                <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                    Gross Premium
-                  </label>
-                  <input
-                    type="number"
-                    value={csmInputs.premium}
-                    onChange={(e) => setCsmInputs(prev => ({ ...prev, premium: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 px-1">
-                    Future Cash Flows (Present Value)
-                  </label>
-                  <input
-                    type="number"
-                    value={csmInputs.fcf}
-                    onChange={(e) => setCsmInputs(prev => ({ ...prev, fcf: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 px-1">
-                    Risk Adjustment
-                  </label>
-                  <input
-                    type="number"
-                    value={csmInputs.ra}
-                    onChange={(e) => setCsmInputs(prev => ({ ...prev, ra: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div className="flex space-x-3 px-1">
-                  <button
-                    onClick={calculateCSMResults}
-                    disabled={loading}
-                    className="flex-1 bg-trust-950 text-white px-8 py-4 rounded-2xl hover:bg-trust-900 transition-all duration-300 font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2"
-                  >
-                    {loading ? 'Processing...' : 'Calculate CSM'}
-                    <RotateCcw className="h-4 w-4 text-growth-400" />
-                  </button>
-                  <button
-                    onClick={() => setCsmInputs({ premium: 1000000, fcf: 800000, ra: 50000 })}
-                    className="px-8 py-4 bg-gray-100 text-trust-950 rounded-2xl hover:bg-gray-200 transition-colors font-black text-[10px] uppercase tracking-[0.2em]"
-                  >
-                    Reset
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
-              <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Results</h3>
-
-              {results.csm && (
-                <div className="space-y-4 px-2">
-                  <div className="bg-growth-50 p-6 rounded-2xl border border-growth-100">
-                    <h4 className="text-[10px] font-black text-growth-900 uppercase tracking-[0.2em] mb-3 px-1">Contractual Service Margin</h4>
-                    <div className="text-3xl font-heading font-black text-growth-600 px-1">
-                      {formatCurrency(results.csm.csm)}
-                    </div>
-                    <div className="text-[10px] font-bold text-growth-800/60 mt-2 px-1">
-                      <InlineMath math="CSM = \max(0, P - FCF - RA)" />
-                    </div>
-                  </div>
-
-                  <div className="bg-accent-50 p-6 rounded-2xl border border-accent-100">
-                    <h4 className="text-[10px] font-black text-accent-900 uppercase tracking-[0.2em] mb-3 px-1">Loss Component</h4>
-                    <div className="text-3xl font-heading font-black text-accent-600 px-1">
-                      {formatCurrency(results.csm.lossComponent)}
-                    </div>
-                    <div className="text-[10px] font-bold text-accent-800/60 mt-2 px-1">
-                      <InlineMath math="LC = \max(0, FCF + RA - P)" />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
-                      <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Premium</div>
-                      <div className="text-sm font-bold text-trust-950">{formatCurrency(results.csm.premium)}</div>
-                    </div>
-                    <div className="text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
-                      <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">FCF</div>
-                      <div className="text-sm font-bold text-trust-950">{formatCurrency(results.csm.fcf)}</div>
-                    </div>
-                    <div className="text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
-                      <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">RA</div>
-                      <div className="text-sm font-bold text-trust-950">{formatCurrency(results.csm.ra)}</div>
-                    </div>
-                  </div>
-
-                  <ExportButton
-                    data={[results.csm]}
-                    title="CSM Calculation Results"
-                    filename="csm_calculation"
-                    className="mt-4"
-                  />
-                </div>
-              )}
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Geschlecht</label>
+            <div className="flex gap-2">
+              {[{ v: 'unisex', l: 'Unisex' }, { v: 'male', l: 'Männlich' }, { v: 'female', l: 'Weiblich' }].map(({ v, l }) => (
+                <button key={v} onClick={() => setInputs((p) => ({ ...p, gender: v }))}
+                  className={`flex-1 py-1.5 rounded-lg text-sm border transition-colors ${inputs.gender === v ? 'bg-trust-950 text-white border-trust-950' : 'bg-white text-gray-600 border-gray-200 hover:border-trust-300'}`}>
+                  {l}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Methodology Transparency Components */}
-          {showMethodology && (
-            <div className="space-y-6">
-              <FormulaExplainer
-                formula="CSM = \\max(0, P - FCF - RA)"
-                variables={[
-                  { symbol: 'P', name: 'Premium Received', description: 'Total premium received at inception', unit: 'Currency', type: 'input', range: 'Positive values', defaultValue: 'Policy premium' },
-                  { symbol: 'FCF', name: 'Fulfillment Cash Flows', description: 'Present value of expected cash flows', unit: 'Currency', type: 'input', range: 'Positive values', defaultValue: 'Calculated' },
-                  { symbol: 'RA', name: 'Risk Adjustment', description: 'Compensation for non-financial risk', unit: 'Currency', type: 'input', range: 'Non-negative values', defaultValue: 'Calculated' },
-                  { symbol: 'CSM', name: 'Contractual Service Margin', description: 'Unearned profit to be recognized over coverage period', unit: 'Currency', type: 'output', range: 'Non-negative values', defaultValue: 'Calculated' }
-                ]}
-                description="Initial CSM recognition formula under IFRS 17"
-                examples={[
-                  {
-                    title: 'Profitable Contract',
-                    description: 'A term life insurance policy with positive expected profit',
-                    inputs: { 'P': '$1,000,000', 'FCF': '$800,000', 'RA': '$50,000' },
-                    calculation: 'CSM = \max(0, 1000000 - 800000 - 50000) = 150000',
-                    result: '$150,000'
-                  },
-                  {
-                    title: 'Onerous Contract',
-                    description: 'A contract with expected losses',
-                    inputs: { 'P': '$500,000', 'FCF': '$600,000', 'RA': '$30,000' },
-                    calculation: 'CSM = \max(0, 500000 - 600000 - 30000) = 0',
-                    result: '$0 (Loss Component: $130,000)'
-                  }
-                ]}
-                conditions={[
-                  'CSM cannot be negative',
-                  'Premium must be received at inception',
-                  'FCF and RA must be measured at inception'
-                ]}
-                validationRules={[
-                  { name: 'CSM Non-Negative', description: 'CSM cannot be negative', type: 'range', condition: 'CSM >= 0', errorMessage: 'CSM cannot be negative', severity: 'error' },
-                  { name: 'Premium Reasonableness', description: 'Premium should be reasonable relative to benefits', type: 'reasonableness', condition: 'P / FCF between 0.8 and 1.5', errorMessage: 'Premium appears unreasonable', severity: 'warning' }
-                ]}
-                version="1.0.0"
-                lastUpdated={new Date().toISOString()}
-              />
-            </div>
-          )}
-
-          {/* Calculation Steps */}
-          {showCalculationSteps && results.csm?.calculationSteps && (
-            <div className="space-y-6">
-              <CalculationStepViewer
-                steps={results.csm.calculationSteps}
-                title="CSM Calculation Steps"
-                showIntermediateResults={true}
-                showFormulas={true}
-                showValidation={true}
-              />
-            </div>
-          )}
-
-          {/* Audit Trail */}
-          {showAuditTrail && auditTrail && (
-            <div className="space-y-6">
-              <AuditTrailViewer
-                auditTrail={auditTrail}
-                resultValidation={{
-                  rangeChecks: auditTrail.validationResults.filter(v => v.type === 'range'),
-                  consistencyChecks: auditTrail.validationResults.filter(v => v.type === 'consistency'),
-                  reasonablenessTests: auditTrail.validationResults.filter(v => v.type === 'reasonableness'),
-                  passedAll: auditTrail.validationResults.every(v => v.passed)
-                }}
-                title="CSM Calculation Audit Trail"
-              />
-            </div>
-          )}
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Versicherungsart</label>
+            <select name="policyType" value={inputs.policyType} onChange={handleInput}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-trust-400 bg-white">
+              {POLICY_TYPES.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
+            </select>
+          </div>
         </div>
-      )}
 
-      {/* Risk Adjustment Calculator */}
-      {activeTab === 'ra' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
-            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Risk Adjustment Calculation</h3>
+        {/* Assumptions (collapsible) */}
+        <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+          <button onClick={() => setShowAssumptions((v) => !v)}
+            className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-trust-950 hover:bg-gray-50 transition-colors">
+            <span>Annahmen (Erweitert)</span>
+            {showAssumptions ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
 
-            <div className="space-y-4">
+          {showAssumptions && (
+            <div className="px-5 pb-5 space-y-4 border-t border-gray-100">
+              {[
+                { name: 'discountRate', label: 'Diskontierungssatz', min: 0, max: 0.1, step: 0.001 },
+                { name: 'lapseRate', label: 'Stornoquote', min: 0, max: 0.2, step: 0.001 },
+                { name: 'expenseLoading', label: 'Kostenzuschlag', min: 0, max: 0.15, step: 0.001 },
+                { name: 'expenseInflation', label: 'Kosteninflation', min: 0, max: 0.05, step: 0.001 },
+                { name: 'riskAdjustmentFactor', label: 'Risikoanpassungsfaktor', min: 0, max: 0.1, step: 0.001 },
+              ].map(({ name, label, min, max, step }) => (
+                <div key={name}>
+                  <div className="flex justify-between text-sm text-gray-600 mb-1">
+                    <span>{label}</span>
+                    <span className="text-trust-700 font-medium">{formatPercentage(assumptions[name])}</span>
+                  </div>
+                  <input type="range" name={name} min={min} max={max} step={step}
+                    value={assumptions[name]} onChange={handleAssumption}
+                    className="w-full accent-trust-700" />
+                </div>
+              ))}
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cash Flow Scenarios (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  value={raInputs.cashFlows.join(', ')}
-                  onChange={(e) => {
-                    const values = e.target.value.split(',').map(v => parseFloat(v.trim()) || 0);
-                    setRaInputs(prev => ({ ...prev, cashFlows: values }));
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="750000, 800000, 850000, 900000, 950000"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                  Confidence Level
-                </label>
-                <select
-                  value={raInputs.confidenceLevel}
-                  onChange={(e) => setRaInputs(prev => ({ ...prev, confidenceLevel: parseFloat(e.target.value) }))}
-                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950 appearance-none"
-                >
-                  <option value={0.90}>90% Confidence</option>
-                  <option value={0.95}>95% Confidence</option>
-                  <option value={0.99}>99% Confidence</option>
+                <label className="block text-sm text-gray-600 mb-1">Sterbetafel</label>
+                <select name="mortalityTable" value={assumptions.mortalityTable} onChange={handleAssumption}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-trust-400 bg-white">
+                  {MORTALITY_TABLES.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
                 </select>
               </div>
 
-              <div className="flex space-x-3">
-                <button
-                  onClick={calculateRiskAdjustmentResults}
-                  className={`flex-1 bg-gradient-to-r ${colors.gradient} text-white px-6 py-3 rounded-lg hover:bg-gradient-to-r ${colors.hover} transition-all duration-300 font-medium`}
-                >
-                  Calculate Risk Adjustment
-                </button>
-                <button
-                  onClick={() => resetCalculator('ra')}
-                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
-            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Results</h3>
-
-            {results.ra && (
-              <div className="space-y-4">
-                <div className="bg-trust-50 p-6 rounded-2xl border border-trust-100">
-                  <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-3 px-1">Risk Adjustment</h4>
-                  <div className="text-3xl font-heading font-black text-trust-600 px-1">
-                    {formatCurrency(results.ra.riskAdjustment)}
-                  </div>
-                  <div className="text-[10px] font-bold text-trust-800/60 mt-2 px-1">
-                    <InlineMath math="RA = \text{VaR}_{95}(CF) - \mathbb{E}[CF]" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
-                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Expected Value</div>
-                    <div className="text-sm font-bold text-trust-950">{formatCurrency(results.ra.expectedValue)}</div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100">
-                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">VaR Value</div>
-                    <div className="text-sm font-bold text-trust-950">{formatCurrency(results.ra.varValue)}</div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <h5 className="font-medium text-gray-700 mb-2">Cash Flow Scenarios</h5>
-                  <div className="text-sm text-gray-600">
-                    {results.ra.cashFlows.map((cf, index) => (
-                      <span key={index}>
-                        {formatCurrency(cf)}
-                        {index < results.ra.cashFlows.length - 1 && ', '}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <ExportButton
-                  data={[results.ra]}
-                  title="Risk Adjustment Calculation Results"
-                  filename="risk_adjustment_calculation"
-                  className="mt-4"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* CSM Run-off Calculator */}
-      {activeTab === 'runoff' && (
-        <div className="space-y-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
-              <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">CSM Run-off Projection</h3>
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                    Initial CSM
-                  </label>
-                  <input
-                    type="number"
-                    value={runoffInputs.initialCSM}
-                    onChange={(e) => setRunoffInputs(prev => ({ ...prev, initialCSM: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                    Service Pattern
-                  </label>
-                  <input
-                    type="text"
-                    value={runoffInputs.servicePattern.join(', ')}
-                    onChange={(e) => {
-                      const values = e.target.value.split(',').map(v => parseFloat(v.trim()) || 0);
-                      setRunoffInputs(prev => ({ ...prev, servicePattern: values }));
-                    }}
-                    className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                    placeholder="0.2, 0.2, 0.2, 0.2, 0.2"
-                  />
-                </div>
-
-                <div className="flex gap-4">
-                  <button
-                    onClick={calculateRunoffResults}
-                    disabled={loading}
-                    className="flex-1 bg-trust-950 text-white px-8 py-4 rounded-2xl hover:bg-trust-900 transition-all duration-300 font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2"
-                  >
-                    {loading ? 'Projecting...' : 'Project Run-off'}
-                    <RotateCcw className="h-4 w-4 text-growth-400" />
-                  </button>
-                  <button
-                    onClick={() => setRunoffInputs({ initialCSM: 150000, servicePattern: [0.2, 0.2, 0.2, 0.2, 0.2] })}
-                    className="px-8 py-4 bg-gray-100 text-trust-950 rounded-2xl hover:bg-gray-200 transition-colors font-black text-[10px] uppercase tracking-[0.2em]"
-                  >
-                    Reset
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
-              <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Run-off Summary</h3>
-
-              {results.runoff && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-6 bg-gray-50/50 rounded-2xl border border-gray-100">
-                      <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Initial CSM</div>
-                      <div className="text-sm font-bold text-trust-950">{formatCurrency(results.runoff.initialCSM)}</div>
-                    </div>
-                    <div className="text-center p-6 bg-gray-50/50 rounded-2xl border border-gray-100">
-                      <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Periods</div>
-                      <div className="text-sm font-bold text-trust-950">{results.runoff.runoff.length} Periods</div>
-                    </div>
-                  </div>
-
-                  <div className="bg-growth-50 p-6 rounded-2xl border border-growth-100">
-                    <h4 className="text-[10px] font-black text-growth-900 uppercase tracking-[0.2em] mb-2 px-1">Total CSM Release</h4>
-                    <div className="text-2xl font-heading font-black text-growth-600 px-1">
-                      {formatCurrency(results.runoff.runoff.reduce((sum, period) => sum + period.csmRelease, 0))}
-                    </div>
-                  </div>
-
-                  <ExportButton
-                    data={results.runoff.runoff}
-                    title="CSM Run-off Schedule"
-                    filename="csm_runoff_schedule"
-                    className="mt-4"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Run-off Table */}
-          {results.runoff && (
-            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass overflow-hidden">
-              <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Run-off Schedule</h3>
-              <div className="overflow-x-auto -mx-10">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-gray-50/50">
-                      <th className="px-10 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Period</th>
-                      <th className="px-10 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Service Pattern</th>
-                      <th className="px-10 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">CSM Release</th>
-                      <th className="px-10 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">CSM Balance</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {results.runoff.runoff.map((period, index) => (
-                      <tr key={index} className="hover:bg-gray-50/30 transition-colors">
-                        <td className="px-10 py-5 text-sm font-bold text-trust-950">Year {period.period}</td>
-                        <td className="px-10 py-5 text-sm font-medium text-gray-400">{formatPercentage(period.serviceProvided)}</td>
-                        <td className="px-10 py-5 text-sm font-bold text-trust-950">{formatCurrency(period.csmRelease)}</td>
-                        <td className="px-10 py-5 text-sm font-bold text-growth-600">{formatCurrency(period.csmRemaining)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Konfidenzniveau (RA)</label>
+                <select name="confidenceLevel" value={assumptions.confidenceLevel} onChange={handleAssumption}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-trust-400 bg-white">
+                  {['0.75', '0.90', '0.95', '0.99'].map((v) => <option key={v} value={v}>{(Number(v) * 100).toFixed(0)} %</option>)}
+                </select>
               </div>
             </div>
           )}
         </div>
-      )}
 
-      {/* Calculation History */}
-      {history.length > 0 && (
-        <div className="bg-white/90 backdrop-blur-xl border border-trust-100 rounded-[2.5rem] p-10 shadow-glass mt-12">
-          <h3 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-8">Audit History</h3>
-          <div className="space-y-4">
-            {history.slice(0, 5).map((calc) => (
-              <div key={calc.id} className="flex items-center justify-between p-6 bg-gray-50/50 rounded-2xl border border-gray-100 hover:border-trust-200 transition-all duration-300">
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-trust-950 uppercase tracking-widest">{calc.type?.replace('_', ' ').toUpperCase()}</span>
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-                    {new Date(calc.timestamp).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex flex-col items-end">
-                  <div className="text-sm font-bold text-trust-950">
-                    {calc.csm && formatCurrency(calc.csm)}
-                    {calc.riskAdjustment && formatCurrency(calc.riskAdjustment)}
-                  </div>
-                  <span className="text-[9px] font-bold text-growth-500 uppercase tracking-widest">Actuarial Validation Pass</span>
-                </div>
+        {error && (
+          <div className="bg-red-50 border border-red-100 rounded-lg px-4 py-3 text-sm text-red-700">{error}</div>
+        )}
+
+        <button onClick={handleCalculate} disabled={loading}
+          className="w-full py-3 bg-trust-950 text-white rounded-lg font-medium hover:bg-trust-900 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+          {loading && <Loader2 size={16} className="animate-spin" />}
+          {loading ? 'Berechnung läuft...' : 'Berechnen'}
+        </button>
+      </div>
+
+      {/* Results panel */}
+      <div className="lg:col-span-3 space-y-4">
+        {results ? (
+          <>
+            {/* Status badge */}
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium w-fit ${isOnerous ? 'bg-red-50 text-red-700 border border-red-100' : 'bg-green-50 text-green-700 border border-green-100'}`}>
+              <span className={`w-2 h-2 rounded-full ${isOnerous ? 'bg-red-500' : 'bg-green-500'}`} />
+              {isOnerous ? 'Belastender Vertrag' : 'Profitabler Vertrag'}
+            </div>
+
+            {/* Key metrics */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white border border-gray-100 rounded-xl p-5">
+                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">CSM</p>
+                <p className="text-2xl font-semibold text-trust-950">{formatCurrency(results.csm)}</p>
+                <p className="text-xs text-gray-400 mt-1">Vertragliche Servicemarge</p>
               </div>
-            ))}
+              <div className="bg-white border border-gray-100 rounded-xl p-5">
+                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Verlustkomponente</p>
+                <p className="text-2xl font-semibold text-red-600">{formatCurrency(results.lossComponent)}</p>
+                <p className="text-xs text-gray-400 mt-1">Loss Component</p>
+              </div>
+            </div>
+
+            {/* Breakdown */}
+            <div className="bg-white border border-gray-100 rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-trust-950 mb-4">Aufschlüsselung</h3>
+              <div className="space-y-3">
+                {[
+                  { label: 'Barwert der Prämien', value: results.pvPremiums, note: 'PV Prämien' },
+                  { label: 'Barwert der Leistungen', value: results.pvBenefits, note: 'PV Leistungen', negative: true },
+                  { label: 'Barwert der Kosten', value: results.pvExpenses, note: 'PV Kosten', negative: true },
+                  { label: 'Erfüllungszahlungsströme (FCF)', value: results.fcf, note: 'FCF = PV(Leistungen) + PV(Kosten) − PV(Prämien)' },
+                  { label: 'Risikoanpassung (RA)', value: results.ra, note: 'Risk Adjustment', negative: true },
+                ].map(({ label, value, note }) => (
+                  <div key={label} className="flex justify-between items-start py-2 border-b border-gray-50 last:border-0">
+                    <div>
+                      <p className="text-sm text-trust-900">{label}</p>
+                      <p className="text-xs text-gray-400">{note}</p>
+                    </div>
+                    <p className={`text-sm font-medium tabular-nums ${value < 0 ? 'text-red-600' : 'text-trust-900'}`}>
+                      {formatCurrency(value)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Bewertungsmodell */}
+            <div className="bg-white border border-gray-100 rounded-xl p-5">
+              <p className="text-xs text-gray-400 mb-1">Bewertungsmodell</p>
+              <p className="text-sm font-medium text-trust-900">
+                {inputs.policyType === 'term_life' ? 'Allgemeines Bewertungsmodell (GMM)' : 'Allgemeines Bewertungsmodell (GMM)'}
+              </p>
+              {results.source === 'client' && (
+                <p className="text-xs text-gray-400 mt-1">Vereinfachte Schätzung (kostenloses Tier)</p>
+              )}
+            </div>
+
+            {/* Pro-gated features */}
+            <div className="bg-white border border-gray-100 rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-trust-950 mb-3">Professional-Funktionen</h3>
+              <div className="space-y-2">
+                {[
+                  'Vollständiger Prüfpfad (Python-Engine)',
+                  'PDF-Export mit Berechnungsdetails',
+                  'Sensitivitätsanalyse',
+                  'CSM-Abwicklungsmuster',
+                ].map((f) => (
+                  <div key={f} className="flex items-center gap-2 text-sm text-gray-400">
+                    <Lock size={14} />
+                    <span>{f}</span>
+                  </div>
+                ))}
+              </div>
+              {!isPro && (
+                <a href="/preise" className="block mt-4 py-2 text-center text-sm bg-trust-50 text-trust-700 border border-trust-100 rounded-lg hover:bg-trust-100 transition-colors">
+                  Professional — 79 €/Monat
+                </a>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="bg-gray-50 rounded-xl border border-gray-100 p-12 flex flex-col items-center justify-center text-center">
+            <p className="text-gray-400 text-sm">Geben Sie die Parameter ein und klicken Sie auf "Berechnen".</p>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
-};
-
-export default IFRS17Calculator;
+}

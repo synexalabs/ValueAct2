@@ -4,7 +4,6 @@
  */
 
 const MethodologyModel = require('../models/Methodology');
-const FormulaVersionModel = require('../models/FormulaVersion');
 const { db } = require('./firestoreService');
 const logger = require('../utils/logger');
 
@@ -180,19 +179,6 @@ class MethodologyService {
 
       await db.collection(this.methodologyCollection).doc(methodologyId).update(methodologyModel.toJSON());
 
-      // Create formula version
-      await this.createFormulaVersion({
-        methodologyId,
-        formulaId: formulaData.id,
-        formula: formulaData.latex,
-        description: formulaData.description,
-        variables: formulaData.variables,
-        conditions: formulaData.conditions,
-        examples: formulaData.examples,
-        changedBy: userId,
-        changeLog: 'Formula added to methodology'
-      });
-
       logger.info(`Formula added to methodology: ${methodologyId}`, {
         methodologyId,
         formulaId: formulaData.id,
@@ -203,33 +189,6 @@ class MethodologyService {
     } catch (error) {
       logger.error('Error adding formula:', error);
       throw new Error('Failed to add formula');
-    }
-  }
-
-  /**
-   * Create formula version
-   * @param {object} formulaVersionData - Formula version data
-   * @returns {Promise<object>} Created formula version
-   */
-  async createFormulaVersion(formulaVersionData) {
-    try {
-      const formulaVersion = FormulaVersionModel.createFormulaVersionDocument(formulaVersionData);
-
-      const docRef = await db.collection(this.formulaVersionCollection).add(formulaVersion);
-      
-      logger.info(`Formula version created: ${docRef.id}`, {
-        formulaVersionId: docRef.id,
-        methodologyId: formulaVersionData.methodologyId,
-        formulaId: formulaVersionData.formulaId
-      });
-
-      return {
-        id: docRef.id,
-        ...formulaVersion
-      };
-    } catch (error) {
-      logger.error('Error creating formula version:', error);
-      throw new Error('Failed to create formula version');
     }
   }
 

@@ -1,606 +1,272 @@
-"use client";
+'use client';
 
-/**
- * Solvency II Calculator Component
- * Provides interactive calculators for SCR, MCR, and solvency ratio calculations
- */
+import React, { useState, useCallback } from 'react';
+import { ChevronDown, ChevronUp, Lock, Loader2 } from 'lucide-react';
+import { formatCurrency, formatPercentage } from '../../utils/formatters';
+import { useAuth } from '../../contexts/AuthContext';
+import axios from 'axios';
 
-import React, { useState } from 'react';
-import { Shield, Calculator, TrendingUp, AlertTriangle } from 'lucide-react';
-import { InlineMath, BlockMath } from 'react-katex';
-import ExportButton from '../ExportButton';
-import { useCalculationHistory } from '../../hooks/useLocalStorage';
-import {
-  calculateSCR,
-  calculateMCR,
-  calculateSolvencyRatio,
-  calculateCapitalAnalysis,
-  calculateRiskContributions,
-  calculateDiversificationBenefit
-} from '../../utils/solvencyCalculations';
-import { formatCurrency, formatPercentage, formatNumber } from '../../utils/formatters';
-import { getCalculatorColors, getStatusColors } from '../../utils/designSystem';
-
-const SolvencyCalculator = () => {
-  const [activeTab, setActiveTab] = useState('scr');
-  const { history, saveCalculation } = useCalculationHistory('solvency');
-  const colors = getCalculatorColors('solvency');
-
-  // SCR Calculator State
-  const [scrInputs, setScrInputs] = useState({
-    marketRisk: 500000,
-    counterpartyRisk: 200000,
-    lifeUnderwritingRisk: 300000,
-    healthUnderwritingRisk: 150000,
-    nonLifeUnderwritingRisk: 100000,
-    operationalRisk: 250000
-  });
-
-  // MCR Calculator State
-  const [mcrInputs, setMcrInputs] = useState({
-    technicalProvisions: 10000000,
-    premiumWritten: 5000000,
-    claimsPaid: 3000000
-  });
-
-  // Solvency Ratio Calculator State
-  const [ratioInputs, setRatioInputs] = useState({
-    ownFunds: 2000000,
-    scr: 1500000,
-    mcr: 2500000
-  });
-
-  // Results state
-  const [results, setResults] = useState({});
-
-  const calculateSCRResults = () => {
-    const scr = calculateSCR(scrInputs);
-    const contributions = calculateRiskContributions(scrInputs);
-    const diversification = calculateDiversificationBenefit(scrInputs);
-
-    const newResults = {
-      scr,
-      contributions,
-      diversification,
-      riskModules: scrInputs,
-      timestamp: new Date().toISOString()
-    };
-
-    setResults(prev => ({ ...prev, scr: newResults }));
-    saveCalculation({ type: 'scr', ...newResults });
-  };
-
-  const calculateMCRResults = () => {
-    const { technicalProvisions, premiumWritten, claimsPaid } = mcrInputs;
-    const mcr = calculateMCR(technicalProvisions, premiumWritten, claimsPaid);
-
-    const newResults = {
-      mcr,
-      technicalProvisions,
-      premiumWritten,
-      claimsPaid,
-      timestamp: new Date().toISOString()
-    };
-
-    setResults(prev => ({ ...prev, mcr: newResults }));
-    saveCalculation({ type: 'mcr', ...newResults });
-  };
-
-  const calculateRatioResults = () => {
-    const { ownFunds, scr, mcr } = ratioInputs;
-    const solvencyRatio = calculateSolvencyRatio(ownFunds, scr);
-    const capitalAnalysis = calculateCapitalAnalysis(ownFunds, scr, mcr);
-
-    const newResults = {
-      solvencyRatio,
-      capitalAnalysis,
-      ownFunds,
-      scr,
-      mcr,
-      timestamp: new Date().toISOString()
-    };
-
-    setResults(prev => ({ ...prev, ratio: newResults }));
-    saveCalculation({ type: 'solvency_ratio', ...newResults });
-  };
-
-  const resetCalculator = (type) => {
-    switch (type) {
-      case 'scr':
-        setScrInputs({
-          marketRisk: 500000,
-          counterpartyRisk: 200000,
-          lifeUnderwritingRisk: 300000,
-          healthUnderwritingRisk: 150000,
-          nonLifeUnderwritingRisk: 100000,
-          operationalRisk: 250000
-        });
-        break;
-      case 'mcr':
-        setMcrInputs({
-          technicalProvisions: 10000000,
-          premiumWritten: 5000000,
-          claimsPaid: 3000000
-        });
-        break;
-      case 'ratio':
-        setRatioInputs({
-          ownFunds: 2000000,
-          scr: 1500000,
-          mcr: 2500000
-        });
-        break;
-    }
-  };
-
-  const tabs = [
-    { id: 'scr', label: 'SCR Calculator', icon: Shield },
-    { id: 'mcr', label: 'MCR Calculator', icon: AlertTriangle },
-    { id: 'ratio', label: 'Solvency Ratio', icon: TrendingUp }
-  ];
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'excellent': return 'text-green-600 bg-green-50 border-green-200';
-      case 'good': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'adequate': return 'text-orange-600 bg-orange-50 border-orange-200';
-      case 'insufficient': return 'text-red-600 bg-red-50 border-red-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
-    }
-  };
-
-  return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="mb-12">
-        <h1 className="text-4xl font-heading font-black text-trust-950 uppercase tracking-tight mb-3 px-2">Solvency II Calculator</h1>
-        <p className="text-gray-400 font-medium px-2">
-          Regulatory capital modeling engine for Solvency Capital Requirement (SCR) and Minimum Capital Requirement (MCR) under Pillar 1 standards.
-        </p>
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="flex flex-wrap gap-2 mb-6 px-4">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${activeTab === tab.id
-              ? `bg-trust-950 text-growth-400 shadow-lg`
-              : 'bg-gray-100 text-gray-400 hover:text-trust-950 hover:bg-gray-200'
-              }`}
-          >
-            <div className="flex items-center gap-2">
-              <tab.icon className="h-4 w-4" />
-              <span>{tab.label}</span>
-            </div>
-          </button>
-        ))}
-      </div>
-
-      {/* SCR Calculator */}
-      {activeTab === 'scr' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
-            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Risk Module Inputs</h3>
-
-            <div className="space-y-4 px-2">
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                  Market Risk
-                </label>
-                <input
-                  type="number"
-                  value={scrInputs.marketRisk}
-                  onChange={(e) => setScrInputs(prev => ({ ...prev, marketRisk: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                  Counterparty Risk
-                </label>
-                <input
-                  type="number"
-                  value={scrInputs.counterpartyRisk}
-                  onChange={(e) => setScrInputs(prev => ({ ...prev, counterpartyRisk: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                  Life Underwriting Risk
-                </label>
-                <input
-                  type="number"
-                  value={scrInputs.lifeUnderwritingRisk}
-                  onChange={(e) => setScrInputs(prev => ({ ...prev, lifeUnderwritingRisk: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                  Health Underwriting Risk
-                </label>
-                <input
-                  type="number"
-                  value={scrInputs.healthUnderwritingRisk}
-                  onChange={(e) => setScrInputs(prev => ({ ...prev, healthUnderwritingRisk: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                  Non-Life Underwriting Risk
-                </label>
-                <input
-                  type="number"
-                  value={scrInputs.nonLifeUnderwritingRisk}
-                  onChange={(e) => setScrInputs(prev => ({ ...prev, nonLifeUnderwritingRisk: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                  Operational Risk
-                </label>
-                <input
-                  type="number"
-                  value={scrInputs.operationalRisk}
-                  onChange={(e) => setScrInputs(prev => ({ ...prev, operationalRisk: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                />
-              </div>
-
-              <div className="flex gap-4 pt-4">
-                <button
-                  onClick={calculateSCRResults}
-                  className="flex-1 bg-trust-950 text-white px-8 py-4 rounded-2xl hover:bg-trust-900 transition-all duration-300 font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2"
-                >
-                  Calculate SCR
-                  <Shield className="h-4 w-4 text-growth-400" />
-                </button>
-                <button
-                  onClick={() => resetCalculator('scr')}
-                  className="px-8 py-4 bg-gray-100 text-trust-950 rounded-2xl hover:bg-gray-200 transition-colors font-black text-[10px] uppercase tracking-[0.2em]"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
-            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">SCR Results</h3>
-
-            {results.scr && (
-              <div className="space-y-4 px-2">
-                <div className="bg-trust-50 p-6 rounded-2xl border border-trust-100">
-                  <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-2 px-1">Solvency Capital Requirement</h4>
-                  <div className="text-3xl font-heading font-black text-trust-600 px-1">
-                    {formatCurrency(results.scr.scr)}
-                  </div>
-                  <div className="text-[10px] font-bold text-trust-800/60 mt-2 px-1">
-                    <InlineMath math="SCR = \sqrt{\sum_{i} SCR_i^2 + \sum_{i \neq j} \rho_{ij} SCR_i SCR_j}" />
-                  </div>
-                </div>
-
-                <div className="bg-growth-50 p-6 rounded-2xl border border-growth-100">
-                  <h4 className="text-[10px] font-black text-growth-900 uppercase tracking-[0.2em] mb-2 px-1">Diversification Benefit</h4>
-                  <div className="text-xl font-bold text-growth-600 px-1">
-                    {formatCurrency(results.scr.diversification.diversificationBenefit)}
-                  </div>
-                  <div className="text-[9px] font-black text-growth-800/60 uppercase tracking-widest mt-1 px-1">
-                    {formatPercentage(results.scr.diversification.diversificationPercent / 100)} Net Reduction Applied
-                  </div>
-                </div>
-
-                <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
-                  <h5 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-4 px-1">Risk Plateaus</h5>
-                  <div className="space-y-3">
-                    {results.scr.contributions.map((contribution, index) => (
-                      <div key={index} className="flex justify-between items-center px-1">
-                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                          {contribution.riskType.replace(/([A-Z])/g, ' $1').trim()}
-                        </span>
-                        <div className="text-right">
-                          <div className="text-[11px] font-black text-trust-950">
-                            {formatCurrency(contribution.contributionAmount)}
-                          </div>
-                          <div className="text-[9px] font-bold text-gray-400">
-                            {formatPercentage(contribution.contribution / 100)}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <ExportButton
-                  data={[results.scr]}
-                  title="SCR Calculation Results"
-                  filename="scr_calculation"
-                  className="mt-4"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* MCR Calculator */}
-      {activeTab === 'mcr' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
-            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">MCR Calculation</h3>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                  Technical Provisions
-                </label>
-                <input
-                  type="number"
-                  value={mcrInputs.technicalProvisions}
-                  onChange={(e) => setMcrInputs(prev => ({ ...prev, technicalProvisions: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                  Premium Written
-                </label>
-                <input
-                  type="number"
-                  value={mcrInputs.premiumWritten}
-                  onChange={(e) => setMcrInputs(prev => ({ ...prev, premiumWritten: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                  Claims Paid
-                </label>
-                <input
-                  type="number"
-                  value={mcrInputs.claimsPaid}
-                  onChange={(e) => setMcrInputs(prev => ({ ...prev, claimsPaid: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <button
-                  onClick={calculateMCRResults}
-                  className="flex-1 bg-trust-950 text-white px-8 py-4 rounded-2xl hover:bg-trust-900 transition-all duration-300 font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2"
-                >
-                  Calculate MCR
-                  <Calculator className="h-4 w-4 text-growth-400" />
-                </button>
-                <button
-                  onClick={() => resetCalculator('mcr')}
-                  className="px-8 py-4 bg-gray-100 text-trust-950 rounded-2xl hover:bg-gray-200 transition-colors font-black text-[10px] uppercase tracking-[0.2em]"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
-            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">MCR Results</h3>
-
-            {results.mcr && (
-              <div className="space-y-4">
-                <div className="bg-accent-50 p-6 rounded-2xl border border-accent-100">
-                  <h4 className="text-[10px] font-black text-accent-950 uppercase tracking-[0.2em] mb-2 px-1">Minimum Capital Requirement</h4>
-                  <div className="text-3xl font-heading font-black text-accent-600 px-1">
-                    {formatCurrency(results.mcr.mcr)}
-                  </div>
-                  <div className="text-[10px] font-bold text-accent-800/60 mt-2 px-1">
-                    <InlineMath math="MCR = \max(TP \times 25\%, PW \times 15\%, CP \times 10\%)" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-6 bg-gray-50/50 rounded-2xl border border-gray-100">
-                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">TP × 25%</div>
-                    <div className="text-[11px] font-black text-trust-950">
-                      {formatCurrency(results.mcr.technicalProvisions * 0.25)}
-                    </div>
-                  </div>
-                  <div className="text-center p-6 bg-gray-50/50 rounded-2xl border border-gray-100">
-                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">PW × 15%</div>
-                    <div className="text-[11px] font-black text-trust-950">
-                      {formatCurrency(results.mcr.premiumWritten * 0.15)}
-                    </div>
-                  </div>
-                  <div className="text-center p-6 bg-gray-50/50 rounded-2xl border border-gray-100">
-                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">CP × 10%</div>
-                    <div className="text-[11px] font-black text-trust-950">
-                      {formatCurrency(results.mcr.claimsPaid * 0.10)}
-                    </div>
-                  </div>
-                </div>
-
-                <ExportButton
-                  data={[results.mcr]}
-                  title="MCR Calculation Results"
-                  filename="mcr_calculation"
-                  className="mt-4"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Solvency Ratio Calculator */}
-      {activeTab === 'ratio' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
-            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Solvency Ratio Inputs</h3>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                  Own Funds
-                </label>
-                <input
-                  type="number"
-                  value={ratioInputs.ownFunds}
-                  onChange={(e) => setRatioInputs(prev => ({ ...prev, ownFunds: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                  SCR
-                </label>
-                <input
-                  type="number"
-                  value={ratioInputs.scr}
-                  onChange={(e) => setRatioInputs(prev => ({ ...prev, scr: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3 px-1">
-                  MCR
-                </label>
-                <input
-                  type="number"
-                  value={ratioInputs.mcr}
-                  onChange={(e) => setRatioInputs(prev => ({ ...prev, mcr: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-6 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all duration-300 outline-none font-bold text-trust-950"
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <button
-                  onClick={calculateRatioResults}
-                  className="flex-1 bg-trust-950 text-white px-8 py-4 rounded-2xl hover:bg-trust-900 transition-all duration-300 font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2"
-                >
-                  Analyze Capital
-                  <TrendingUp className="h-4 w-4 text-growth-400" />
-                </button>
-                <button
-                  onClick={() => resetCalculator('ratio')}
-                  className="px-8 py-4 bg-gray-100 text-trust-950 rounded-2xl hover:bg-gray-200 transition-colors font-black text-[10px] uppercase tracking-[0.2em]"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] p-10 border border-trust-50 shadow-glass">
-            <h3 className="text-2xl font-heading font-black text-trust-950 uppercase tracking-tight mb-8">Solvency Analysis</h3>
-
-            {results.ratio && (
-              <div className="space-y-4">
-                <div className="bg-trust-50 p-6 rounded-2xl border border-trust-100">
-                  <h4 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-2 px-1">Solvency Ratio Analysis</h4>
-                  <div className={`text-3xl font-heading font-black px-1 ${results.ratio.solvencyRatio.status === 'excellent' ? 'text-growth-600' :
-                      results.ratio.solvencyRatio.status === 'good' ? 'text-trust-600' :
-                        results.ratio.solvencyRatio.status === 'adequate' ? 'text-accent-500' : 'text-accent-600'
-                    }`}>
-                    {formatRatio(results.ratio.solvencyRatio.ratio)}
-                  </div>
-                  <div className="flex items-center gap-2 mt-3 px-1">
-                    <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border ${results.ratio.solvencyRatio.status === 'excellent' ? 'bg-growth-100 text-growth-700 border-growth-200' :
-                        results.ratio.solvencyRatio.status === 'good' ? 'bg-trust-100 text-trust-700 border-trust-200' :
-                          results.ratio.solvencyRatio.status === 'adequate' ? 'bg-accent-50 text-accent-700 border-accent-100' : 'bg-accent-100 text-accent-800 border-accent-200'
-                      }`}>
-                      {results.ratio.solvencyRatio.status}
-                    </span>
-                    <div className="text-[10px] font-bold text-trust-800/60">
-                      <InlineMath math="SR = \frac{\text{Own Funds}}{SCR}" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-6 bg-gray-50/50 rounded-2xl border border-gray-100">
-                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">SCR Surplus</div>
-                    <div className={`text-[11px] font-black ${results.ratio.capitalAnalysis.scrSurplus >= 0 ? 'text-growth-600' : 'text-accent-600'}`}>
-                      {formatCurrency(results.ratio.capitalAnalysis.scrSurplus)}
-                    </div>
-                  </div>
-                  <div className="text-center p-6 bg-gray-50/50 rounded-2xl border border-gray-100">
-                    <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">MCR Surplus</div>
-                    <div className={`text-[11px] font-black ${results.ratio.capitalAnalysis.mcrSurplus >= 0 ? 'text-growth-600' : 'text-accent-600'}`}>
-                      {formatCurrency(results.ratio.capitalAnalysis.mcrSurplus)}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
-                  <h5 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-4 px-1">Compliance Matrix</h5>
-                  <div className="space-y-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                    <div className="flex justify-between px-1">
-                      <span>SCR Requirement:</span>
-                      <span className={results.ratio.capitalAnalysis.isSCRCompliant ? 'text-growth-600' : 'text-accent-600'}>
-                        {results.ratio.capitalAnalysis.isSCRCompliant ? '✓ PASS' : '✗ FAIL'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between px-1">
-                      <span>MCR Requirement:</span>
-                      <span className={results.ratio.capitalAnalysis.isMCRCompliant ? 'text-growth-600' : 'text-accent-600'}>
-                        {results.ratio.capitalAnalysis.isMCRCompliant ? '✓ PASS' : '✗ FAIL'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <ExportButton
-                  data={[results.ratio]}
-                  title="Solvency Ratio Analysis"
-                  filename="solvency_ratio_analysis"
-                  className="mt-4"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Calculation History */}
-      {history.length > 0 && (
-        <div className="bg-white/90 backdrop-blur-xl border border-trust-100 rounded-[2.5rem] p-10 shadow-glass mt-12">
-          <h3 className="text-[10px] font-black text-trust-950 uppercase tracking-[0.2em] mb-8">Audit History</h3>
-          <div className="space-y-4">
-            {history.slice(0, 5).map((calc) => (
-              <div key={calc.id} className="flex items-center justify-between p-6 bg-gray-50/50 rounded-2xl border border-gray-100 hover:border-trust-200 transition-all duration-300">
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-trust-950 uppercase tracking-widest">{calc.type?.replace('_', ' ').toUpperCase()}</span>
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-                    {new Date(calc.timestamp).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex flex-col items-end">
-                  <div className="text-sm font-bold text-trust-950">
-                    {calc.scr && formatCurrency(calc.scr)}
-                    {calc.mcr && formatCurrency(calc.mcr)}
-                    {calc.solvencyRatio && formatRatio(calc.solvencyRatio.ratio)}
-                  </div>
-                  <span className="text-[9px] font-bold text-growth-500 uppercase tracking-widest">Actuarial Validation Pass</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+const DEFAULT_INPUTS = {
+  faceAmount: 100000,
+  premium: 3000,
+  issueAge: 35,
+  policyTerm: 20,
+  gender: 'unisex',
+  policyType: 'term_life',
+  ownFunds: 5000000,
 };
 
-export default SolvencyCalculator;
+const DEFAULT_ASSETS = {
+  equityPct: 0.10,
+  propertyPct: 0.05,
+  bondPct: 0.60,
+  fxPct: 0.10,
+};
+
+function clientSCREstimate(inputs, assets) {
+  const face = inputs.faceAmount;
+  const premium = inputs.premium;
+
+  // Simplified market risk
+  const equityRisk = inputs.ownFunds * assets.equityPct * 0.39;
+  const propertyRisk = inputs.ownFunds * assets.propertyPct * 0.25;
+  const interestRisk = inputs.ownFunds * assets.bondPct * 0.10;
+  const fxRisk = inputs.ownFunds * assets.fxPct * 0.25;
+  const marketRisk = Math.sqrt(equityRisk ** 2 + propertyRisk ** 2 + interestRisk ** 2 + fxRisk ** 2);
+
+  const mortalityRisk = face * 0.0015 * 15;
+  const lapseRisk = (face * 0.5) * 0.10;
+  const expenseRisk = premium * 0.10;
+  const lifeUW = Math.sqrt(mortalityRisk ** 2 + lapseRisk ** 2 + expenseRisk ** 2);
+
+  const counterparty = premium * 0.15;
+
+  const bscr = Math.sqrt(marketRisk ** 2 + lifeUW ** 2 + counterparty ** 2
+    + 2 * 0.25 * marketRisk * lifeUW);
+
+  const opRisk = Math.min(0.30 * bscr, Math.max(0.04 * premium, 0.0045 * face * 0.95));
+  const scr = bscr + opRisk;
+
+  const mcr_linear = 0.0026 * face * 0.80 + 0.0030 * face * 0.15 + 0.001 * face * 0.50;
+  const mcr = Math.max(3_700_000, Math.min(0.45 * scr, Math.max(0.25 * scr, mcr_linear)));
+
+  const solvencyRatio = inputs.ownFunds / scr;
+
+  return {
+    scr, mcr, bscr, opRisk, solvencyRatio,
+    riskModules: { marketRisk, lifeUW, counterparty, opRisk },
+    diversification: bscr - (marketRisk + lifeUW + counterparty),
+  };
+}
+
+export default function SolvencyCalculator() {
+  const { isAuthenticated, plan } = useAuth();
+  const isPro = isAuthenticated && plan === 'pro';
+
+  const [inputs, setInputs] = useState(DEFAULT_INPUTS);
+  const [assets, setAssets] = useState(DEFAULT_ASSETS);
+  const [showAssets, setShowAssets] = useState(false);
+  const [results, setResults] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleInput = (e) => {
+    const { name, value } = e.target;
+    setInputs((p) => ({ ...p, [name]: ['faceAmount', 'premium', 'issueAge', 'policyTerm', 'ownFunds'].includes(name) ? Number(value) : value }));
+  };
+
+  const handleAsset = (e) => {
+    const { name, value } = e.target;
+    setAssets((p) => ({ ...p, [name]: Number(value) }));
+  };
+
+  const handleCalculate = useCallback(async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      if (isPro) {
+        const response = await axios.post('/api/calculations/solvency', {
+          policies: [{ ...inputs, policy_id: 'P001' }],
+          assumptions: { ...assets, confidence_level: 0.995, time_horizon: 1 },
+        });
+        setResults({ ...response.data, source: 'server' });
+      } else {
+        const est = clientSCREstimate(inputs, assets);
+        setResults({ ...est, source: 'client' });
+      }
+    } catch (err) {
+      if (err.response?.status === 429) {
+        setError('Tageslimit erreicht. Upgraden Sie auf Professional für unbegrenzte Berechnungen.');
+      } else {
+        setError('Berechnung fehlgeschlagen. Bitte überprüfen Sie die Eingaben.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [inputs, assets, isPro]);
+
+  const ratioColor = results
+    ? results.solvencyRatio >= 1.5 ? 'text-green-600' : results.solvencyRatio >= 1.0 ? 'text-yellow-600' : 'text-red-600'
+    : 'text-trust-900';
+
+  return (
+    <div className="grid lg:grid-cols-5 gap-6">
+      {/* Input panel */}
+      <div className="lg:col-span-2 space-y-4">
+        <div className="bg-white border border-gray-100 rounded-xl p-5 space-y-4">
+          <h2 className="text-sm font-semibold text-trust-950 uppercase tracking-wide">Eingabeparameter</h2>
+
+          {[
+            { name: 'faceAmount', label: 'Versicherungssumme (€)', step: 1000 },
+            { name: 'premium', label: 'Jahresprämie (€)', step: 100 },
+            { name: 'ownFunds', label: 'Eigenmittel (€)', step: 100000 },
+          ].map(({ name, label, step }) => (
+            <div key={name}>
+              <label className="block text-sm text-gray-600 mb-1">{label}</label>
+              <input type="number" name={name} value={inputs[name]} onChange={handleInput}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-trust-400"
+                min={0} step={step} />
+            </div>
+          ))}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Eintrittsalter</label>
+              <input type="number" name="issueAge" value={inputs.issueAge} onChange={handleInput}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-trust-400"
+                min={18} max={85} />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Laufzeit (Jahre)</label>
+              <input type="number" name="policyTerm" value={inputs.policyTerm} onChange={handleInput}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-trust-400"
+                min={1} max={50} />
+            </div>
+          </div>
+        </div>
+
+        {/* Asset allocation */}
+        <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+          <button onClick={() => setShowAssets((v) => !v)}
+            className="w-full flex items-center justify-between px-5 py-4 text-sm font-semibold text-trust-950 hover:bg-gray-50 transition-colors">
+            <span>Asset-Allokation</span>
+            {showAssets ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+
+          {showAssets && (
+            <div className="px-5 pb-5 space-y-4 border-t border-gray-100">
+              {[
+                { name: 'equityPct', label: 'Aktienquote', max: 0.5 },
+                { name: 'propertyPct', label: 'Immobilienquote', max: 0.3 },
+                { name: 'bondPct', label: 'Anleihenquote', max: 0.9 },
+                { name: 'fxPct', label: 'Fremdwährungsquote', max: 0.3 },
+              ].map(({ name, label, max }) => (
+                <div key={name}>
+                  <div className="flex justify-between text-sm text-gray-600 mb-1">
+                    <span>{label}</span>
+                    <span className="text-trust-700 font-medium">{formatPercentage(assets[name])}</span>
+                  </div>
+                  <input type="range" name={name} min={0} max={max} step={0.01}
+                    value={assets[name]} onChange={handleAsset}
+                    className="w-full accent-trust-700" />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-100 rounded-lg px-4 py-3 text-sm text-red-700">{error}</div>
+        )}
+
+        <button onClick={handleCalculate} disabled={loading}
+          className="w-full py-3 bg-trust-950 text-white rounded-lg font-medium hover:bg-trust-900 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+          {loading && <Loader2 size={16} className="animate-spin" />}
+          {loading ? 'Berechnung läuft...' : 'Berechnen'}
+        </button>
+      </div>
+
+      {/* Results */}
+      <div className="lg:col-span-3 space-y-4">
+        {results ? (
+          <>
+            {/* Solvency ratio */}
+            <div className="bg-white border border-gray-100 rounded-xl p-5">
+              <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Solvenzquote</p>
+              <p className={`text-3xl font-semibold ${ratioColor}`}>
+                {formatPercentage(results.solvencyRatio)}
+              </p>
+              <div className="w-full bg-gray-100 rounded-full h-2 mt-3">
+                <div className={`h-2 rounded-full transition-all ${results.solvencyRatio >= 1.5 ? 'bg-green-500' : results.solvencyRatio >= 1.0 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                  style={{ width: `${Math.min(100, results.solvencyRatio * 66.7)}%` }} />
+              </div>
+              <div className="flex justify-between text-xs text-gray-400 mt-1">
+                <span>0%</span><span>100% (MCR)</span><span>150% (gut)</span>
+              </div>
+            </div>
+
+            {/* SCR / MCR */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white border border-gray-100 rounded-xl p-5">
+                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">SCR</p>
+                <p className="text-xl font-semibold text-trust-950">{formatCurrency(results.scr)}</p>
+                <p className="text-xs text-gray-400 mt-1">Solvenzkapitalanforderung</p>
+              </div>
+              <div className="bg-white border border-gray-100 rounded-xl p-5">
+                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">MCR</p>
+                <p className="text-xl font-semibold text-trust-950">{formatCurrency(results.mcr)}</p>
+                <p className="text-xs text-gray-400 mt-1">Mindestkapitalanforderung</p>
+              </div>
+            </div>
+
+            {/* Risk modules */}
+            <div className="bg-white border border-gray-100 rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-trust-950 mb-4">Risikomodule</h3>
+              <div className="space-y-3">
+                {[
+                  { label: 'Marktrisiko', value: results.riskModules?.marketRisk },
+                  { label: 'Lebensversicherungstechnisches Risiko', value: results.riskModules?.lifeUW },
+                  { label: 'Gegenparteiausfallrisiko', value: results.riskModules?.counterparty },
+                  { label: 'Operationelles Risiko', value: results.riskModules?.opRisk || results.opRisk },
+                  { label: 'Diversifikationseffekt', value: results.diversification, negative: true },
+                ].filter(r => r.value != null).map(({ label, value, negative }) => (
+                  <div key={label} className="flex justify-between items-center py-2 border-b border-gray-50 last:border-0">
+                    <p className="text-sm text-trust-900">{label}</p>
+                    <p className={`text-sm font-medium tabular-nums ${negative ? 'text-green-600' : 'text-trust-900'}`}>
+                      {negative ? '−' : ''}{formatCurrency(Math.abs(value))}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              {results.source === 'client' && (
+                <p className="text-xs text-gray-400 mt-3">Vereinfachte Schätzung (kostenloses Tier)</p>
+              )}
+            </div>
+
+            {/* Pro-gated */}
+            <div className="bg-white border border-gray-100 rounded-xl p-5">
+              <h3 className="text-sm font-semibold text-trust-950 mb-3">Professional-Funktionen</h3>
+              <div className="space-y-2">
+                {['Vollständige Risikomodul-Aufschlüsselung', 'Stresstest-Szenarien', 'PDF-Export', 'LAC-DT-Berechnung'].map((f) => (
+                  <div key={f} className="flex items-center gap-2 text-sm text-gray-400">
+                    <Lock size={14} />
+                    <span>{f}</span>
+                  </div>
+                ))}
+              </div>
+              {!isPro && (
+                <a href="/preise" className="block mt-4 py-2 text-center text-sm bg-trust-50 text-trust-700 border border-trust-100 rounded-lg hover:bg-trust-100 transition-colors">
+                  Professional — 79 €/Monat
+                </a>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="bg-gray-50 rounded-xl border border-gray-100 p-12 flex flex-col items-center justify-center text-center">
+            <p className="text-gray-400 text-sm">Geben Sie die Parameter ein und klicken Sie auf "Berechnen".</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

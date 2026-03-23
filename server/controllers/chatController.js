@@ -1,74 +1,58 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const logger = require('../utils/logger');
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-
-// Input sanitization utility for security
 const sanitizeInput = (input, maxLength = 2000) => {
-    if (!input || typeof input !== 'string') return '';
-    return input
-        .slice(0, maxLength)
-        .replace(/<[^>]*>/g, '')  // Remove HTML tags
-        .replace(/[\x00-\x1F\x7F]/g, '')  // Remove control characters
-        .trim();
+  if (!input || typeof input !== 'string') return '';
+  return input
+    .slice(0, maxLength)
+    .replace(/<[^>]*>/g, '')
+    .replace(/[\x00-\x1F\x7F]/g, '')
+    .trim();
 };
 
+const systemPrompt = `Du bist ein Experte für Versicherungsmathematik und unterstützt Aktuare bei der täglichen Arbeit.
+
+Deine Kernkompetenz:
+- IFRS 17: GMM, PAA, VFA, CSM-Mechanik, Risikoanpassung, Verlustkomponente
+- Solvency II: SCR/MCR nach Standardformel, Risikomodule, Delegierte Verordnung (EU) 2015/35
+- Deutsche Standards: DAV-Sterbetafeln (DAV 2008 T, DAV 2004 R), BaFin-Anforderungen, VAG
+- EIOPA: Risikofreie Zinskurve, Smith-Wilson-Extrapolation, UFR
+
+Antworte auf Deutsch, es sei denn, der Benutzer schreibt auf Englisch.
+Verwende die korrekte versicherungsmathematische Fachterminologie.
+Gib praxisnahe Antworten mit Bezug zu regulatorischen Anforderungen.`;
+
 class ChatController {
-    async handleChat(req, res) {
-        try {
-            // Sanitize input to prevent XSS and injection attacks
-            const message = sanitizeInput(req.body.message);
+  async handleChat(req, res) {
+    try {
+      const message = sanitizeInput(req.body.message);
 
-            if (!message || message.length < 2) {
-                return res.status(400).json({ error: 'Message is required (minimum 2 characters)' });
-            }
+      if (!message || message.length < 2) {
+        return res.status(400).json({ error: 'Nachricht erforderlich (mindestens 2 Zeichen)' });
+      }
 
-            // Require valid API key
-            if (!process.env.GOOGLE_API_KEY) {
-                return res.status(503).json({
-                    error: 'AI service is currently unavailable.'
-                });
-            }
+      if (!process.env.GOOGLE_API_KEY) {
+        return res.status(503).json({ error: 'KI-Dienst ist derzeit nicht verfügbar.' });
+      }
 
-            // Use Gemini AI
-            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-pro',
+        systemInstruction: systemPrompt
+      });
 
-            const prompt = `You are an expert actuarial co-pilot specializing in life insurance actuarial practice. 
-      You have deep knowledge across all areas of life insurance actuarial work including:
-      
-      CORE KNOWLEDGE AREAS:
-      - Life Insurance Fundamentals: Product types, mortality tables, valuation principles, policyholder behavior
-      - IFRS 17: GMM, PAA, VFA models, CSM mechanics, risk adjustments, implementation challenges
-      - Solvency II: SCR/MCR calculations, internal models, capital management, risk frameworks
-      - Pricing & Product Development: GLM modeling, profit testing, product design, market analysis
-      - Risk Management & ALM: Asset-liability management, interest rate risk, longevity risk, hedging strategies
-      - Regulatory & Compliance: Global frameworks, reporting standards, compliance management
-      
-      User question: ${message}
-      
-      Provide a comprehensive, professional response that:
-      1. Answers the technical question with actuarial accuracy
-      2. Provides practical business context and implications
-      3. Offers strategic insights where relevant
-      4. Suggests additional resources or considerations
-      5. Maintains a professional, educational tone
-      
-      Focus on practical application and real-world relevance. Keep responses detailed but accessible.`;
+      const result = await model.generateContent(message);
+      const text = result.response.text();
 
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text();
-
-            res.json({ response: text });
-        } catch (error) {
-            logger.error('Chat error:', error);
-            res.status(500).json({
-                error: 'Failed to process chat request',
-                response: "I'm experiencing technical difficulties. Please try again in a moment."
-            });
-        }
+      res.json({ response: text });
+    } catch (error) {
+      logger.error('Chat error:', error);
+      res.status(500).json({
+        error: 'Anfrage konnte nicht verarbeitet werden',
+        response: 'Es sind technische Schwierigkeiten aufgetreten. Bitte versuchen Sie es erneut.'
+      });
     }
+  }
 }
 
 module.exports = new ChatController();

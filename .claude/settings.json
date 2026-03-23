@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find actuarial-engine:*)",
+      "Bash(find tests:*)",
+      "Bash(/Users/zaurguliyev/Documents/dev/Valuact/server/.env.example:*)",
+      "Bash(/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/.env.example:*)",
+      "Bash(/Users/zaurguliyev/Documents/dev/Valuact/client/.env.local.example:*)",
+      "Bash(/Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine/pyproject.toml:*)",
+      "Bash(npm install:*)",
+      "Bash(/Users/zaurguliyev/Documents/dev/Valuact/client/public/robots.txt:*)",
+      "Bash(find /Users/zaurguliyev/Documents/dev/Valuact/client/src -type f \\\\\\(-name *.jsx -o -name *.js -o -name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(find /Users/zaurguliyev/Documents/dev/Valuact/server/src -type f \\\\\\(-name *.js -o -name *.ts \\\\\\))",
+      "Bash(find /Users/zaurguliyev/Documents/dev/Valuact/server -maxdepth 3 -type f \\\\\\(-name *.js -o -name *.ts \\\\\\) ! -path */node_modules/*)",
+      "Bash(find /Users/zaurguliyev/Documents/dev/Valuact/actuarial-engine -type f -name *.py)",
+      "Bash(grep -r \"import.*from.*components\\\\|require.*components\" /Users/zaurguliyev/Documents/dev/Valuact/client/src --include=*.jsx --include=*.js)",
+      "Bash(grep -r \"require.*models/\\\\|from.*models/\" /Users/zaurguliyev/Documents/dev/Valuact/server --include=*.js)"
+    ],
+    "additionalDirectories": [
+      "/Users/zaurguliyev/Documents/dev/Valuact/client/src/app/(customer)"
+    ]
+  }
+}

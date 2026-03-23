@@ -1,18 +1,17 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
 
-/**
- * Generate JWT token for user
- * @param {string} userId - User ID
- * @param {string} email - User email
- * @returns {string} JWT token
- */
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+  console.error('FATAL: JWT_SECRET must be set and at least 32 characters');
+  process.exit(1);
+}
+
 function generateToken(userId, email) {
   return jwt.sign(
-    { 
-      userId, 
+    {
+      userId,
       email,
       iat: Math.floor(Date.now() / 1000)
     },
@@ -21,11 +20,6 @@ function generateToken(userId, email) {
   );
 }
 
-/**
- * Verify JWT token
- * @param {string} token - JWT token
- * @returns {object} Decoded token payload
- */
 function verifyToken(token) {
   try {
     return jwt.verify(token, JWT_SECRET);
@@ -34,16 +28,11 @@ function verifyToken(token) {
   }
 }
 
-/**
- * Extract token from Authorization header
- * @param {string} authHeader - Authorization header value
- * @returns {string} Token string
- */
 function extractTokenFromHeader(authHeader) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw new Error('Invalid authorization header format');
   }
-  return authHeader.substring(7); // Remove 'Bearer ' prefix
+  return authHeader.substring(7);
 }
 
 module.exports = {

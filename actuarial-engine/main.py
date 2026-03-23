@@ -106,8 +106,8 @@ async def calculate_ifrs17(request: IFRS17Request):
         logger.info(f"Starting IFRS 17 calculation for {len(request.policies)} policies")
         
         # Convert policies to dict format for calculation
-        policies_dict = [policy.dict() for policy in request.policies]
-        assumptions_dict = request.assumptions.dict()
+        policies_dict = [policy.model_dump() for policy in request.policies]
+        assumptions_dict = request.assumptions.model_dump()
         
         # Perform calculation
         results = calculate_portfolio_csm(
@@ -148,8 +148,8 @@ async def calculate_solvency(request: SolvencyRequest):
         logger.info(f"Starting Solvency II calculation for {len(request.policies)} policies")
         
         # Convert policies to dict format for calculation
-        policies_dict = [policy.dict() for policy in request.policies]
-        assumptions_dict = request.assumptions.dict()
+        policies_dict = [policy.model_dump() for policy in request.policies]
+        assumptions_dict = request.assumptions.model_dump()
         
         # Perform calculation
         results = calculate_portfolio_scr(
@@ -178,27 +178,18 @@ async def get_mortality_tables():
         List of available mortality tables with their metadata
     """
     try:
-        tables = [
+        from data.dav_mortality_tables import get_available_dav_tables
+        dav_tables = get_available_dav_tables()
+
+        tables = dav_tables + [
             {
                 "id": "CSO_2017",
-                "name": "Commissioners Standard Ordinary 2017",
-                "description": "US mortality table for life insurance",
+                "name": "CSO 2017 (US-Referenz)",
+                "description": "US-Sterbetafel – nur als Vergleichsreferenz",
                 "gender": "unisex",
-                "year": 2017
-            },
-            {
-                "id": "CSO_2001",
-                "name": "Commissioners Standard Ordinary 2001",
-                "description": "US mortality table for life insurance",
-                "gender": "unisex",
-                "year": 2001
-            },
-            {
-                "id": "GAM_1994",
-                "name": "German Actuarial Mortality 1994",
-                "description": "German mortality table for life insurance",
-                "gender": "unisex",
-                "year": 1994
+                "year": 2017,
+                "type": "reference",
+                "publisher": "SOA"
             }
         ]
         

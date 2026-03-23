@@ -8,20 +8,10 @@ import pandas as pd
 from typing import List, Dict, Any, Tuple
 from datetime import datetime, timedelta
 import time
-import sys
-import os
 from enum import Enum
 from functools import lru_cache
 
-# Add the utils directory to the path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'utils'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'data'))
-
-# Import audit context
-from audit_logger import AuditContext
-
-# Import actuarial utilities
-from audit_logger import validate_non_negative
+from utils.audit_logger import AuditContext, validate_non_negative
 from data.mortality_tables import get_mortality_table, get_survival_probability, get_mortality_rate
 
 # Global cache for mortality tables and discount factors
@@ -220,7 +210,9 @@ def calculate_portfolio_csm(policies: List[Dict[str, Any]],
         df['pv_premiums'] = calculate_pv_premiums_vectorized(df, assumptions, assumptions['mortality_table'])
         df['pv_expenses'] = calculate_pv_expenses_vectorized(df, assumptions, assumptions['mortality_table'])
         
-        df['fcf'] = df['pv_premiums'] - df['pv_benefits'] - df['pv_expenses']
+        # FCF = PV(Benefits) + PV(Expenses) - PV(Premiums)
+        # Positive FCF means net cash outflow (insurer pays more than receives) — IFRS 17 para. 38
+        df['fcf'] = df['pv_benefits'] + df['pv_expenses'] - df['pv_premiums']
         
         audit.add_intermediate_result("PV Benefits Total", df['pv_benefits'].sum(), "currency", "Total present value of benefits")
         audit.add_intermediate_result("PV Premiums Total", df['pv_premiums'].sum(), "currency", "Total present value of premiums")
@@ -253,23 +245,25 @@ def calculate_portfolio_csm(policies: List[Dict[str, Any]],
         
         audit.add_intermediate_result("Risk Adjustment Total", df['risk_adjustment'].sum(), "currency", "Total risk adjustment")
         
-        # Calculate Contractual Service Margin (CSM)
+        # Calculate Contractual Service Margin (CSM) — IFRS 17 para. 38
+        # CSM = max(0, -(FCF + RA)) — profit recognised over coverage period
         audit.add_calculation_step(
-            description="CSM Calculation",
-            explanation="Calculate CSM = max(0, FCF - RA)",
-            formula="CSM = \\max(0, FCF - RA)"
+            description="CSM Berechnung",
+            explanation="CSM = max(0, -(FCF + RA)) gem. IFRS 17 Abs. 38",
+            formula="CSM = \\max(0, -(FCF + RA))"
         )
-        
-        df['csm'] = np.maximum(0, df['fcf'] - df['risk_adjustment'])
-        
+
+        df['csm'] = np.maximum(0, -(df['fcf'] + df['risk_adjustment']))
+
         # Calculate Loss Component for onerous contracts
+        # LC = max(0, FCF + RA) — immediate loss for onerous contracts
         audit.add_calculation_step(
-            description="Loss Component Calculation",
-            explanation="Calculate LC = max(0, RA - FCF) for onerous contracts",
-            formula="LC = \\max(0, RA - FCF)"
+            description="Verlustkomponente",
+            explanation="LC = max(0, FCF + RA) für belastende Verträge",
+            formula="LC = \\max(0, FCF + RA)"
         )
-        
-        df['loss_component'] = np.maximum(0, df['risk_adjustment'] - df['fcf'])
+
+        df['loss_component'] = np.maximum(0, df['fcf'] + df['risk_adjustment'])
         
         # Validate CSM results
         audit.add_validation_result("CSM Non-Negative", "range", 

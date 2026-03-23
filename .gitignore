@@ -117,3 +117,11 @@ firebase-debug.*.log
 # Build outputs
 client/dist/
 server/dist/
+
+# Python
+__pycache__/
+*.pyc
+*.log
+
+# Actuarial engine logs
+actuarial-engine/*.log
