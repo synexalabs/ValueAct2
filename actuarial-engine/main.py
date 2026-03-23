@@ -35,25 +35,28 @@ def sanitize_error_message(error: Exception, context: str) -> str:
         return f"{context}: {str(error)}"
     return f"{context} - Please contact support if this persists."
 
+
 # Create FastAPI application
 app = FastAPI(
     title="Valuact Actuarial Engine",
     description="Portfolio-level actuarial calculations for IFRS 17 and Solvency II",
     version="1.0.0",
     docs_url="/docs" if os.getenv("ENVIRONMENT") != "production" else None,
-    redoc_url="/redoc" if os.getenv("ENVIRONMENT") != "production" else None
+    redoc_url="/redoc" if os.getenv("ENVIRONMENT") != "production" else None,
 )
 
 # Get allowed origins from environment or use defaults
 allowed_origins = os.getenv(
-    "ALLOWED_ORIGINS", 
-    "http://localhost:5173,http://localhost:3000,http://localhost:3001"
+    "ALLOWED_ORIGINS",
+    "http://localhost:5173,http://localhost:3000,http://localhost:3001",
 ).split(",")
 
 # Add CORS middleware with origin whitelist for production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins if os.getenv("ENVIRONMENT") == "production" else ["*"],
+    allow_origins=(
+        allowed_origins if os.getenv("ENVIRONMENT") == "production" else ["*"]
+    ),
     allow_credentials=True,
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
@@ -62,13 +65,10 @@ app.add_middleware(
 # Add trusted host middleware for production
 if os.getenv("ENVIRONMENT") == "production":
     allowed_hosts = os.getenv(
-        "ALLOWED_HOSTS", 
-        "valuact-rechner.de,localhost,127.0.0.1"
+        "ALLOWED_HOSTS", "valuact-rechner.de,localhost,127.0.0.1"
     ).split(",")
-    app.add_middleware(
-        TrustedHostMiddleware,
-        allowed_hosts=allowed_hosts
-    )
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
+
 
 @app.get("/")
 async def root():
@@ -76,8 +76,9 @@ async def root():
     return {
         "message": "Valuact Actuarial Engine",
         "version": "1.0.0",
-        "status": "healthy"
+        "status": "healthy",
     }
+
 
 @app.get("/health")
 async def health_check():
@@ -86,103 +87,103 @@ async def health_check():
         "status": "healthy",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "version": "1.0.0",
-        "environment": os.getenv("ENVIRONMENT", "development")
+        "environment": os.getenv("ENVIRONMENT", "development"),
     }
+
 
 @app.post("/api/v1/calculate/ifrs17", response_model=IFRS17Response)
 async def calculate_ifrs17(request: IFRS17Request):
     """
     Calculate IFRS 17 CSM for a portfolio of insurance policies
-    
+
     This endpoint processes an entire portfolio of insurance policies and calculates
     the Contractual Service Margin (CSM) according to IFRS 17 standards.
-    
+
     Args:
         request: IFRS17Request containing policies and assumptions
-        
+
     Returns:
         IFRS17Response with CSM calculations and results
-        
+
     Raises:
         HTTPException: If validation fails or calculation errors occur
     """
     try:
-        logger.info(f"Starting IFRS 17 calculation for {len(request.policies)} policies")
-        
+        logger.info(
+            f"Starting IFRS 17 calculation for {len(request.policies)} policies"
+        )
+
         # Convert policies to dict format for calculation
         policies_dict = [policy.model_dump() for policy in request.policies]
         assumptions_dict = request.assumptions.model_dump()
-        
+
         # Perform calculation
         results = calculate_portfolio_csm(
-            policies=policies_dict,
-            assumptions=assumptions_dict
+            policies=policies_dict, assumptions=assumptions_dict
         )
-        
+
         logger.info(f"IFRS 17 calculation completed successfully")
         return results
-        
+
     except HTTPException:
         raise
     except Exception as e:
         error_msg = sanitize_error_message(e, "IFRS 17 calculation failed")
-        raise HTTPException(
-            status_code=500,
-            detail=error_msg
-        )
+        raise HTTPException(status_code=500, detail=error_msg)
+
 
 @app.post("/api/v1/calculate/solvency", response_model=SolvencyResponse)
 async def calculate_solvency(request: SolvencyRequest):
     """
     Calculate Solvency II SCR for a portfolio of insurance policies
-    
+
     This endpoint processes an entire portfolio of insurance policies and calculates
     the Solvency Capital Requirement (SCR) according to Solvency II standards.
-    
+
     Args:
         request: SolvencyRequest containing policies and assumptions
-        
+
     Returns:
         SolvencyResponse with SCR calculations and results
-        
+
     Raises:
         HTTPException: If validation fails or calculation errors occur
     """
     try:
-        logger.info(f"Starting Solvency II calculation for {len(request.policies)} policies")
-        
+        logger.info(
+            f"Starting Solvency II calculation for {len(request.policies)} policies"
+        )
+
         # Convert policies to dict format for calculation
         policies_dict = [policy.model_dump() for policy in request.policies]
         assumptions_dict = request.assumptions.model_dump()
-        
+
         # Perform calculation
         results = calculate_portfolio_scr(
-            policies=policies_dict,
-            assumptions=assumptions_dict
+            policies=policies_dict, assumptions=assumptions_dict
         )
-        
+
         logger.info(f"Solvency II calculation completed successfully")
         return results
-        
+
     except HTTPException:
         raise
     except Exception as e:
         error_msg = sanitize_error_message(e, "Solvency II calculation failed")
-        raise HTTPException(
-            status_code=500,
-            detail=error_msg
-        )
+        raise HTTPException(status_code=500, detail=error_msg)
+
 
 @app.get("/api/v1/mortality-tables")
 async def get_mortality_tables():
     """
     Get available mortality tables
-    
+
     Returns:
         List of available mortality tables with their metadata
     """
     try:
         from data.dav_mortality_tables import get_available_dav_tables
+
         dav_tables = get_available_dav_tables()
 
         tables = dav_tables + [
@@ -193,30 +194,27 @@ async def get_mortality_tables():
                 "gender": "unisex",
                 "year": 2017,
                 "type": "reference",
-                "publisher": "SOA"
+                "publisher": "SOA",
             }
         ]
-        
+
         return {"mortality_tables": tables}
-        
+
     except Exception as e:
         logger.error(f"Failed to get mortality tables: {str(e)}")
         raise HTTPException(
-            status_code=500,
-            detail="Failed to retrieve mortality tables"
+            status_code=500, detail="Failed to retrieve mortality tables"
         )
+
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
     """Custom HTTP exception handler"""
     return JSONResponse(
         status_code=exc.status_code,
-        content={
-            "error": True,
-            "message": exc.detail,
-            "status_code": exc.status_code
-        }
+        content={"error": True, "message": exc.detail, "status_code": exc.status_code},
     )
+
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request, exc):
@@ -224,21 +222,13 @@ async def general_exception_handler(request, exc):
     logger.error(f"Unhandled exception: {str(exc)}")
     return JSONResponse(
         status_code=500,
-        content={
-            "error": True,
-            "message": "Internal server error",
-            "status_code": 500
-        }
+        content={"error": True, "message": "Internal server error", "status_code": 500},
     )
+
 
 if __name__ == "__main__":
     import os
+
     port = int(os.getenv("PORT", 8080))
-    
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=port,
-        reload=False,
-        log_level="info"
-    )
+
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False, log_level="info")
