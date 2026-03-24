@@ -7,14 +7,6 @@ require('dotenv').config();
 const admin = require('firebase-admin');
 const logger = require('./utils/logger');
 
-// Import routes
-const authRoutes = require('./routes/auth');
-const calculationRoutes = require('./routes/calculations');
-const methodologyRoutes = require('./routes/methodology');
-const healthRoutes = require('./routes/healthRoutes');
-const chatRoutes = require('./routes/chat');
-const stripeRoutes = require('./routes/stripe');
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -40,6 +32,14 @@ if (!admin.apps.length) {
     process.exit(1);
   }
 }
+
+// Import routes after Firebase is initialized
+const authRoutes = require('./routes/auth');
+const calculationRoutes = require('./routes/calculations');
+const methodologyRoutes = require('./routes/methodology');
+const healthRoutes = require('./routes/healthRoutes');
+const chatRoutes = require('./routes/chat');
+const stripeRoutes = require('./routes/stripe');
 
 if (!process.env.GOOGLE_API_KEY) {
   logger.warn('GOOGLE_API_KEY not set - AI chat features will be disabled');

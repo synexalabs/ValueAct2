@@ -237,7 +237,7 @@ const firestoreUtils = {
 };
 
 module.exports = {
-  db: getFirestore(),
+  get db() { return getFirestore(); },
   initializeFirestore,
   getFirestore,
   ...firestoreUtils
