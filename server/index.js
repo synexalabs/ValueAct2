@@ -80,19 +80,10 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Free tier: 3 calculations per day
-const calculationLimiter = rateLimit({
-  windowMs: 24 * 60 * 60 * 1000,
-  max: 3,
-  message: { error: 'Tageslimit erreicht. Upgraden Sie auf Professional für unbegrenzte Berechnungen.' },
-  keyGenerator: (req) => req.user?.id || req.ip,
-  skip: (req) => req.user?.plan === 'pro'
-});
-
 // Routes
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/calculations', calculationLimiter, calculationRoutes);
+app.use('/api/calculations', calculationRoutes);
 app.use('/api/methodology', methodologyRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/stripe', stripeRoutes);
@@ -116,7 +107,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+  res.status(404).json({ error: 'Route nicht gefunden.' });
 });
 
 app.listen(PORT, () => {

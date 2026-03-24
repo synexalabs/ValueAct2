@@ -44,13 +44,15 @@ export default function MortalityBrowser() {
     return Math.pow(1 - q, calcTerm);
   };
 
-  // Rough life expectancy
+  // Curtate future lifetime using Gompertz mortality progression
   const lifeExpectancy = () => {
-    const q = qxData[calcAge] || 0.005;
+    const q0 = qxData[calcAge] || 0.005;
     let ex = 0;
     let sp = 1;
-    for (let t = 1; t <= 60; t++) {
-      sp *= (1 - q * Math.pow(1.07, Math.min(t, 20)));
+    for (let t = 1; t <= 80; t++) {
+      // Gompertz: mortality roughly doubles every 8-10 years (β ≈ 0.085)
+      const qx_t = Math.min(1, q0 * Math.exp(0.085 * t));
+      sp *= (1 - qx_t);
       if (sp < 0.001) break;
       ex += sp;
     }

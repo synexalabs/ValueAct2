@@ -20,6 +20,9 @@ export default function ImpressumPage() {
               <p>
                 Zaur Guliyev<br />
                 Synexa Labs<br />
+                {/* TODO: Replace with real address before launch — required by § 5 TMG */}
+                Musterstraße 1<br />
+                50667 Köln<br />
                 Deutschland
               </p>
             </section>

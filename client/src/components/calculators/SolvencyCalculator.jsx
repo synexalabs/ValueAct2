@@ -47,7 +47,7 @@ function clientSCREstimate(inputs, assets) {
   const opRisk = Math.min(0.30 * bscr, Math.max(0.04 * premium, 0.0045 * face * 0.95));
   const scr = bscr + opRisk;
 
-  const mcr_linear = 0.0026 * face * 0.80 + 0.0030 * face * 0.15 + 0.001 * face * 0.50;
+  const mcr_linear = 0.045 * face * 0.80 + 0.0085 * face * 0.15 + 0.0015 * face * 0.50;
   const mcr = Math.max(3_700_000, Math.min(0.45 * scr, Math.max(0.25 * scr, mcr_linear)));
 
   const solvencyRatio = inputs.ownFunds / scr;

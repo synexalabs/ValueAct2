@@ -261,7 +261,7 @@ class PythonEngineService {
             logger.error('Get mortality tables error:', error.message);
             // Return default tables if endpoint not available
             return {
-                tables: ['DAV_2008_T', 'DAV_2004_R', 'DAV_2008_T_MALE', 'DAV_2008_T_FEMALE'],
+                tables: ['DAV_2008_T', 'DAV_2004_R', 'DAV_2008_T_MALE', 'DAV_2008_T_FEMALE', 'DAV_2004_R_MALE', 'DAV_2004_R_FEMALE'],
                 error: 'Could not fetch from engine, returning defaults',
             };
         }

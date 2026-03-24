@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const admin = require('firebase-admin');
 const { authMiddleware } = require('../middleware/auth');
 const logger = require('../utils/logger');
 
@@ -57,7 +58,6 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         const session = event.data.object;
         const userId = session.metadata?.userId;
         if (userId) {
-          const admin = require('firebase-admin');
           await admin.firestore().collection('users').doc(userId).update({
             plan: 'pro',
             stripeCustomerId: session.customer,

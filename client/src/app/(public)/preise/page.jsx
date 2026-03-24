@@ -98,7 +98,7 @@ export default function PreisePage() {
 
           <p className="text-center text-sm text-gray-400 mt-8">
             Zahlung per Kreditkarte oder SEPA-Lastschrift. Monatlich kündbar.
-            Alle Preise zzgl. MwSt.
+            Preise sind Endpreise. Gemäß § 19 UStG wird keine Umsatzsteuer erhoben.
           </p>
         </div>
       </main>

@@ -1,14 +1,16 @@
 const express = require('express');
 const calculationController = require('../controllers/calculationController');
 const { authMiddleware } = require('../middleware/auth');
+const { freeCalcLimiter } = require('../middleware/calculationRateLimit');
 const { validateRequest, calculationRequestSchema } = require('../utils/validators');
 const pythonEngine = require('../services/pythonEngineService');
 const logger = require('../utils/logger');
 
 const router = express.Router();
 
-// All calculation routes require authentication
+// Auth runs first so req.user.plan is available for the rate limiter
 router.use(authMiddleware);
+router.use(freeCalcLimiter);
 
 // Dedicated IFRS 17 calculation route — returns client-ready flat shape
 router.post('/ifrs17', async (req, res) => {

@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { ChevronDown, ChevronUp, Lock, Loader2 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { calculateCSM, calculateLossComponent, calculatePresentValue, generateCSMRunoff } from '../../utils/ifrs17Calculations';
 import { formatCurrency, formatPercentage, formatNumber } from '../../utils/formatters';
 import { useAuth } from '../../contexts/AuthContext';
@@ -40,6 +41,15 @@ const POLICY_TYPES = [
   { value: 'whole_life', label: 'Kapitallebensversicherung' },
   { value: 'annuity', label: 'Rentenversicherung' },
 ];
+
+const getMeasurementModelLabel = (type) => {
+  switch (type) {
+    case 'annuity': return 'Variabler Gebührenansatz (VFA)';
+    case 'whole_life': return 'Allgemeines Bewertungsmodell (GMM)';
+    case 'term_life':
+    default: return 'Allgemeines Bewertungsmodell (GMM)';
+  }
+};
 
 function clientSideEstimate(inputs, assumptions) {
   const { faceAmount, premium, policyTerm, issueAge } = inputs;
@@ -292,12 +302,33 @@ export default function IFRS17Calculator() {
             <div className="bg-white border border-gray-100 rounded-xl p-5">
               <p className="text-xs text-gray-400 mb-1">Bewertungsmodell</p>
               <p className="text-sm font-medium text-trust-900">
-                {inputs.policyType === 'term_life' ? 'Allgemeines Bewertungsmodell (GMM)' : 'Allgemeines Bewertungsmodell (GMM)'}
+                {getMeasurementModelLabel(inputs.policyType)}
               </p>
               {results.source === 'client' && (
                 <p className="text-xs text-gray-400 mt-1">Vereinfachte Schätzung (kostenloses Tier)</p>
               )}
             </div>
+
+            {/* CSM release pattern chart */}
+            {results.csmRunoff && results.csmRunoff.length > 0 && (
+              <div className="bg-white border border-gray-100 rounded-xl p-5">
+                <h3 className="text-sm font-semibold text-trust-950 mb-4">CSM-Abwicklungsmuster</h3>
+                <div className="h-48">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={results.csmRunoff.map((v, i) => ({ period: i + 1, csmRelease: v }))}>
+                      <XAxis dataKey="period" tick={{ fontSize: 11 }} label={{ value: 'Jahr', position: 'insideBottom', offset: -5, fontSize: 11 }} />
+                      <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                      <Tooltip
+                        formatter={(value) => [formatCurrency(value), 'CSM-Auflösung']}
+                        labelFormatter={(label) => `Jahr ${label}`}
+                      />
+                      <Bar dataKey="csmRelease" fill="#1e293b" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <p className="text-xs text-gray-400 mt-2">Verteilung der CSM-Auflösung über die Deckungsperiode</p>
+              </div>
+            )}
 
             {/* Pro-gated features */}
             <div className="bg-white border border-gray-100 rounded-xl p-5">
@@ -307,7 +338,6 @@ export default function IFRS17Calculator() {
                   'Vollständiger Prüfpfad (Python-Engine)',
                   'PDF-Export mit Berechnungsdetails',
                   'Sensitivitätsanalyse',
-                  'CSM-Abwicklungsmuster',
                 ].map((f) => (
                   <div key={f} className="flex items-center gap-2 text-sm text-gray-400">
                     <Lock size={14} />

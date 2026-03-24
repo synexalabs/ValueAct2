@@ -4,12 +4,10 @@ import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useLanguage } from '../contexts/LanguageContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, logout } = useAuth();
-  const { language, setLanguage } = useLanguage();
 
   const navLinks = [
     { label: 'Rechner', path: '/rechner' },
@@ -36,14 +34,6 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
-
-            <button
-              onClick={() => setLanguage(language === 'de' ? 'en' : 'de')}
-              className="text-xs font-medium border border-gray-200 rounded px-2 py-1 text-gray-500 hover:border-trust-300 hover:text-trust-700 transition-colors"
-              aria-label="Sprache wechseln"
-            >
-              {language === 'de' ? 'EN' : 'DE'}
-            </button>
 
             {isAuthenticated ? (
               <>
