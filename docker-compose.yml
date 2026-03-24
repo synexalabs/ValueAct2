@@ -12,7 +12,7 @@ services:
       dockerfile: Dockerfile
     container_name: valuact-actuarial-engine
     ports:
-      - "8000:8000"
+      - "8000:8080"
     environment:
       <<: *common-env
       WORKERS: 4
@@ -21,7 +21,7 @@ services:
     volumes:
       - ./actuarial-engine/data:/app/data:ro
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -49,7 +49,7 @@ services:
     environment:
       <<: *common-env
       NODE_ENV: production
-      PYTHON_ENGINE_URL: http://actuarial-engine:8000
+      PYTHON_ENGINE_URL: http://actuarial-engine:8080
       CALCULATION_TIMEOUT: 300000
     env_file:
       - ./server/.env
