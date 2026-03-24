@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { ChevronDown, ChevronUp, Lock, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Lock, Loader2, Download } from 'lucide-react';
 import { formatCurrency, formatPercentage } from '../../utils/formatters';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
+import { exportSolvencyReport } from '../../services/pdfReportService';
+import SensitivityPanel from './SensitivityPanel';
+import AiChatPanel from '../AiChatPanel';
 
 const DEFAULT_INPUTS = {
   faceAmount: 100000,
@@ -242,6 +245,29 @@ export default function SolvencyCalculator() {
                 <p className="text-xs text-gray-400 mt-3">Vereinfachte Schätzung (kostenloses Tier)</p>
               )}
             </div>
+
+            {/* Disclaimer */}
+            <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-xs text-amber-800">
+              <strong>Hinweis:</strong> Diese Berechnungen basieren auf der Solvency-II-Standardformel (Delegierte Verordnung (EU) 2015/35) und dienen ausschließlich zu Informations- und Bildungszwecken. Sie ersetzen keine aufsichtsrechtliche Beratung. Für offizielle SFCR-Berichte sind zugelassene Aktuare hinzuzuziehen.
+            </div>
+
+            {/* Sensitivity Analysis */}
+            {isPro && <SensitivityPanel baseResults={results} baseAssumptions={assumptions} calcType="solvency" />}
+
+            {/* AI Chat */}
+            <AiChatPanel
+              calculationContext={results ? { scr: results.scr, mcr: results.mcr, solvencyRatio: results.solvencyRatio, diversification: results.diversification } : null}
+              calcType="solvency"
+            />
+
+            {/* PDF Export */}
+            {isPro && (
+              <button onClick={() => exportSolvencyReport(results, inputs, assumptions)}
+                className="w-full flex items-center justify-center gap-2 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 hover:border-trust-200 transition-colors">
+                <Download size={15} />
+                PDF-Bericht exportieren
+              </button>
+            )}
 
             {/* Pro-gated */}
             <div className="bg-white border border-gray-100 rounded-xl p-5">

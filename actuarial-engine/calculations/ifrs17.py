@@ -162,7 +162,7 @@ def calculate_portfolio_csm(
     """
     calculation_id = f"IFRS17_CSM_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
-    with AuditContext(calculation_id, "IFRS17_CSM_v2.0.0") as audit:
+    with AuditContext(calculation_id, "IFRS17_CSM_v2.1.0") as audit:
         start_time = time.time()
 
         # Set calculation inputs
@@ -260,19 +260,28 @@ def calculate_portfolio_csm(
             "Mortality Table", mortality_table, "table", "Selected mortality table"
         )
 
-        # Pre-calculate Smith-Wilson Yield Curve
-        liquid_rates = assumptions.get(
-            "liquid_rates", {1: 0.01, 2: 0.012, 5: 0.015, 10: 0.02, 20: 0.025, 30: 0.03}
-        )
+        # Pre-calculate Yield Curve
         max_term = (
             int(df.get("policy_term", pd.Series([50])).max()) if len(df) > 0 else 50
         )
 
-        # Extrapolate to cover maximum possible duration
-        curve_rates = smith_wilson_extrapolation(
-            liquid_rates, max_maturity=max_term + 1
-        )
-        yield_curve = tuple(curve_rates[t] for t in range(max_term + 1))
+        use_eiopa = assumptions.get("use_eiopa_yield_curve", False)
+        if use_eiopa:
+            # Pro feature: use EIOPA RFR curve with Smith-Wilson + optional VA
+            from utils.eiopa_yield_curve import get_eiopa_yield_curve
+            include_va = assumptions.get("include_va", False)
+            curve_rates = get_eiopa_yield_curve(
+                currency="EUR", country="DE", include_va=include_va, max_maturity=max_term + 1
+            )
+        else:
+            liquid_rates = assumptions.get(
+                "liquid_rates", {1: 0.01, 2: 0.012, 5: 0.015, 10: 0.02, 20: 0.025, 30: 0.03}
+            )
+            curve_rates = smith_wilson_extrapolation(
+                liquid_rates, max_maturity=max_term + 1
+            )
+
+        yield_curve = tuple(curve_rates.get(t, curve_rates[max(curve_rates.keys())]) for t in range(max_term + 1))
 
         # Pre-calculate discount factors for common terms to improve performance
         discount_rate = assumptions.get("discount_rate", 0.035)
@@ -344,19 +353,25 @@ def calculate_portfolio_csm(
             formula="RA = \\text{VaR}_{\\alpha}(FCF) - \\mathbb{E}[FCF]",
         )
 
-        # Vectorized risk adjustment calculation
+        # Risk Adjustment — supports "factor" (simple), "coc" (Cost of Capital), or "confidence_level" (VaR)
+        ra_method = assumptions.get("ra_method", "factor")
         risk_factor = assumptions.get("risk_adjustment_factor", 0.02)
         confidence_level = assumptions.get("confidence_level", 0.75)
 
-        # Base risk adjustment
-        base_ra = np.abs(df["fcf"]) * risk_factor
+        if ra_method in ("coc", "confidence_level"):
+            from calculations.risk_adjustment import calculate_risk_adjustment_portfolio
 
-        # Adjust for confidence level (higher confidence = higher RA)
-        confidence_multiplier = {0.75: 1.0, 0.90: 1.5, 0.95: 2.0, 0.99: 3.0}.get(
-            confidence_level, 1.0
-        )
-
-        df["risk_adjustment"] = base_ra * confidence_multiplier
+            ra_result = calculate_risk_adjustment_portfolio(df, assumptions, method=ra_method)
+            # Map per-policy RA back to DataFrame by policy_id
+            ra_map = {item["policy_id"]: item["risk_adjustment"] for item in ra_result["ra_by_policy"]}
+            df["risk_adjustment"] = df["policy_id"].map(ra_map).fillna(0.0)
+        else:
+            # Default: simple factor approach
+            base_ra = np.abs(df["fcf"]) * risk_factor
+            confidence_multiplier = {0.75: 1.0, 0.90: 1.5, 0.95: 2.0, 0.99: 3.0}.get(
+                confidence_level, 1.0
+            )
+            df["risk_adjustment"] = base_ra * confidence_multiplier
 
         audit.add_intermediate_result(
             "Risk Adjustment Total",
@@ -540,28 +555,28 @@ def calculate_portfolio_csm(
         # Add formulas used
         audit.add_formula_used(
             "CSM_Initial",
-            "2.0.0",
+            "2.1.0",
             "Initial CSM Recognition",
-            "CSM_0 = \\max(0, FCF_0 - RA_0)",
+            "CSM_0 = \\max(0, -(FCF_0 + RA_0))",
         )
         audit.add_formula_used(
             "FCF",
-            "2.0.0",
+            "2.1.0",
             "Fulfilment Cash Flows",
-            "FCF = PV_{premiums} - PV_{benefits} - PV_{expenses}",
+            "FCF = PV_{benefits} + PV_{expenses} - PV_{premiums}",
         )
         audit.add_formula_used(
             "Risk_Adjustment",
-            "2.0.0",
+            "2.1.0",
             "Risk Adjustment",
             "RA = \\text{VaR}_{\\alpha}(FCF) - \\mathbb{E}[FCF]",
         )
         audit.add_formula_used(
-            "Loss_Component", "2.0.0", "Loss Component", "LC = \\max(0, RA - FCF)"
+            "Loss_Component", "2.1.0", "Loss Component", "LC = \\max(0, FCF + RA)"
         )
         audit.add_formula_used(
             "CSM_Release",
-            "2.0.0",
+            "2.1.0",
             "CSM Release",
             "CSM_{release,t} = CSM_{opening,t} \\times \\frac{CU_t}{\\sum CU}",
         )
@@ -579,7 +594,7 @@ def calculate_portfolio_csm(
             "execution_time": execution_time,
             "audit_trail": audit.get_audit_trail(),
             "result_validation": audit.get_validation_summary(),
-            "methodology_version": "2.0.0",
+            "methodology_version": "2.1.0",
         }
 
         return results
@@ -981,11 +996,16 @@ def calculate_pv_benefits_vectorized(
             ]
         )
 
+        policy_type = row.get("policy_type", "term_life")
+
         # PV of death benefits
         death_benefits = face_amount * mortality_probs * discount_factors[:term]
 
-        # PV of maturity benefit
-        maturity_benefit = face_amount * survival_probs[-1] * discount_factors[term - 1]
+        # PV of maturity benefit — only for endowment/whole_life (term life has no survival benefit)
+        if policy_type in ("endowment", "whole_life"):
+            maturity_benefit = face_amount * survival_probs[-1] * discount_factors[term - 1]
+        else:
+            maturity_benefit = 0.0
 
         pv_benefits[i] = np.sum(death_benefits) + maturity_benefit
 
@@ -1025,11 +1045,15 @@ def calculate_pv_premiums_vectorized(
     # Vectorized calculation for each policy
     pv_premiums = np.zeros(len(df))
 
+    lapse_rate = assumptions.get("lapse_rate", 0.05)
+    use_dynamic_lapse = assumptions.get("use_dynamic_lapse", True)
+
     for i, (_, row) in enumerate(df.iterrows()):
         age = int(row.get("issue_age", row.get("age", 35)))
         term = int(row.get("policy_term", 20))
         premium = row["premium"]
         gender = row.get("gender", "M")
+        policy_type = row.get("policy_type", "term_life")
 
         # Calculate survival probabilities for all periods
         survival_probs = np.array(
@@ -1039,8 +1063,16 @@ def calculate_pv_premiums_vectorized(
             ]
         )
 
-        # PV of premiums (paid at beginning of each period)
-        premium_cashflows = premium * survival_probs * discount_factors[:term]
+        # Calculate persistence (lapse) probabilities — premiums are only paid by in-force policies
+        if use_dynamic_lapse:
+            persistence_probs = np.array(
+                [get_cumulative_persistence(lapse_rate, t, policy_type) for t in range(1, term + 1)]
+            )
+        else:
+            persistence_probs = np.array([(1 - lapse_rate) ** t for t in range(1, term + 1)])
+
+        # PV of premiums (paid at beginning of each period, conditional on survival AND persistence)
+        premium_cashflows = premium * survival_probs * persistence_probs * discount_factors[:term]
         pv_premiums[i] = np.sum(premium_cashflows)
 
     return pd.Series(pv_premiums, index=df.index)
@@ -1061,16 +1093,25 @@ def calculate_pv_expenses_vectorized(
         Series of PV of expenses for each policy
     """
     discount_rate = assumptions["discount_rate"]
-    expense_loading = assumptions.get("expense_loading", 0.05)  # Standardized naming
+    expense_loading = assumptions.get("expense_loading", 0.05)
+    expense_inflation = assumptions.get("expense_inflation", 0.02)
     max_term = int(df.get("policy_term", pd.Series([20])).max())
 
     # Create time vector
     time_vector = np.arange(1, max_term + 1)
 
-    # Calculate discount factors for all periods
+    # Calculate discount factors using yield curve (consistent with benefits/premiums)
     discount_factors = np.array(
-        [get_cached_discount_factor(discount_rate, t) for t in time_vector]
+        [
+            get_cached_discount_factor(
+                discount_rate, t, assumptions.get("_yield_curve")
+            )
+            for t in time_vector
+        ]
     )
+
+    # Pre-compute inflation factors for all periods: year t expense inflated by (1+g)^(t-1)
+    inflation_factors = np.array([(1 + expense_inflation) ** (t - 1) for t in time_vector])
 
     # Vectorized calculation for each policy
     pv_expenses = np.zeros(len(df))
@@ -1089,9 +1130,9 @@ def calculate_pv_expenses_vectorized(
             ]
         )
 
-        # PV of expenses (proportional to premium)
+        # PV of expenses: inflated each year, weighted by survival, discounted
         expense_cashflows = (
-            premium * expense_loading * survival_probs * discount_factors[:term]
+            premium * expense_loading * inflation_factors[:term] * survival_probs * discount_factors[:term]
         )
         pv_expenses[i] = np.sum(expense_cashflows)
 

@@ -1,5 +1,6 @@
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
+import Link from 'next/link';
 
 export const metadata = {
   title: 'Methodik | ValueAct Rechner',
@@ -16,6 +17,13 @@ export default function MethodikPage() {
           <p className="text-gray-500 text-sm mb-10">
             Dokumentation der versicherungsmathematischen Berechnungsgrundlagen.
           </p>
+
+          {/* Quick links */}
+          <div className="flex flex-wrap gap-3 mb-10">
+            <Link href="/methodik/formeln" className="px-4 py-2 bg-trust-50 text-trust-700 border border-trust-100 rounded-lg text-sm hover:bg-trust-100 transition-colors font-medium">
+              Formelsammlung →
+            </Link>
+          </div>
 
           <div className="space-y-10">
             <section>

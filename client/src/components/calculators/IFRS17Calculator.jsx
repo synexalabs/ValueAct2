@@ -1,12 +1,16 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { ChevronDown, ChevronUp, Lock, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Lock, Loader2, Download } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { calculateCSM, calculateLossComponent, calculatePresentValue, generateCSMRunoff } from '../../utils/ifrs17Calculations';
 import { formatCurrency, formatPercentage, formatNumber } from '../../utils/formatters';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
+import PortfolioUpload from './PortfolioUpload';
+import { exportIFRS17Report } from '../../services/pdfReportService';
+import SensitivityPanel from './SensitivityPanel';
+import AiChatPanel from '../AiChatPanel';
 
 const DEFAULT_INPUTS = {
   faceAmount: 100000,
@@ -24,7 +28,10 @@ const DEFAULT_ASSUMPTIONS = {
   expenseLoading: 0.05,
   expenseInflation: 0.02,
   riskAdjustmentFactor: 0.02,
-  confidenceLevel: '0.90',
+  confidenceLevel: '0.75',
+  raMethod: 'factor',
+  useEiopaYieldCurve: false,
+  includeVa: false,
 };
 
 const MORTALITY_TABLES = [
@@ -96,6 +103,13 @@ export default function IFRS17Calculator() {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [rollforward, setRollforward] = useState(null);
+  const [rfLoading, setRfLoading] = useState(false);
+  const [openingCsm, setOpeningCsm] = useState(0);
+  const [coverageCurrent, setCoverageCurrent] = useState(100);
+  const [coverageFuture, setCoverageFuture] = useState(900);
+  const [inputMode, setInputMode] = useState('single'); // 'single' | 'portfolio'
+  const [portfolio, setPortfolio] = useState(null);
 
   const handleInput = (e) => {
     const { name, value } = e.target;
@@ -103,8 +117,13 @@ export default function IFRS17Calculator() {
   };
 
   const handleAssumption = (e) => {
-    const { name, value } = e.target;
-    setAssumptions((prev) => ({ ...prev, [name]: ['discountRate', 'lapseRate', 'expenseLoading', 'expenseInflation', 'riskAdjustmentFactor'].includes(name) ? Number(value) : value }));
+    const { name, value, type, checked } = e.target;
+    const numericFields = ['discountRate', 'lapseRate', 'expenseLoading', 'expenseInflation', 'riskAdjustmentFactor'];
+    const boolFields = ['useEiopaYieldCurve', 'includeVa'];
+    setAssumptions((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' || boolFields.includes(name) ? checked : numericFields.includes(name) ? Number(value) : value,
+    }));
   };
 
   const handleCalculate = useCallback(async () => {
@@ -112,10 +131,10 @@ export default function IFRS17Calculator() {
     setLoading(true);
     try {
       if (isPro) {
-        const response = await axios.post('/api/calculations/ifrs17', {
-          policies: [{ ...inputs, policy_id: 'P001' }],
-          assumptions,
-        });
+        const policies = inputMode === 'portfolio' && portfolio
+          ? portfolio
+          : [{ ...inputs, policy_id: 'P001' }];
+        const response = await axios.post('/api/calculations/ifrs17', { policies, assumptions });
         setResults({ ...response.data, source: 'server' });
       } else {
         const est = clientSideEstimate(inputs, assumptions);
@@ -132,12 +151,54 @@ export default function IFRS17Calculator() {
     }
   }, [inputs, assumptions, isPro]);
 
+  const handleRollforward = useCallback(async () => {
+    if (!results || !isPro) return;
+    setRfLoading(true);
+    try {
+      const response = await axios.post('/api/calculations/csm-rollforward', {
+        opening_balance: { csm: openingCsm },
+        new_business: [{ premium: inputs.premium, fcf: results.fcf || 0, ra: results.ra || 0 }],
+        assumptions: {
+          discount_rate: assumptions.discountRate,
+          coverage_units_current: coverageCurrent,
+          coverage_units_future: coverageFuture,
+        },
+        economic_data: {},
+      });
+      setRollforward(response.data);
+    } catch {
+      // silently fail — rollforward is supplemental
+    } finally {
+      setRfLoading(false);
+    }
+  }, [results, isPro, openingCsm, coverageCurrent, coverageFuture, inputs, assumptions]);
+
   const isOnerous = results && results.lossComponent > 0;
 
   return (
     <div className="grid lg:grid-cols-5 gap-6">
       {/* Input panel */}
       <div className="lg:col-span-2 space-y-4">
+        {/* Mode tabs */}
+        {isPro && (
+          <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+            {[{ key: 'single', label: 'Einzelpolice' }, { key: 'portfolio', label: 'Portfolio-Upload' }].map(({ key, label }) => (
+              <button key={key} onClick={() => setInputMode(key)}
+                className={`flex-1 py-1.5 text-sm rounded-md transition-colors font-medium ${inputMode === key ? 'bg-white text-trust-950 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Portfolio upload */}
+        {inputMode === 'portfolio' && isPro ? (
+          <div className="bg-white border border-gray-100 rounded-xl p-5">
+            <h2 className="text-sm font-semibold text-trust-950 uppercase tracking-wide mb-4">Portfolio hochladen</h2>
+            <PortfolioUpload onPortfolioLoaded={(policies) => setPortfolio(policies)} />
+          </div>
+        ) : (
+        <>
         {/* Main inputs */}
         <div className="bg-white border border-gray-100 rounded-xl p-5 space-y-4">
           <h2 className="text-sm font-semibold text-trust-950 uppercase tracking-wide">Eingabeparameter</h2>
@@ -235,6 +296,33 @@ export default function IFRS17Calculator() {
                   {['0.75', '0.90', '0.95', '0.99'].map((v) => <option key={v} value={v}>{(Number(v) * 100).toFixed(0)} %</option>)}
                 </select>
               </div>
+
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">RA-Methode</label>
+                <select name="raMethod" value={assumptions.raMethod} onChange={handleAssumption}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-trust-400 bg-white">
+                  <option value="factor">Faktorbasiert (Standard)</option>
+                  <option value="confidence_level">Konfidenzniveau (VaR)</option>
+                  <option value="coc">Cost of Capital (6 %)</option>
+                </select>
+              </div>
+
+              {isPro && (
+                <div className="space-y-2 pt-1">
+                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <input type="checkbox" name="useEiopaYieldCurve" checked={assumptions.useEiopaYieldCurve}
+                      onChange={handleAssumption} className="rounded border-gray-300 text-trust-600 focus:ring-trust-500" />
+                    EIOPA RFR-Zinskurve verwenden (EUR)
+                  </label>
+                  {assumptions.useEiopaYieldCurve && (
+                    <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer ml-4">
+                      <input type="checkbox" name="includeVa" checked={assumptions.includeVa}
+                        onChange={handleAssumption} className="rounded border-gray-300 text-trust-600 focus:ring-trust-500" />
+                      Volatilitätsanpassung (VA) einbeziehen
+                    </label>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -243,11 +331,13 @@ export default function IFRS17Calculator() {
           <div className="bg-red-50 border border-red-100 rounded-lg px-4 py-3 text-sm text-red-700">{error}</div>
         )}
 
-        <button onClick={handleCalculate} disabled={loading}
+        <button onClick={handleCalculate} disabled={loading || (inputMode === 'portfolio' && !portfolio)}
           className="w-full py-3 bg-trust-950 text-white rounded-lg font-medium hover:bg-trust-900 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
           {loading && <Loader2 size={16} className="animate-spin" />}
-          {loading ? 'Berechnung läuft...' : 'Berechnen'}
+          {loading ? 'Berechnung läuft...' : inputMode === 'portfolio' && portfolio ? `Portfolio berechnen (${portfolio.length} Policen)` : 'Berechnen'}
         </button>
+        </>
+        )}
       </div>
 
       {/* Results panel */}
@@ -328,6 +418,79 @@ export default function IFRS17Calculator() {
                 </div>
                 <p className="text-xs text-gray-400 mt-2">Verteilung der CSM-Auflösung über die Deckungsperiode</p>
               </div>
+            )}
+
+            {/* CSM Überleitung (Roll-forward) — Pro */}
+            {isPro && (
+              <div className="bg-white border border-gray-100 rounded-xl p-5">
+                <h3 className="text-sm font-semibold text-trust-950 mb-4">CSM-Überleitung (IFRS 17.44)</h3>
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Eröffnungs-CSM (€)</label>
+                    <input type="number" value={openingCsm} onChange={(e) => setOpeningCsm(Number(e.target.value))}
+                      className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-trust-400" step={1000} />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Deckungseinheiten (aktuell)</label>
+                    <input type="number" value={coverageCurrent} onChange={(e) => setCoverageCurrent(Number(e.target.value))}
+                      className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-trust-400" min={0} />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Deckungseinheiten (zukünftig)</label>
+                    <input type="number" value={coverageFuture} onChange={(e) => setCoverageFuture(Number(e.target.value))}
+                      className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-trust-400" min={1} />
+                  </div>
+                </div>
+                <button onClick={handleRollforward} disabled={rfLoading}
+                  className="w-full py-2 text-sm bg-trust-50 text-trust-700 border border-trust-100 rounded-lg hover:bg-trust-100 transition-colors disabled:opacity-60 flex items-center justify-center gap-2 mb-4">
+                  {rfLoading && <Loader2 size={14} className="animate-spin" />}
+                  CSM-Überleitung berechnen
+                </button>
+                {rollforward && (
+                  <div className="space-y-1">
+                    {[
+                      { label: 'Eröffnungs-CSM', value: rollforward.opening_csm },
+                      { label: '+ Neugeschäft', value: rollforward.new_business_csm },
+                      { label: '+ Zinsaufwand', value: rollforward.interest_accretion },
+                      { label: '± Schätzungsänderungen', value: rollforward.changes_in_estimates },
+                      { label: '± Erfahrungsanpassungen', value: rollforward.experience_adjustments },
+                      { label: '− CSM-Auflösung', value: -rollforward.csm_release },
+                    ].map(({ label, value }) => (
+                      <div key={label} className="flex justify-between py-1 border-b border-gray-50 last:border-0 text-sm">
+                        <span className="text-gray-600">{label}</span>
+                        <span className={`tabular-nums font-medium ${value < 0 ? 'text-red-600' : 'text-trust-900'}`}>{formatCurrency(value)}</span>
+                      </div>
+                    ))}
+                    <div className="flex justify-between pt-2 text-sm font-semibold border-t border-gray-200">
+                      <span className="text-trust-950">= Schluss-CSM</span>
+                      <span className="text-trust-950 tabular-nums">{formatCurrency(rollforward.closing_csm)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Disclaimer */}
+            <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-xs text-amber-800">
+              <strong>Hinweis:</strong> Diese Berechnungen basieren auf dem IFRS-17-Allgemeinen-Bewertungsmodell (GMM) und dienen ausschließlich zu Informations- und Bildungszwecken. Sie ersetzen keine aufsichtsrechtliche Beratung. Für offizielle IFRS-17-Abschlüsse sind zugelassene Aktuare hinzuzuziehen.
+            </div>
+
+            {/* Sensitivity Analysis */}
+            {isPro && <SensitivityPanel baseResults={results} baseAssumptions={assumptions} calcType="ifrs17" />}
+
+            {/* AI Chat */}
+            <AiChatPanel
+              calculationContext={results ? { csm: results.csm, lossComponent: results.lossComponent, fcf: results.fcf, pvPremiums: results.pvPremiums, pvBenefits: results.pvBenefits, ra: results.ra } : null}
+              calcType="ifrs17"
+            />
+
+            {/* PDF Export */}
+            {isPro && (
+              <button onClick={() => exportIFRS17Report(results, inputs, assumptions)}
+                className="w-full flex items-center justify-center gap-2 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 hover:border-trust-200 transition-colors">
+                <Download size={15} />
+                PDF-Bericht exportieren
+              </button>
             )}
 
             {/* Pro-gated features */}

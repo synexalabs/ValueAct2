@@ -4,6 +4,7 @@ const { authMiddleware } = require('../middleware/auth');
 const { freeCalcLimiter } = require('../middleware/calculationRateLimit');
 const { validateRequest, calculationRequestSchema } = require('../utils/validators');
 const pythonEngine = require('../services/pythonEngineService');
+const calculationService = require('../services/calculationService');
 const logger = require('../utils/logger');
 
 const router = express.Router();
@@ -21,7 +22,7 @@ router.post('/ifrs17', async (req, res) => {
     }
     const raw = await pythonEngine.calculateIFRS17(policies, assumptions || {});
     const agg = raw.aggregate_metrics || {};
-    res.json({
+    const response = {
       csm: raw.portfolio_csm,
       lossComponent: agg.loss_component,
       pvPremiums: agg.total_premium,
@@ -31,7 +32,12 @@ router.post('/ifrs17', async (req, res) => {
       ra: agg.risk_adjustment,
       csmRunoff: raw.csm_release_pattern || [],
       source: 'server',
+    };
+    // Non-blocking history save
+    calculationService.saveResult(req.user.id, 'ifrs17', { policies, assumptions }, {
+      csm: response.csm, fcf: response.fcf, lossComponent: response.lossComponent,
     });
+    res.json(response);
   } catch (err) {
     logger.error('IFRS 17 route error:', err.message);
     res.status(500).json({ error: 'IFRS 17 calculation failed' });
@@ -57,10 +63,10 @@ router.post('/solvency', async (req, res) => {
     };
     const raw = await pythonEngine.calculateSolvency(policies, enrichedAssumptions);
     const breakdown = raw.scr_breakdown || {};
-    res.json({
+    const response = {
       scr: raw.scr,
       mcr: raw.mcr,
-      bscr: raw.scr_before_lac_dt,
+      bscr: raw.bscr ?? raw.scr_before_lac_dt,
       opRisk: breakdown.operational_risk,
       solvencyRatio: raw.solvency_ratio,
       diversification: raw.diversification_benefit,
@@ -71,7 +77,12 @@ router.post('/solvency', async (req, res) => {
         opRisk: breakdown.operational_risk,
       },
       source: 'server',
+    };
+    // Non-blocking history save
+    calculationService.saveResult(req.user.id, 'solvency', { policies, assumptions }, {
+      scr: response.scr, mcr: response.mcr, solvencyRatio: response.solvencyRatio,
     });
+    res.json(response);
   } catch (err) {
     logger.error('Solvency II route error:', err.message);
     res.status(500).json({ error: 'Solvency II calculation failed' });
@@ -99,6 +110,26 @@ router.post('/:calculationId/cancel',
 router.get('/history',
   calculationController.getCalculationHistory
 );
+
+// CSM roll-forward (Überleitung) — Pro only (rate limiter already applied)
+router.post('/csm-rollforward', async (req, res) => {
+  try {
+    const { opening_balance, new_business, assumptions, economic_data } = req.body;
+    if (!opening_balance || typeof opening_balance.csm !== 'number') {
+      return res.status(400).json({ error: 'opening_balance.csm is required' });
+    }
+    const result = await pythonEngine.calculateCsmRollforward(
+      opening_balance,
+      new_business || [],
+      assumptions || {},
+      economic_data || {}
+    );
+    res.json(result);
+  } catch (err) {
+    logger.error('CSM rollforward route error:', err.message);
+    res.status(500).json({ error: 'CSM-Überleitung Berechnung fehlgeschlagen' });
+  }
+});
 
 // Sensitivity analysis route
 router.post('/sensitivity',

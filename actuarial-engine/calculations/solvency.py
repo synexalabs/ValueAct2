@@ -75,22 +75,23 @@ def calculate_portfolio_scr(
     # Calculate LAC DT (Loss-Absorbing Capacity of Deferred Taxes)
     lac_dt = calculate_lac_dt(df, assumptions)
 
-    # Calculate total SCR using correlation matrix
-    total_scr = calculate_total_scr(
+    # Calculate BSCR using correlation matrix — op risk is excluded per Art. 103
+    bscr = calculate_total_scr(
         {
             "market_risk": market_risk_scr,
             "counterparty_risk": counterparty_risk_scr,
             "life_underwriting_risk": life_underwriting_risk_scr,
             "health_underwriting_risk": health_underwriting_risk_scr,
             "non_life_underwriting_risk": non_life_underwriting_risk_scr,
-            "operational_risk": operational_risk_scr,
         }
     )
 
-    # Apply LAC DT adjustment
+    # SCR = BSCR + Op_SCR − LAC_DT  (Art. 103 Delegated Regulation (EU) 2015/35)
+    # Op risk is added linearly, NOT inside the correlation matrix sqrt
+    total_scr = bscr + operational_risk_scr
     total_scr_adjusted = total_scr - lac_dt
 
-    # Calculate diversification benefit
+    # Calculate diversification benefit (over non-op risks only, per standard formula)
     individual_sum = sum(
         [
             market_risk_scr,
@@ -98,10 +99,9 @@ def calculate_portfolio_scr(
             life_underwriting_risk_scr,
             health_underwriting_risk_scr,
             non_life_underwriting_risk_scr,
-            operational_risk_scr,
         ]
     )
-    diversification_benefit = individual_sum - total_scr
+    diversification_benefit = individual_sum - bscr
 
     # Calculate MCR (Minimum Capital Requirement)
     mcr = calculate_mcr(df, {**assumptions, "scr_for_mcr": total_scr_adjusted})
@@ -167,6 +167,7 @@ def calculate_portfolio_scr(
     # Build response
     results = {
         "scr": float(total_scr_adjusted),
+        "bscr": float(bscr),
         "scr_before_lac_dt": float(total_scr),
         "lac_dt": float(lac_dt),
         "mcr": float(mcr),
@@ -176,7 +177,7 @@ def calculate_portfolio_scr(
             "life_underwriting_risk": float(life_underwriting_risk_scr),
             "health_underwriting_risk": float(health_underwriting_risk_scr),
             "non_life_underwriting_risk": float(non_life_underwriting_risk_scr),
-            "operational_risk": float(operational_risk_scr),
+            "operational_risk": float(operational_risk_scr),  # added linearly per Art. 103
         },
         "diversification_benefit": float(diversification_benefit),
         "solvency_ratio": float(solvency_ratio),
@@ -191,7 +192,7 @@ def calculate_portfolio_scr(
         "assumptions_used": assumptions,
         "calculation_timestamp": datetime.now().isoformat(),
         "execution_time": execution_time,
-        "methodology_version": "2.0.0",
+        "methodology_version": "2.1.0",
     }
 
     return results

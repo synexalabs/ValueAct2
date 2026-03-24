@@ -173,6 +173,42 @@ async def calculate_solvency(request: SolvencyRequest):
         raise HTTPException(status_code=500, detail=error_msg)
 
 
+@app.post("/api/v1/calculate/csm-rollforward")
+async def calculate_csm_rollforward_endpoint(request: dict):
+    """
+    Calculate IFRS 17 CSM roll-forward (Überleitung) for a reporting period.
+
+    Expected body:
+      opening_balance: { csm: float }
+      new_business: [ { premium, fcf, ra } ]
+      assumptions: { discount_rate, coverage_units_current, coverage_units_future,
+                     delta_estimates?, experience_adjustments?, fx_impact? }
+      economic_data: {}
+    """
+    try:
+        from calculations.csm_rollforward import calculate_csm_rollforward
+
+        opening_balance = request.get("opening_balance", {"csm": 0.0})
+        new_business = request.get("new_business", [])
+        assumptions = request.get("assumptions", {})
+        economic_data = request.get("economic_data", {})
+
+        movement = calculate_csm_rollforward(
+            opening_balance=opening_balance,
+            new_business=new_business,
+            assumptions=assumptions,
+            economic_data=economic_data,
+        )
+
+        result = movement.to_dict()
+        result["is_valid"] = movement.validate()
+        return result
+
+    except Exception as e:
+        error_msg = sanitize_error_message(e, "CSM roll-forward calculation failed")
+        raise HTTPException(status_code=500, detail=error_msg)
+
+
 @app.get("/api/v1/mortality-tables")
 async def get_mortality_tables():
     """

@@ -84,6 +84,22 @@ class CalculationService {
     return { message: 'Calculation cancelled successfully' };
   }
 
+  async saveResult(userId, calculationType, inputs, summary) {
+    try {
+      await firestoreService.addDocument(COLLECTION, {
+        userId,
+        calculationType,
+        status: 'completed',
+        inputs,
+        summary,
+        createdAt: new Date(),
+      });
+    } catch (err) {
+      // Non-blocking — don't fail the response if history save fails
+      logger.warn('Failed to save calculation history:', err.message);
+    }
+  }
+
   async getCalculationHistory(userId, filters = {}) {
     const calculations = await firestoreService.queryCollection(
       COLLECTION,

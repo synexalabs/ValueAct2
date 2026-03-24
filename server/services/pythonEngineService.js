@@ -105,6 +105,10 @@ class PythonEngineService {
                     risk_adjustment_factor: parseFloat(assumptions.riskAdjustmentFactor || assumptions.risk_adjustment_factor || 0.06),
                     expense_loading: parseFloat(assumptions.expenseLoading || assumptions.expense_loading || 0.05),
                     tax_rate: parseFloat(assumptions.taxRate || assumptions.tax_rate || 0.21),
+                    confidence_level: parseFloat(assumptions.confidenceLevel || assumptions.confidence_level || 0.75),
+                    ra_method: assumptions.raMethod || assumptions.ra_method || 'factor',
+                    use_eiopa_yield_curve: assumptions.useEiopaYieldCurve ?? assumptions.use_eiopa_yield_curve ?? false,
+                    include_va: assumptions.includeVa ?? assumptions.include_va ?? false,
                 }
             };
 
@@ -170,6 +174,41 @@ class PythonEngineService {
         } catch (error) {
             this.recordFailure();
             logger.error('Solvency calculation error:', error.message);
+            throw new Error(`Python engine error: ${error.message}`);
+        }
+    }
+
+    /**
+     * Calculate CSM roll-forward (Überleitung) for a reporting period
+     */
+    async calculateCsmRollforward(openingBalance, newBusiness, assumptions, economicData = {}) {
+        if (!this.canMakeRequest()) {
+            throw new Error('Python engine circuit breaker is OPEN - service temporarily unavailable');
+        }
+        try {
+            const payload = {
+                opening_balance: openingBalance,
+                new_business: newBusiness || [],
+                assumptions: {
+                    discount_rate: parseFloat(assumptions.discountRate || assumptions.discount_rate || 0.035),
+                    coverage_units_current: parseFloat(assumptions.coverageUnitsCurrent || assumptions.coverage_units_current || 0),
+                    coverage_units_future: parseFloat(assumptions.coverageUnitsFuture || assumptions.coverage_units_future || 1),
+                    delta_estimates: parseFloat(assumptions.deltaEstimates || assumptions.delta_estimates || 0),
+                    experience_adjustments: parseFloat(assumptions.experienceAdjustments || assumptions.experience_adjustments || 0),
+                    fx_impact: parseFloat(assumptions.fxImpact || assumptions.fx_impact || 0),
+                },
+                economic_data: economicData,
+            };
+            const response = await axios.post(
+                `${PYTHON_ENGINE_URL}/api/v1/calculate/csm-rollforward`,
+                payload,
+                { timeout: this.CALCULATION_TIMEOUT }
+            );
+            this.recordSuccess();
+            return response.data;
+        } catch (error) {
+            this.recordFailure();
+            logger.error('CSM rollforward calculation error:', error.message);
             throw new Error(`Python engine error: ${error.message}`);
         }
     }

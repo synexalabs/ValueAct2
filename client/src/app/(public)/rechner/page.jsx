@@ -39,6 +39,13 @@ export default function RechnerPage() {
                 desc: 'Sterbewahrscheinlichkeiten, Überlebenswahrscheinlichkeiten und fernere Lebenserwartung.',
                 badge: 'Kostenlos',
               },
+              {
+                href: '/rechner/zinskurve',
+                title: 'EIOPA Zinskurve',
+                subtitle: 'Risikofreie Zinssätze EUR',
+                desc: 'Smith-Wilson-Extrapolation der EIOPA RFR-Kurve mit optionaler Volatilitätsanpassung (VA).',
+                badge: 'Kostenlos',
+              },
             ].map((item) => (
               <Link
                 key={item.href}
