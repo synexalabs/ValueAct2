@@ -11,8 +11,10 @@ Rates are expressed as qx per 1000 lives.
 from data.dav_mortality_tables import (
     DAV_2008_T_MALE,
     DAV_2008_T_FEMALE,
+    DAV_2008_T_UNISEX,
     DAV_2004_R_MALE,
     DAV_2004_R_FEMALE,
+    DAV_2004_R_UNISEX,
     DAV_MORTALITY_TABLES,
 )
 
@@ -828,10 +830,10 @@ MORTALITY_TABLES = {
     # DAV German Tables (Current Standard)
     "DAV_2008_T_MALE": DAV_2008_T_MALE,
     "DAV_2008_T_FEMALE": DAV_2008_T_FEMALE,
-    "DAV_2008_T": DAV_2008_T_MALE,  # Default to male for unisex - Term Life
+    "DAV_2008_T": DAV_2008_T_UNISEX,  # Default unisex per EU Gender Directive
     "DAV_2004_R_MALE": DAV_2004_R_MALE,
     "DAV_2004_R_FEMALE": DAV_2004_R_FEMALE,
-    "DAV_2004_R": DAV_2004_R_MALE,  # Default to male for unisex - Annuities
+    "DAV_2004_R": DAV_2004_R_UNISEX,  # Default unisex per EU Gender Directive
 }
 
 

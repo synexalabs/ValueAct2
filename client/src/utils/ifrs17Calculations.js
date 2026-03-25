@@ -34,7 +34,7 @@ export const generateCSMRunoff = (initialCSM, servicePattern) => {
   let remainingCSM = initialCSM;
 
   return servicePattern.map((service, index) => {
-    const release = calculateCSMRelease(remainingCSM, service, totalService);
+    const release = calculateCSMRelease(initialCSM, service, totalService);
     remainingCSM -= release;
     return {
       period: index + 1,
