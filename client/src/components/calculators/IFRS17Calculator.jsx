@@ -405,7 +405,11 @@ export default function IFRS17Calculator() {
                 <h3 className="text-sm font-semibold text-trust-950 mb-4">CSM-Abwicklungsmuster</h3>
                 <div className="h-48">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={results.csmRunoff.map((v, i) => ({ period: i + 1, csmRelease: v }))}>
+                    <BarChart data={results.csmRunoff.map((v, i) => ({
+                      period: (typeof v === 'object' && v !== null) ? v.period : i + 1,
+                      csmRelease: (typeof v === 'object' && v !== null) ? v.csmRelease : v,
+                    }))}>
+
                       <XAxis dataKey="period" tick={{ fontSize: 11 }} label={{ value: 'Jahr', position: 'insideBottom', offset: -5, fontSize: 11 }} />
                       <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                       <Tooltip

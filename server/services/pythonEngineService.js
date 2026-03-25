@@ -88,7 +88,7 @@ class PythonEngineService {
             const payload = {
                 policies: portfolio.map(p => ({
                     policy_id: p.policyId || p.policy_id,
-                    issue_date: p.issueDate || p.issue_date,
+                    issue_date: p.issueDate || p.issue_date || new Date().toISOString().slice(0, 10),
                     face_amount: parseFloat(p.faceAmount || p.face_amount || 0),
                     premium: parseFloat(p.premium || 0),
                     policy_type: p.policyType || p.policy_type || 'TERM',
@@ -144,7 +144,7 @@ class PythonEngineService {
             const payload = {
                 policies: portfolio.map(p => ({
                     policy_id: p.policyId || p.policy_id,
-                    issue_date: p.issueDate || p.issue_date,
+                    issue_date: p.issueDate || p.issue_date || new Date().toISOString().slice(0, 10),
                     face_amount: parseFloat(p.faceAmount || p.face_amount || 0),
                     premium: parseFloat(p.premium || 0),
                     policy_type: p.policyType || p.policy_type || 'TERM',

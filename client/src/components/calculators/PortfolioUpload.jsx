@@ -3,12 +3,12 @@ import React, { useRef, useState } from 'react';
 import Papa from 'papaparse';
 import { Upload, FileText, AlertCircle, CheckCircle2 } from 'lucide-react';
 
-const SAMPLE_CSV = `policy_id,face_amount,premium,issue_age,policy_term,gender,policy_type
-P001,100000,2800,35,20,M,term_life
-P002,150000,4200,42,15,F,term_life
-P003,200000,3600,38,25,M,whole_life
-P004,80000,2100,50,10,F,term_life
-P005,120000,5500,45,20,M,annuity
+const SAMPLE_CSV = `policy_id,issue_date,face_amount,premium,issue_age,policy_term,gender,policy_type
+P001,2023-01-15,100000,2800,35,20,M,term_life
+P002,2023-03-01,150000,4200,42,15,F,term_life
+P003,2022-07-10,200000,3600,38,25,M,whole_life
+P004,2024-01-01,80000,2100,50,10,F,term_life
+P005,2023-06-15,120000,5500,45,20,M,annuity
 `;
 
 const REQUIRED_COLUMNS = ['policy_id', 'face_amount', 'premium', 'issue_age', 'policy_term'];
@@ -61,6 +61,7 @@ export default function PortfolioUpload({ onPortfolioLoaded }) {
         // Normalise types
         const policies = data.map((row) => ({
           policy_id: row.policy_id,
+          issue_date: row.issue_date || new Date().toISOString().slice(0, 10),
           face_amount: parseFloat(row.face_amount) || 0,
           premium: parseFloat(row.premium) || 0,
           issue_age: parseInt(row.issue_age) || 35,
