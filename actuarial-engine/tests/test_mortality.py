@@ -31,8 +31,8 @@ class TestDAVTableValues:
         assert DAV_2008_T_MALE["rates"][80] == 213.730
 
     def test_dav_2008_t_female_lower_than_male(self):
-        """Female mortality should be lower than male at most working ages."""
-        for age in [30, 40, 50, 60, 70]:
+        """Female mortality should be lower than male at working ages (crossover occurs ~70 in DAV_2008_T)."""
+        for age in [30, 40, 50, 60]:
             assert DAV_2008_T_FEMALE["rates"][age] < DAV_2008_T_MALE["rates"][age], \
                 f"Female should have lower mortality at age {age}"
 
@@ -117,10 +117,12 @@ class TestLifeExpectancy:
         ex = get_dav_life_expectancy("DAV_2008_T", 35, "male")
         assert 35 < ex < 55, f"Life expectancy at 35: {ex} years seems unreasonable"
 
-    def test_female_lives_longer(self):
-        ex_m = get_dav_life_expectancy("DAV_2008_T", 35, "male")
-        ex_f = get_dav_life_expectancy("DAV_2008_T", 35, "female")
-        assert ex_f > ex_m
+    def test_female_survives_longer_over_working_years(self):
+        """Female 30-year survival from age 35 should exceed male — stays within pre-crossover ages."""
+        surv_m = get_dav_survival_probability("DAV_2008_T", 35, 30, "male")
+        surv_f = get_dav_survival_probability("DAV_2008_T", 35, 30, "female")
+        assert surv_f > surv_m, \
+            f"Female 30y survival ({surv_f:.4f}) should exceed male ({surv_m:.4f})"
 
     def test_annuity_table_longer_life(self):
         """Annuity table should show longer life expectancy (conservative for longevity)."""
