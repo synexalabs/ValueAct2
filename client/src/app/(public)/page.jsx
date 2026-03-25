@@ -41,6 +41,7 @@ const trustSignals = [
   'EIOPA-konform',
   'Solvency II Standardformel',
   'IFRS 17 Abs. 38',
+  'bAV / IAS 19',
   'BaFin-Standards',
 ];
 
@@ -108,6 +109,7 @@ export default function LandingPage() {
                 {[
                   { title: 'IFRS 17 Rechner', desc: 'CSM & Verlustkomponente', href: '/rechner/ifrs17' },
                   { title: 'Solvency II Rechner', desc: 'SCR & MCR Berechnung', href: '/rechner/solvency' },
+                  { title: 'bAV-Rechner', desc: 'Pensionsverpflichtungen IAS 19 & HGB', href: '/rechner/bav' },
                   { title: 'DAV Sterbetafeln', desc: 'DAV 2008 T / DAV 2004 R', href: '/rechner/sterbetafeln' },
                 ].map((item) => (
                   <Link

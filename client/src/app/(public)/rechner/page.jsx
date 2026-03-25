@@ -46,7 +46,15 @@ export default function RechnerPage() {
                 desc: 'Smith-Wilson-Extrapolation der EIOPA RFR-Kurve mit optionaler Volatilitätsanpassung (VA).',
                 badge: 'Kostenlos',
               },
+              {
+                href: '/rechner/bav',
+                title: 'bAV-Rechner',
+                subtitle: 'Pensionsverpflichtungen',
+                desc: 'DBO nach IAS 19 Projected Unit Credit und HGB/BilMoG. Vergleichsrechnung, Dienstzeitaufwand, PSVaG.',
+                badge: 'Neu',
+              },
             ].map((item) => (
+
               <Link
                 key={item.href}
                 href={item.href}

@@ -136,5 +136,38 @@ router.post('/sensitivity',
   calculationController.runSensitivityAnalysis
 );
 
+// bAV pension valuation route (Betriebliche Altersversorgung)
+router.post('/bav', async (req, res) => {
+  try {
+    const { commitment, commitments, assumptions, valuation_date, standard } = req.body;
+    if (!commitment && !commitments) {
+      return res.status(400).json({ error: 'commitment oder commitments erforderlich' });
+    }
+
+    const response = await pythonEngine.calculateBAV(
+      commitment || null,
+      commitments || null,
+      assumptions || {},
+      valuation_date || '2024-12-31',
+      standard || 'ias19'
+    );
+
+    // Non-blocking history save
+    const key = standard === 'comparison' ? 'comparison' : (standard === 'hgb' ? 'hgb_dbo' : 'ias19_dbo');
+    const summary = commitments
+      ? { total_dbo: response.total_dbo, count: response.commitment_count }
+      : { dbo: response.dbo || response.ias19?.dbo };
+    if (req.user?.id) {
+      calculationService.saveResult(req.user.id, `bav_${key}`, { commitment, commitments, assumptions }, summary);
+    }
+
+    res.json(response);
+  } catch (err) {
+    logger.error('bAV route error:', err.message);
+    res.status(500).json({ error: 'bAV-Berechnung fehlgeschlagen' });
+  }
+});
+
 module.exports = router;
+
 

@@ -214,6 +214,48 @@ class PythonEngineService {
     }
 
     /**
+     * Calculate bAV DBO after IAS 19 or HGB/BilMoG
+     */
+    async calculateBAV(commitment, commitments, assumptions, valuationDate, standard) {
+        if (!this.canMakeRequest()) {
+            throw new Error('Python engine circuit breaker is OPEN - service temporarily unavailable');
+        }
+        try {
+            const payload = {
+                commitment,
+                commitments,
+                assumptions: {
+                    retirement_age: parseInt(assumptions.retirementAge || assumptions.retirement_age || 67),
+                    pension_trend: parseFloat(assumptions.pensionTrend || assumptions.pension_trend || 0.015),
+                    salary_trend: parseFloat(assumptions.salaryTrend || assumptions.salary_trend || 0.025),
+                    fluctuation_rate: parseFloat(assumptions.fluctuationRate || assumptions.fluctuation_rate || 0.03),
+                    mortality_table: assumptions.mortalityTable || assumptions.mortality_table || 'DAV_2004_R',
+                    marriage_probability: parseFloat(assumptions.marriageProbability || assumptions.marriage_probability || 0.80),
+                    invalidity_rate: parseFloat(assumptions.invalidityRate || assumptions.invalidity_rate || 0.005),
+                    hgb_averaging_period: parseInt(assumptions.hgbAveragingPeriod || assumptions.hgb_averaging_period || 7),
+                    ...(assumptions.discountRate != null
+                        ? { discount_rate: parseFloat(assumptions.discountRate) }
+                        : {}),
+                },
+                valuation_date: valuationDate || '2024-12-31',
+                standard: standard || 'ias19',
+            };
+            const response = await axios.post(
+                `${PYTHON_ENGINE_URL}/api/v1/calculate/bav`,
+                payload,
+                { timeout: this.CALCULATION_TIMEOUT }
+            );
+            this.recordSuccess();
+            return response.data;
+        } catch (error) {
+            this.recordFailure();
+            logger.error('bAV calculation error:', error.message);
+            throw new Error(`Python engine error: ${error.message}`);
+        }
+    }
+
+
+    /**
      * Run sensitivity analysis across multiple scenarios
      * @param {string} calculationType - 'ifrs17' or 'solvency'
      * @param {Array} portfolio - List of policies

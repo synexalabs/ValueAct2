@@ -209,6 +209,48 @@ async def calculate_csm_rollforward_endpoint(request: dict):
         raise HTTPException(status_code=500, detail=error_msg)
 
 
+@app.post("/api/v1/calculate/bav")
+async def calculate_bav(request: dict):
+    """
+    bAV-Bewertung: DBO nach IAS 19 oder HGB/BilMoG.
+
+    Body:
+      commitment: { id, birth_date, entry_date, gender, annual_pension, ... }
+      assumptions: { discount_rate?, retirement_age?, pension_trend?, ... }
+      valuation_date: "2024-12-31"
+      standard: "ias19" | "hgb" | "comparison"
+    """
+    try:
+        from calculations.bav import (
+            calculate_dbo_ias19, calculate_dbo_hgb,
+            calculate_bav_comparison, calculate_bav_portfolio,
+        )
+
+        commitment = request.get("commitment")
+        commitments = request.get("commitments")
+        assumptions = request.get("assumptions", {})
+        valuation_date = request.get("valuation_date", "2024-12-31")
+        standard = request.get("standard", "ias19")
+
+        if commitments:
+            return calculate_bav_portfolio(commitments, assumptions, valuation_date, standard)
+        elif commitment:
+            if standard == "comparison":
+                return calculate_bav_comparison(commitment, assumptions, valuation_date)
+            elif standard == "hgb":
+                return calculate_dbo_hgb(commitment, assumptions, valuation_date)
+            else:
+                return calculate_dbo_ias19(commitment, assumptions, valuation_date)
+        else:
+            raise HTTPException(status_code=400, detail="commitment oder commitments erforderlich")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = sanitize_error_message(e, "bAV-Berechnung fehlgeschlagen")
+        raise HTTPException(status_code=500, detail=error_msg)
+
+
 @app.get("/api/v1/mortality-tables")
 async def get_mortality_tables():
     """

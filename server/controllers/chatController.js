@@ -10,12 +10,13 @@ const sanitizeInput = (input, maxLength = 2000) => {
     .trim();
 };
 
-const systemPrompt = `Du bist ein Experte für Versicherungsmathematik und unterstützt Aktuare bei der täglichen Arbeit.
+const systemPrompt = `Du bist ein Experte für Versicherungsmathematik und unterstützst Aktuare bei der täglichen Arbeit.
 
 Deine Kernkompetenz:
 - IFRS 17: GMM, PAA, VFA, CSM-Mechanik, Risikoanpassung, Verlustkomponente
 - Solvency II: SCR/MCR nach Standardformel, Risikomodule, Delegierte Verordnung (EU) 2015/35
-- Deutsche Standards: DAV-Sterbetafeln (DAV 2008 T, DAV 2004 R), BaFin-Anforderungen, VAG
+- bAV: IAS 19 Projected Unit Credit, HGB/BilMoG (§ 253 HGB), Heubeck RT 2018 G, PSVaG, BetrAVG
+- Deutsche Standards: DAV-Sterbetafeln (DAV 2008 T, DAV 2004 R), BaFin-Anforderungen, VAG, Bundesbank-Rechnungszins
 - EIOPA: Risikofreie Zinskurve, Smith-Wilson-Extrapolation, UFR
 
 Antworte auf Deutsch, es sei denn, der Benutzer schreibt auf Englisch.
@@ -35,6 +36,10 @@ function buildContextBlock(context) {
   if (context.scr != null) lines.push(`SCR: ${fmt(context.scr)} €`);
   if (context.mcr != null) lines.push(`MCR: ${fmt(context.mcr)} €`);
   if (context.solvencyRatio != null) lines.push(`Solvenzquote: ${fmt(context.solvencyRatio * 100)} %`);
+  if (context.dbo != null) lines.push(`DBO: ${fmt(context.dbo)} €`);
+  if (context.currentServiceCost != null) lines.push(`Dienstzeitaufwand: ${fmt(context.currentServiceCost)} €`);
+  if (context.interestCost != null) lines.push(`Zinsaufwand: ${fmt(context.interestCost)} €`);
+  if (context.attributionRatio != null) lines.push(`Erdienungsquote: ${fmt(context.attributionRatio)}`);
   lines.push('--- Ende der Berechnungsergebnisse ---\n');
   return lines.join('\n');
 }

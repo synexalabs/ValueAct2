@@ -12,6 +12,7 @@ const freeFeatures = [
   '3 Berechnungen pro Tag',
   'IFRS 17 CSM-Rechner (Basis)',
   'Solvency II SCR-Rechner (Basis)',
+  'bAV-Rechner (DBO-Basisschätzung)',
   'DAV-Sterbetafeln Browser',
   'Keine Registrierung nötig',
 ];
@@ -23,6 +24,9 @@ const proFeatures = [
   'Sensitivitätsanalyse',
   'CSM-Abwicklungsmuster',
   'EIOPA-Zinskurvenintegration',
+  'bAV-Vollbewertung (IAS 19 PUC + HGB)',
+  'bAV-Vergleichsrechnung IAS 19 vs. HGB',
+  'bAV-Portfolio (bis 50 Zusagen)',
   'Portfolio-Modus (bis 100 Policen)',
   'Berechnungshistorie',
   'E-Mail-Support',
