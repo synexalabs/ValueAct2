@@ -212,8 +212,8 @@ def calculate_dbo_ias19(
             projected_pension = annual_pension
 
         audit.add_calculation_step(
-            "Projizierte Jahresrente",
-            f"Rente bei Pensionseintritt (Alter {retirement_age})",
+            description="Projizierte Jahresrente",
+            explanation=f"Rente bei Pensionseintritt (Alter {retirement_age})",
             formula="R_{proj} = R_0 \\times (1 + trend)^{n}",
             inputs={"annual_pension": annual_pension, "years_to_retirement": years_to_retirement},
         )
@@ -261,8 +261,8 @@ def calculate_dbo_ias19(
         attribution_ratio = min(1.0, past_service / total_service) if total_service > 0 else 1.0
 
         audit.add_calculation_step(
-            "Erdienungsquote",
-            "Past Service / Total Service gem. IAS 19.70",
+            description="Erdienungsquote",
+            explanation="Past Service / Total Service gem. IAS 19.70",
             formula="q = \\frac{T_{past}}{T_{total}}",
             inputs={"past_service": past_service, "total_service": total_service},
         )
@@ -282,8 +282,8 @@ def calculate_dbo_ias19(
         )
 
         audit.add_calculation_step(
-            "DBO-Berechnung",
-            "Projected Unit Credit gem. IAS 19.67",
+            description="DBO-Berechnung",
+            explanation="Projected Unit Credit gem. IAS 19.67",
             formula="DBO = R_{proj} \\times \\ddot{a} \\times HBL \\times INV \\times q \\times v^n",
         )
         audit.add_intermediate_result("DBO", dbo, "EUR", "Defined Benefit Obligation")
