@@ -36,7 +36,6 @@ if (!admin.apps.length) {
 // Import routes after Firebase is initialized
 const authRoutes = require('./routes/auth');
 const calculationRoutes = require('./routes/calculations');
-const methodologyRoutes = require('./routes/methodology');
 const healthRoutes = require('./routes/healthRoutes');
 const chatRoutes = require('./routes/chat');
 const stripeRoutes = require('./routes/stripe');
@@ -84,7 +83,6 @@ app.use('/api/', limiter);
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/calculations', calculationRoutes);
-app.use('/api/methodology', methodologyRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/stripe', stripeRoutes);
 
